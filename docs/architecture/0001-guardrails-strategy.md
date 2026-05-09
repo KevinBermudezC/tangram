@@ -57,7 +57,7 @@ The system prompt is treated as code: changes go through PR review with rational
 We will evaluate **NVIDIA NeMo Guardrails** when *all* of the following are true:
 
 1. The reactive AI mode (suggestions while editing, à la Cursor) ships, expanding the surface area of free-form conversation.
-2. RAG over an architectural-pattern corpus is online — at that point hallucinations become measurable and actionable.
+2. The patterns library + RAG (over our bundled, curated corpus — see ADR-0005) is online — at that point hallucinations become measurable and actionable.
 3. We have an evals suite: without it, adding guardrails is unverifiable.
 4. We see real misuse in the wild (jailbreak attempts, off-topic abuse) that the system-prompt layer is not catching.
 

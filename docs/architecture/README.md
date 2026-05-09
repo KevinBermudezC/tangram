@@ -22,10 +22,13 @@ Numbered sequentially: `0001-…`, `0002-…`, etc.
 
 ## Index
 
-| #    | Title                                                                | Status   |
-| ---- | -------------------------------------------------------------------- | -------- |
-| 0001 | [Guardrails strategy](./0001-guardrails-strategy.md)                 | Accepted |
-| 0002 | [OpenSpec for change proposals](./0002-openspec-for-change-proposals.md) | Accepted |
+| #    | Title                                                                          | Status   |
+| ---- | ------------------------------------------------------------------------------ | -------- |
+| 0001 | [Guardrails strategy](./0001-guardrails-strategy.md)                           | Accepted |
+| 0002 | [OpenSpec for change proposals](./0002-openspec-for-change-proposals.md)       | Accepted |
+| 0003 | [Stack choice](./0003-stack-choice.md)                                         | Accepted |
+| 0004 | [Persistence: filesystem + Chroma](./0004-persistence.md)                      | Accepted |
+| 0005 | [Patterns library architecture (RAG over bundled corpus)](./0005-patterns-library-and-rag.md) | Accepted |
 
 ## Writing a new ADR
 

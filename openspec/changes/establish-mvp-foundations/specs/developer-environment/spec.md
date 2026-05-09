@@ -1,28 +1,34 @@
 ## ADDED Requirements
 
-### Requirement: One-command local startup
+### Requirement: Frictionless local startup
 
-A contributor with Docker installed SHALL be able to clone the repository and start a working backend with a single command.
+A contributor with Python 3.11+ installed SHALL be able to clone the repository and start a working backend in three commands or fewer, without installing Docker.
 
 #### Scenario: Fresh clone bootstraps successfully
 
-- **WHEN** a contributor runs `docker compose up` from the repository root after a fresh clone
-- **THEN** Postgres and the backend service start without manual configuration steps
+- **WHEN** a contributor runs `pip install -e ".[dev]"` followed by `uvicorn app.main:app --reload` from `backend/` after a fresh clone
+- **THEN** the backend starts without manual configuration steps
 - **AND** `GET http://localhost:8000/health` returns 200
 
-#### Scenario: Restart preserves database state
+#### Scenario: Restart preserves on-disk data
 
-- **WHEN** the contributor stops the stack and runs `docker compose up` again
-- **THEN** Postgres data persists across the restart through a named Docker volume
+- **WHEN** the contributor stops the backend and starts it again
+- **THEN** any files under `data/` (diagrams, Chroma store) persist across restarts because they live on the host filesystem
 
-### Requirement: Postgres with pgvector extension
+### Requirement: Optional Docker for production
 
-The development database SHALL be Postgres 16 with the `pgvector` extension available, regardless of whether any code currently uses vector queries.
+The backend SHALL provide a working `Dockerfile` for production deployments, but SHALL NOT require Docker for local development.
 
-#### Scenario: pgvector extension is creatable
+#### Scenario: Docker image builds successfully
 
-- **WHEN** a SQL session connects to the development database and runs `CREATE EXTENSION IF NOT EXISTS vector`
-- **THEN** the extension installs successfully without further setup
+- **WHEN** `docker build` runs against `backend/`
+- **THEN** the build succeeds using only the public Python base image and the declared dependencies
+- **AND** the image runs Uvicorn on port 8000 by default
+
+#### Scenario: Local dev does not require Docker
+
+- **WHEN** a contributor follows the documented local-dev steps in `backend/README.md`
+- **THEN** at no point are they required to install Docker, Docker Desktop, or any container runtime
 
 ### Requirement: Configuration documented via `.env.example`
 
@@ -36,18 +42,10 @@ Every configurable surface in the backend SHALL be present in `backend/.env.exam
 
 ### Requirement: Contributor docs cover the dev loop
 
-The repository SHALL include a `backend/README.md` that documents how to install dependencies, run the service, run tests, and lint the code.
+The repository SHALL include a `backend/README.md` that documents how to install dependencies, run the service, run tests, and lint the code, all without Docker.
 
 #### Scenario: Contributor follows backend README to first running service
 
 - **WHEN** a new contributor reads `backend/README.md` and follows the steps as written
 - **THEN** they reach a running `/health` response without needing to ask the team
-
-### Requirement: Docker images suitable for offline dev
-
-The backend Docker image SHALL build and run without requiring credentials to private registries or external services.
-
-#### Scenario: Backend image builds offline-capable
-
-- **WHEN** `docker compose build` runs against this repository
-- **THEN** the build succeeds using only the public Python base image and the declared dependencies
+- **AND** no step in the documented path requires installing Docker

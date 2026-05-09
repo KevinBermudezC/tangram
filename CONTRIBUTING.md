@@ -77,10 +77,12 @@ The proposal's specs roll into `openspec/specs/`, becoming the new ground truth.
 
 ## Code conventions
 
-- Backend: Python 3.11+, FastAPI, SQLModel, Pydantic v2. Format with `ruff format`. Lint with `ruff check`.
+- Backend: Python 3.11+, FastAPI, Pydantic v2. Format with `ruff format`. Lint with `ruff check`.
 - Frontend: TypeScript strict mode, Next.js, React Flow. Format with `prettier`. Types are auto-generated from the backend's OpenAPI — never hand-write API types in `frontend/types/api.ts`.
 - Commits: imperative present ("add provider", not "added provider").
 - PRs: link the proposal (`Closes openspec/changes/<id>`).
+- **Configuration**: every new field on `backend/app/core/config.py:Settings` MUST be added to `backend/.env.example` with a placeholder or default. PRs that miss this will be flagged in review.
+- **No new infrastructure dependencies** (Postgres, Redis, etc.) without an ADR. The MVP runs on `pip install + uvicorn` with no Docker. Adding a service is a deliberate architectural decision.
 
 ## Architecture decisions
 

@@ -6,46 +6,58 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for the propose → apply → archive w
 
 ## MVP
 
-Goal: someone clones the repo, runs `docker compose up`, types *"I want to build a delivery app"* into a prompt, and sees an editable diagram in seconds.
+Goal: someone clones the repo, runs `pip install` + `uvicorn` + `npm run dev`, types *"I want to build a delivery app"* into a prompt, and sees an editable diagram in seconds. **No Docker required.**
 
-| # | Capability                              | Proposal                                     | Status   |
-| - | --------------------------------------- | -------------------------------------------- | -------- |
-| 1 | Diagram schema                          | `docs/schema/diagram-v0.md`                  | ✅ Done   |
-| 2 | Backend runtime + dev environment       | `establish-mvp-foundations`                  | 🟡 Active |
-| 3 | LLM provider abstraction                | `add-llm-provider-abstraction`               | ⬜ Planned |
-| 4 | System prompt v0 (pedagogical)          | `add-system-prompt-v0`                       | ⬜ Planned |
-| 5 | `POST /generate` (text → diagram)       | `add-diagram-generation-endpoint`            | ⬜ Planned |
-| 6 | `POST /analyze` (diagram → feedback)    | `add-diagram-analysis-endpoint`              | ⬜ Planned |
-| 7 | Diagram persistence (save/load)         | `add-diagram-persistence`                    | ⬜ Planned |
-| 8 | Frontend foundation (Next.js + RF)      | `establish-frontend-foundation`              | ⬜ Planned |
-| 9 | OpenAPI → TypeScript codegen            | `add-openapi-typescript-codegen`             | ⬜ Planned |
-| 10| Editor: drag/drop/connect/edit          | `add-diagram-editor`                         | ⬜ Planned |
-| 11| Per-node AI explanation panel           | `add-ai-explanation-panel`                   | ⬜ Planned |
+| #  | Capability                                  | Proposal                                     | Status   |
+| -- | ------------------------------------------- | -------------------------------------------- | -------- |
+| 1  | Diagram schema                              | `docs/schema/diagram-v0.md`                  | ✅ Done   |
+| 2  | Backend foundation + storage layout         | `establish-mvp-foundations`                  | 🟡 Active |
+| 3  | LLM provider abstraction (Ollama/OpenAI/Anthropic) | `add-llm-provider-abstraction`        | ⬜ Planned |
+| 4  | **CI pipeline (lint + tests)**              | `add-ci-pipeline`                            | ⬜ Planned |
+| 5  | Component metadata files (8 yamls)          | `add-component-metadata`                     | ⬜ Planned |
+| 6  | Anti-pattern rules engine (~5 rules)        | `add-anti-pattern-rules`                     | ⬜ Planned |
+| 7  | Patterns library v0 + RAG via Chroma        | `add-patterns-library-and-rag`               | ⬜ Planned |
+| 8  | Tutor mode + system prompt v0               | `add-tutor-mode`                             | ⬜ Planned |
+| 9  | `POST /generate` (text → diagram)           | `add-diagram-generation-endpoint`            | ⬜ Planned |
+| 10 | `POST /analyze` (diagram → feedback + rule findings) | `add-diagram-analysis-endpoint`     | ⬜ Planned |
+| 11 | Diagram persistence routes (filesystem)     | `add-diagram-persistence-routes`             | ⬜ Planned |
+| 12 | Frontend foundation (Next.js + React Flow)  | `establish-frontend-foundation`              | ⬜ Planned |
+| 13 | OpenAPI → TypeScript codegen                | `add-openapi-typescript-codegen`             | ⬜ Planned |
+| 14 | Editor: drag/drop/connect/edit              | `add-diagram-editor`                         | ⬜ Planned |
+| 15 | Per-node AI explanation panel               | `add-ai-explanation-panel`                   | ⬜ Planned |
+| 16 | Export to Mermaid                           | `add-mermaid-export`                         | ⬜ Planned |
+
+> Why CI lands at #4: we want CI in place before the editor + LLM features start landing rapidly, so regressions are caught in PRs. Earlier than that, there isn't enough code to meaningfully test. Later, it's easy to forget a broken PR for days.
 
 ## Phase 2
 
 Polish, durability, and the features that make Tangram more than a toy.
 
-| # | Capability                              | Status         |
-| - | --------------------------------------- | -------------- |
-| 1 | Reactive AI mode (suggestions while editing) | ⬜ Planned |
-| 2 | RAG over architectural patterns (`pgvector`) | ⬜ Planned |
-| 3 | Custom component types                       | ⬜ Planned |
-| 4 | Diagram versioning / change history          | ⬜ Planned |
-| 5 | Export / import diagrams as JSON             | ⬜ Planned |
-| 6 | Dark / light theme                           | ⬜ Planned |
-| 7 | Eval harness for the LLM pipeline            | ⬜ Planned |
+| # | Capability                                                | Status         |
+| - | --------------------------------------------------------- | -------------- |
+| 1 | Reactive AI mode (suggestions while editing, à la Cursor) | ⬜ Planned |
+| 2 | `senior` and `brainstorm` modes                           | ⬜ Planned |
+| 3 | Patterns library grows (target 30+ patterns, contributions) | ⬜ Planned |
+| 4 | More anti-pattern rules (target 30+)                      | ⬜ Planned |
+| 5 | Custom component types via plugin system                  | ⬜ Planned |
+| 6 | Diagram versioning / change history                       | ⬜ Planned |
+| 7 | Export / import diagrams as JSON                          | ⬜ Planned |
+| 8 | Export to docker-compose, OpenAPI, SQL DDL                | ⬜ Planned |
+| 9 | Dark / light theme                                        | ⬜ Planned |
+| 10 | `tangram seed` CLI for re-embedding patterns             | ⬜ Planned |
+| 11 | Eval harness for the LLM pipeline                        | ⬜ Planned |
+| 12 | Re-evaluate NeMo Guardrails (per ADR-0001)               | ⬜ Planned |
 
 ## Phase 3
 
-| # | Capability                              | Status         |
-| - | --------------------------------------- | -------------- |
-| 1 | OpenAPI export from `backend` nodes      | ⬜ Planned |
-| 2 | DB schema export from `database` nodes   | ⬜ Planned |
-| 3 | Multi-model orchestration                | ⬜ Planned |
-| 4 | Collaboration / sharing                  | ⬜ Planned |
-| 5 | Cost / SLA annotations                   | ⬜ Planned |
-| 6 | Plugin system (third-party node types)   | ⬜ Planned |
+| # | Capability                                            | Status         |
+| - | ----------------------------------------------------- | -------------- |
+| 1 | Migrate persistence to Postgres + pgvector (if multi-user) | ⬜ Planned |
+| 2 | Collaboration / sharing                               | ⬜ Planned |
+| 3 | Multi-model orchestration                             | ⬜ Planned |
+| 4 | Plugin system (third-party node types, modes, integrations) | ⬜ Planned |
+| 5 | Cost / SLA annotations on nodes                       | ⬜ Planned |
+| 6 | Import from Terraform / k8s manifests                 | ⬜ Planned |
 
 ## Status legend
 
@@ -60,4 +72,4 @@ Polish, durability, and the features that make Tangram more than a toy.
 - [ ] Pick a font for diagram labels
 - [ ] Add a "copy schema as JSON" button
 - [ ] Translate the UI to additional locales
-- [ ] Add the parity test in `backend/tests/test_schema_parity.py` (task 3.3 in `establish-mvp-foundations`)
+- [ ] Add the parity test in `backend/tests/test_schema_parity.py` (task 3.3 in `establish-mvp-foundations`) — done in the foundations PR
