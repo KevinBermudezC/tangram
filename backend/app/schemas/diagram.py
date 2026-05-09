@@ -1,11 +1,11 @@
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 
-class NodeType(str, Enum):
+class NodeType(StrEnum):
     FRONTEND = "frontend"
     BACKEND = "backend"
     DATABASE = "database"
@@ -16,12 +16,12 @@ class NodeType(str, Enum):
     CACHE = "cache"
 
 
-class DataFlow(str, Enum):
+class DataFlow(StrEnum):
     UNIDIRECTIONAL = "unidirectional"
     BIDIRECTIONAL = "bidirectional"
 
 
-class MessageRole(str, Enum):
+class MessageRole(StrEnum):
     USER = "user"
     ASSISTANT = "assistant"
 

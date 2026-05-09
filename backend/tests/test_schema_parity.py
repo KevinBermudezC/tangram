@@ -7,6 +7,7 @@ documentation. This test pins that contract: if either drifts, this test fails.
 from __future__ import annotations
 
 import pytest
+from pydantic import ValidationError
 
 from app.schemas.diagram import Diagram, NodeType
 
@@ -113,7 +114,7 @@ def test_node_type_enum_is_closed() -> None:
             }
         ],
     }
-    with pytest.raises(Exception):  # pydantic.ValidationError
+    with pytest.raises(ValidationError):
         Diagram.model_validate(bad)
 
 
