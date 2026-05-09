@@ -22,9 +22,10 @@ Numbered sequentially: `0001-…`, `0002-…`, etc.
 
 ## Index
 
-| #    | Title                                                       | Status   |
-| ---- | ----------------------------------------------------------- | -------- |
-| 0001 | [Guardrails strategy](./0001-guardrails-strategy.md)        | Accepted |
+| #    | Title                                                                | Status   |
+| ---- | -------------------------------------------------------------------- | -------- |
+| 0001 | [Guardrails strategy](./0001-guardrails-strategy.md)                 | Accepted |
+| 0002 | [OpenSpec for change proposals](./0002-openspec-for-change-proposals.md) | Accepted |
 
 ## Writing a new ADR
 

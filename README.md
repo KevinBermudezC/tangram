@@ -41,7 +41,22 @@ See [ROADMAP.md](./ROADMAP.md). MVP focuses on: visual editor, ~7 component type
 
 ## Contributing
 
-Looking for contributors. See [CONTRIBUTING.md](./CONTRIBUTING.md) (coming soon) and issues tagged `good first issue`.
+Looking for contributors. We use **[OpenSpec](https://openspec.dev)** for change proposals — non-trivial changes start with a spec in `openspec/`, then code. See [CONTRIBUTING.md](./CONTRIBUTING.md) and issues tagged `good first issue`.
+
+## Project layout
+
+```
+backend/             FastAPI + SQLModel + Pydantic
+frontend/            Next.js + React Flow
+db/                  Postgres migrations
+docs/
+  architecture/      ADRs (architectural decisions)
+  schema/            Diagram schema reference
+openspec/
+  changes/           In-flight change proposals
+  specs/             Accepted feature specs
+scripts/             Codegen, dev helpers
+```
 
 ## License
 
