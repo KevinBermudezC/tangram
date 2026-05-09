@@ -13,8 +13,10 @@ See CONTRIBUTING.md for when a proposal is needed.
 
 <!-- Tick the box that applies — leave the rest. Add a custom one if none fit. -->
 
-- [ ] **Proposal** — adds a new spec under `openspec/changes/<change-id>/` (no code yet)
-- [ ] **Implementation** — implements an already-merged proposal
+- [ ] **Proposal + implementation** — proposal under `openspec/changes/<change-id>/` and the code that implements it, together (default for most non-trivial changes)
+- [ ] **Proposal only** — proposal under `openspec/changes/<change-id>/`, no implementation yet (use when the approach needs feedback before coding)
+- [ ] **Implementation only** — implements an already-merged proposal
+- [ ] **Archive** — moves a completed proposal's specs into `openspec/specs/` after the implementation merged
 - [ ] **Trivial** — typo, dependency bump, small bug fix, doc tweak (no proposal needed)
 
 ## Summary
