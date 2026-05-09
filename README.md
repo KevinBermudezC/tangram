@@ -14,26 +14,43 @@ Inspired by the classic Tangram puzzle — 7 geometric pieces that combine into 
 
 ## Why self-hosted?
 
-- **Your data stays yours.** Diagrams live in your local Postgres.
+- **Your data stays yours.** Diagrams live as plain JSON files in `data/diagrams/` on your machine.
 - **BYOK or local AI.** Use your own OpenAI/Anthropic key, or run Ollama locally — zero inference cost.
 - **No vendor lock-in.** The schema is open, the code is open, the deployment is yours.
 
 ## Stack
 
 - **Frontend:** Next.js + React Flow + TypeScript
-- **Backend:** FastAPI + SQLModel (Pydantic-driven)
-- **Database:** Postgres + pgvector (for future RAG)
-- **AI:** provider-agnostic (Ollama, OpenAI, Anthropic, custom endpoints)
+- **Backend:** FastAPI + Pydantic v2 (Python 3.11+)
+- **Storage:** filesystem (JSON files) for diagrams, Chroma (file-based) for patterns embeddings
+- **AI:** provider-agnostic (Ollama default, BYOK for OpenAI / Anthropic / custom)
+
+**No Docker required for local development.** A `Dockerfile` ships for opt-in production deployments.
 
 ## Quick start
 
+Backend:
+
 ```bash
 git clone https://github.com/<org>/tangram
-cd tangram
-docker compose up
+cd tangram/backend
+python -m venv .venv && source .venv/bin/activate   # or: .venv\Scripts\Activate.ps1 on Windows
+pip install -e ".[dev]"
+cp .env.example .env
+uvicorn app.main:app --reload
+# → http://localhost:8000/health
 ```
 
-Open http://localhost:3000.
+Frontend (in another terminal):
+
+```bash
+cd tangram/frontend
+npm install
+npm run dev
+# → http://localhost:3000
+```
+
+See [`backend/README.md`](./backend/README.md) for the full backend reference.
 
 ## Status & roadmap
 

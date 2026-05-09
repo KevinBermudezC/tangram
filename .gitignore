@@ -32,7 +32,9 @@ Thumbs.db
 build/
 *.log
 
-# DB
+# Local user data (diagrams, embeddings)
+data/
+!data/.gitkeep
 *.db
 *.sqlite
 

@@ -1,43 +1,75 @@
 # Roadmap
 
-## MVP (current focus)
+The roadmap maps to OpenSpec change proposals. Each MVP item below is either an **active** proposal under `openspec/changes/`, an already-merged proposal under `openspec/specs/`, or **planned** (not yet written).
 
-Goal: someone clones the repo, runs `docker compose up`, types "I want to build X" into a prompt, and sees an editable diagram in seconds.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for the propose → apply → archive workflow.
 
-- [ ] Schema v0 finalized → see [docs/schema/diagram-v0.md](./docs/schema/diagram-v0.md)
-- [ ] Backend scaffolding (FastAPI + SQLModel)
-- [ ] Pydantic models matching the schema
-- [ ] Postgres + pgvector via docker-compose
-- [ ] Frontend scaffolding (Next.js + React Flow)
-- [ ] OpenAPI → TypeScript codegen pipeline
-- [ ] LLM provider abstraction (Ollama, OpenAI, Anthropic)
-- [ ] System prompt v0 (pedagogical tone)
-- [ ] `POST /generate` — text → diagram
-- [ ] `POST /analyze` — diagram → feedback
-- [ ] Editor: drag, drop, connect, edit, delete
-- [ ] Side panel: per-node AI explanation
-- [ ] Save / load diagrams
+## MVP
+
+Goal: someone clones the repo, runs `pip install` + `uvicorn` + `npm run dev`, types *"I want to build a delivery app"* into a prompt, and sees an editable diagram in seconds. **No Docker required.**
+
+| #  | Capability                                  | Proposal                                     | Status   |
+| -- | ------------------------------------------- | -------------------------------------------- | -------- |
+| 1  | Diagram schema                              | `docs/schema/diagram-v0.md`                  | ✅ Done   |
+| 2  | Backend foundation + storage layout         | `establish-mvp-foundations`                  | 🟡 Active |
+| 3  | LLM provider abstraction (Ollama/OpenAI/Anthropic) | `add-llm-provider-abstraction`        | ⬜ Planned |
+| 4  | **CI pipeline (lint + tests)**              | `add-ci-pipeline`                            | ⬜ Planned |
+| 5  | Component metadata files (8 yamls)          | `add-component-metadata`                     | ⬜ Planned |
+| 6  | Anti-pattern rules engine (~5 rules)        | `add-anti-pattern-rules`                     | ⬜ Planned |
+| 7  | Patterns library v0 + RAG via Chroma        | `add-patterns-library-and-rag`               | ⬜ Planned |
+| 8  | Tutor mode + system prompt v0               | `add-tutor-mode`                             | ⬜ Planned |
+| 9  | `POST /generate` (text → diagram)           | `add-diagram-generation-endpoint`            | ⬜ Planned |
+| 10 | `POST /analyze` (diagram → feedback + rule findings) | `add-diagram-analysis-endpoint`     | ⬜ Planned |
+| 11 | Diagram persistence routes (filesystem)     | `add-diagram-persistence-routes`             | ⬜ Planned |
+| 12 | Frontend foundation (Next.js + React Flow)  | `establish-frontend-foundation`              | ⬜ Planned |
+| 13 | OpenAPI → TypeScript codegen                | `add-openapi-typescript-codegen`             | ⬜ Planned |
+| 14 | Editor: drag/drop/connect/edit              | `add-diagram-editor`                         | ⬜ Planned |
+| 15 | Per-node AI explanation panel               | `add-ai-explanation-panel`                   | ⬜ Planned |
+| 16 | Export to Mermaid                           | `add-mermaid-export`                         | ⬜ Planned |
+
+> Why CI lands at #4: we want CI in place before the editor + LLM features start landing rapidly, so regressions are caught in PRs. Earlier than that, there isn't enough code to meaningfully test. Later, it's easy to forget a broken PR for days.
 
 ## Phase 2
 
-- Persistence beyond local single-user
-- RAG over architectural patterns (pgvector)
-- Reactive AI mode (suggestions while editing, not just on demand)
-- Custom component types
-- Diagram versioning / change history
+Polish, durability, and the features that make Tangram more than a toy.
+
+| # | Capability                                                | Status         |
+| - | --------------------------------------------------------- | -------------- |
+| 1 | Reactive AI mode (suggestions while editing, à la Cursor) | ⬜ Planned |
+| 2 | `senior` and `brainstorm` modes                           | ⬜ Planned |
+| 3 | Patterns library grows (target 30+ patterns, contributions) | ⬜ Planned |
+| 4 | More anti-pattern rules (target 30+)                      | ⬜ Planned |
+| 5 | Custom component types via plugin system                  | ⬜ Planned |
+| 6 | Diagram versioning / change history                       | ⬜ Planned |
+| 7 | Export / import diagrams as JSON                          | ⬜ Planned |
+| 8 | Export to docker-compose, OpenAPI, SQL DDL                | ⬜ Planned |
+| 9 | Dark / light theme                                        | ⬜ Planned |
+| 10 | `tangram seed` CLI for re-embedding patterns             | ⬜ Planned |
+| 11 | Eval harness for the LLM pipeline                        | ⬜ Planned |
+| 12 | Re-evaluate NeMo Guardrails (per ADR-0001)               | ⬜ Planned |
 
 ## Phase 3
 
-- OpenAPI export
-- DB schema export from `database` nodes
-- Multi-model orchestration
-- Collaboration / sharing
-- Cost / SLA annotations
+| # | Capability                                            | Status         |
+| - | ----------------------------------------------------- | -------------- |
+| 1 | Migrate persistence to Postgres + pgvector (if multi-user) | ⬜ Planned |
+| 2 | Collaboration / sharing                               | ⬜ Planned |
+| 3 | Multi-model orchestration                             | ⬜ Planned |
+| 4 | Plugin system (third-party node types, modes, integrations) | ⬜ Planned |
+| 5 | Cost / SLA annotations on nodes                       | ⬜ Planned |
+| 6 | Import from Terraform / k8s manifests                 | ⬜ Planned |
+
+## Status legend
+
+- ✅ **Done** — merged and archived under `openspec/specs/`.
+- 🟡 **Active** — proposal exists under `openspec/changes/`, work in progress.
+- ⬜ **Planned** — referenced here, not yet proposed. Anyone can write the first draft.
 
 ## Good first issues
 
-(To be filled as we hit them.)
+(To be filled as we land specific tasks.)
 
 - [ ] Pick a font for diagram labels
 - [ ] Add a "copy schema as JSON" button
 - [ ] Translate the UI to additional locales
+- [ ] Add the parity test in `backend/tests/test_schema_parity.py` (task 3.3 in `establish-mvp-foundations`) — done in the foundations PR
