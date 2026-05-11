@@ -1,0 +1,55 @@
+# Tangram — CODEOWNERS
+#
+# Reference: https://docs.github.com/en/repositories/managing-your-repositories-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Each line is a file pattern followed by one or more owners.
+# Order matters — the LAST matching pattern wins for a given path.
+#
+# Code owners are automatically requested for review when someone opens
+# a PR that modifies a path they own. When combined with the branch
+# ruleset's "Require review from Code Owners" rule, only listed owners
+# can approve PRs that touch the matching paths.
+
+# ---------------------------------------------------------------------------
+# Default — all files require core-team approval
+# ---------------------------------------------------------------------------
+
+*                                       @KevinBermudezC
+
+# ---------------------------------------------------------------------------
+# Architectural decisions — both maintainers must review
+# ---------------------------------------------------------------------------
+
+/docs/architecture/                     @KevinBermudezC
+/openspec/                              @KevinBermudezC
+/docs/schema/                           @KevinBermudezC
+
+# ---------------------------------------------------------------------------
+# Process / governance files
+# ---------------------------------------------------------------------------
+
+/CONTRIBUTING.md                        @KevinBermudezC
+/README.md                              @KevinBermudezC
+/ROADMAP.md                             @KevinBermudezC
+/.github/                               @KevinBermudezC
+/LICENSE                                @KevinBermudezC
+
+# ---------------------------------------------------------------------------
+# Backend (Python / FastAPI / schemas)
+# ---------------------------------------------------------------------------
+
+/backend/                               @KevinBermudezC
+
+# ---------------------------------------------------------------------------
+# Frontend (Next.js / React Flow)
+# ---------------------------------------------------------------------------
+
+/frontend/                              @KevinBermudezC
+
+# ---------------------------------------------------------------------------
+# Add additional maintainers below as the team grows.
+# Format: <path>   @user1 @user2
+#
+# Example, once your backend co-maintainer joins:
+# /backend/                             @KevinBermudezC @your-partner-handle
+# ---------------------------------------------------------------------------

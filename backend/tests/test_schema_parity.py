@@ -11,7 +11,6 @@ from pydantic import ValidationError
 
 from app.schemas.diagram import Diagram, NodeType
 
-
 CANONICAL_EXAMPLE: dict = {
     "version": "0.1.0",
     "id": "01HXYZ123ABCDEF",

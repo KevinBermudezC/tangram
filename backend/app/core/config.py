@@ -21,8 +21,7 @@ class Settings(BaseSettings):
     data_dir: Path = Field(
         default=Path("data"),
         description=(
-            "Root directory for filesystem-backed storage. "
-            "Diagrams live in <data_dir>/diagrams/."
+            "Root directory for filesystem-backed storage. Diagrams live in <data_dir>/diagrams/."
         ),
     )
     chroma_path: Path = Field(

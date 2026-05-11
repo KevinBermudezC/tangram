@@ -88,6 +88,10 @@ The proposal's specs roll into `openspec/specs/`, becoming the new ground truth.
 
 For changes that constrain *many future changes* (stack, patterns, cross-cutting infrastructure), write an ADR in `docs/architecture/` alongside the proposal. See the [ADR index](./docs/architecture/README.md).
 
+## Repository protections
+
+`main` is protected. All changes flow through pull requests; nobody pushes directly to `main`. Code-owner approval is required for paths listed in `.github/CODEOWNERS`. See [`docs/repo-setup.md`](./docs/repo-setup.md) for the full configuration.
+
 ## Code of conduct
 
 Be kind. Assume good faith. The maintainers reserve the right to remove anyone who makes the project unwelcoming.
