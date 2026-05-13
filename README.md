@@ -4,79 +4,93 @@
 
 > Architectures, piece by piece.
 
-Open source visual editor for system architecture, with an AI copilot that teaches as you build.
+I'm building Tangram because I keep seeing junior devs hit the same wall: system design feels like memorizing flashcards. *"When do I add a queue? Why use a cache here? Is this Postgres or Mongo?"* The answers usually live in 40-minute YouTube videos or behind senior-dev coffee chats.
 
-**Status:** pre-alpha. Schema and scaffolding in progress.
+Tangram is the tool I wish I'd had: drag a few boxes onto a canvas, connect them, and an AI that *teaches* (not just generates) explains what each piece does, why it's there, and what usually goes wrong. Self-hosted, MIT, BYOK or Ollama. No SaaS to sign up for.
 
-## What is this?
+**Status:** pre-alpha. There is no UI yet. The backend can talk to LLMs and the curated knowledge layer is in place, but you can't actually use Tangram as a product today. Watch this space.
 
-Tangram is a self-hosted tool for designing software architectures visually. You drag components onto a canvas, connect them, and an AI copilot explains *why* each piece matters and *how* it fits together. The goal: help junior developers level up their system design skills by doing.
+## What it'll be (and what it won't)
 
-Inspired by the classic Tangram puzzle — 7 geometric pieces that combine into infinite figures. Likewise, Tangram (the tool) gives you a small set of architectural components that combine into any system you can imagine.
+Tangram **will**: give you a canvas with about 8 component types (frontend, backend, database, auth, storage, external services, queues, caches), an AI that comments on the diagram as you build, and exports to things you can actually use (Mermaid, docker-compose, OpenAPI specs).
 
-## Why self-hosted?
+Tangram **won't**: be a replacement for actually learning system design. It won't pass interviews for you. It also won't be a Figma competitor or a generic diagramming tool. Use Excalidraw or draw.io for that.
 
-- **Your data stays yours.** Diagrams live as plain JSON files in `data/diagrams/` on your machine.
-- **BYOK or local AI.** Use your own OpenAI/Anthropic key, or run Ollama locally — zero inference cost.
-- **No vendor lock-in.** The schema is open, the code is open, the deployment is yours.
+The name is from the [Tangram puzzle](https://en.wikipedia.org/wiki/Tangram): seven geometric pieces that combine into infinite figures. Same idea here. Small set of components, infinite architectures.
+
+## Why self-hosted, why open source
+
+Three reasons, in honesty order:
+
+1. **Your diagrams are yours.** They live as plain JSON files in `data/diagrams/` on your machine. Backups are `cp -r`. No vendor can lose them.
+2. **No inference bill.** Ollama runs locally and is free. If you want better quality, plug in your own OpenAI or Anthropic key. Nothing ever routes through me.
+3. **You can read the prompts.** The "intelligence" is curated markdown in [`patterns/`](./patterns/) (coming soon) and YAML in [`components/`](./components/). It's editable, contributable, version-controlled. Not a black box.
 
 ## Stack
 
-- **Frontend:** Next.js + React Flow + TypeScript
-- **Backend:** FastAPI + Pydantic v2 (Python 3.11+)
-- **Storage:** filesystem (JSON files) for diagrams, Chroma (file-based) for patterns embeddings
-- **AI:** provider-agnostic (Ollama default, BYOK for OpenAI / Anthropic / custom)
+- **Frontend:** Next.js + React Flow + TypeScript (not built yet)
+- **Backend:** FastAPI + Pydantic v2 on Python 3.11+
+- **Storage:** JSON files for diagrams, Chroma for embeddings. No Postgres in MVP.
+- **AI:** Ollama by default. OpenAI or Anthropic with your own key.
 
-**No Docker required for local development.** A `Dockerfile` ships for opt-in production deployments.
+No Docker required to run locally. A `Dockerfile` exists if you want to deploy.
 
 ## Quick start
 
-Backend:
+The backend works. The frontend doesn't exist yet, so this gets you `/health` and a working LLM provider, but no UI.
 
 ```bash
-git clone https://github.com/<org>/tangram
+git clone https://github.com/KevinBermudezC/tangram
 cd tangram/backend
-python -m venv .venv && source .venv/bin/activate   # or: .venv\Scripts\Activate.ps1 on Windows
+python -m venv .venv
+source .venv/bin/activate            # Windows: .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
 cp .env.example .env
 uvicorn app.main:app --reload
-# → http://localhost:8000/health
 ```
 
-Frontend (in another terminal):
+Then `curl http://localhost:8000/health` should answer.
 
-```bash
-cd tangram/frontend
-npm install
-npm run dev
-# → http://localhost:3000
-```
+The full backend reference, including how to talk to the LLM layer, is in [`backend/README.md`](./backend/README.md).
 
-See [`backend/README.md`](./backend/README.md) for the full backend reference.
+## Where we are
 
-## Status & roadmap
-
-See [ROADMAP.md](./ROADMAP.md). MVP focuses on: visual editor, ~7 component types, AI-driven generation from a text prompt, contextual explanations.
+See [ROADMAP.md](./ROADMAP.md). Short version: foundations done, features starting now. About a third of the MVP work is shipped (schema, backend skeleton, LLM providers, CI, component metadata library). The visible stuff (editor, generation, analysis, frontend) is still ahead.
 
 ## Contributing
 
-Looking for contributors. We use **[OpenSpec](https://openspec.dev)** for change proposals — non-trivial changes start with a spec in `openspec/`, then code. See [CONTRIBUTING.md](./CONTRIBUTING.md) and issues tagged `good first issue`.
+I'd love help, especially with the [`components/`](./components/) and (coming) `patterns/` libraries. Editing those is *the* lowest-friction way to make Tangram smarter without writing Python.
+
+Read [CONTRIBUTING.md](./CONTRIBUTING.md) first. The short version: non-trivial changes start with an [OpenSpec](https://openspec.dev) proposal, which can live in the same PR as the code. Trivial changes (typos, doc fixes) just open a PR.
+
+Good first issues are labeled on the [issue tracker](https://github.com/KevinBermudezC/tangram/issues).
 
 ## Project layout
 
 ```
-backend/             FastAPI + SQLModel + Pydantic
-frontend/            Next.js + React Flow
-db/                  Postgres migrations
+backend/             FastAPI + Pydantic, the brain
+components/          Curated YAML, one per node type, fully readable as docs
 docs/
-  architecture/      ADRs (architectural decisions)
+  architecture/      ADRs — the durable decisions
   schema/            Diagram schema reference
+frontend/            Next.js + React Flow (not yet)
 openspec/
   changes/           In-flight change proposals
-  specs/             Accepted feature specs
-scripts/             Codegen, dev helpers
+  specs/             Accepted specs, current ground truth
+patterns/            (coming) curated architectural patterns the LLM consults
+scripts/             Dev helpers
 ```
+
+## A note on AI assistance
+
+> 
+> 
+> *I'm building Tangram with AI assistance. I review every change before it lands and I'm the one making the architectural calls.*
+>
+> *If the AI-assisted angle bothers you, fair enough. If you're curious how it holds up in practice, the commit history is open and the OpenSpec proposals show how each change got reasoned through.*
+
+The reason this note exists at all: in 2026 hiding AI assistance is a credibility risk if it's later discovered. I'd rather be upfront.
 
 ## License
 
-MIT.
+MIT. Use it, fork it, ship it.

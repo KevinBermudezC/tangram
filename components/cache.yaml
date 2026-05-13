@@ -27,7 +27,7 @@ anti_patterns:
   - Caching writes. Caches are for reads; writes must go through to the source of truth.
   - Long TTLs on data that mutates frequently. Stale data is a feature only when you decide it is.
   - Using cache as the source of truth. The first cache flush will erase your data; treat it as ephemeral always.
-  - Caching personalized data in a shared cache without keying on the user. Cross-user leaks follow.
+  - Caching personalized data in a shared cache without keying on the user. Cross-user leaks follow, and they are the kind of bug you find out about from a customer email.
   - Premature caching. Profile first; cache the bottleneck, not "everything just in case".
 
 learning_resources:
