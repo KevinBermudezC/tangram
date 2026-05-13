@@ -20,9 +20,7 @@ tradeoffs:
   - Choose SQL by default. Switch to NoSQL when you have a concrete reason (write-heavy, denormalized access patterns, schema-on-read), not because of a blog post.
   - Managed databases (RDS, Cloud SQL) cost more but save you from being woken up at 3am. For small projects, this trade is almost always worth it.
   - One database, many services beats one service per database for MVPs. Splitting databases prematurely means distributed transactions, which are painful.
-  # [TU OPINIÓN: agregá una experiencia real si querés, ej:
-  #  "I tried Mongo for a project that was clearly relational. Lost a weekend to it.
-  #   Default to Postgres."]
+  # "I love using by default PostgreSQL but for this project We're using SQLite for an easy use"
 
 anti_patterns:
   - Letting the frontend talk to the database directly. Always go through a backend.
