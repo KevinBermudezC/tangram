@@ -12,7 +12,7 @@ Create the ruleset under **Settings → Rules → Rulesets → New branch rulese
 | --- | --- |
 | Ruleset name | `main protection` |
 | Enforcement status | **Active** |
-| Bypass list | Empty by default. Add repo administrators only if absolutely needed for emergencies; routine bypassing defeats the purpose. |
+| Bypass list | While the project is solo-maintained, the owner SHOULD be in the bypass list with **mode: Pull request only**. This lets the owner merge their own PRs without a second approver (no one else exists), but still blocks direct pushes to `main` and still requires external contributor PRs to be approved. **Remove the owner from the bypass list once a second maintainer joins.** |
 | Target branches | Include `main` |
 
 ### Rules to enable
