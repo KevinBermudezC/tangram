@@ -206,6 +206,21 @@ print(db.tradeoffs)
 
 Contributing to the metadata is one of the lowest-friction ways to help the project — see [`components/README.md`](../components/README.md).
 
+## Anti-pattern rules
+
+The rules engine inspects a `Diagram` and returns structured `Finding`s for known architectural mistakes. It runs in microseconds, never calls the LLM, and is deterministic.
+
+```python
+from app.services.rules import check_all
+
+# diagram is an instance of app.schemas.diagram.Diagram
+findings = check_all(diagram)
+for f in findings:
+    print(f.severity, f.message)
+```
+
+Five built-in rules ship today (direct frontend-to-DB, direct frontend-to-storage, missing auth, isolated nodes, cycles). Adding a rule is one file plus one registry entry — see [`app/services/rules/README.md`](./app/services/rules/README.md).
+
 ## Production deployment (optional)
 
 If you want to deploy the backend with Docker:
