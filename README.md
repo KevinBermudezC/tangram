@@ -83,9 +83,9 @@ scripts/             Dev helpers
 
 ## A note on AI assistance
 
-> **[TU VOZ AQUÍ — sustituí este párrafo con tu versión personal.]**
-> Ejemplo de borrador:
-> *I'm building Tangram with heavy AI assistance. Claude drafts most of the code and the formal docs (ADRs, OpenSpec proposals); ChatGPT helps with marketing copy. I review every change before it lands and I'm the one making the architectural calls.*
+> 
+> 
+> *I'm building Tangram with AI assistance. I review every change before it lands and I'm the one making the architectural calls.*
 >
 > *If the AI-assisted angle bothers you, fair enough. If you're curious how it holds up in practice, the commit history is open and the OpenSpec proposals show how each change got reasoned through.*
 
