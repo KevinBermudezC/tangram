@@ -105,11 +105,61 @@ Key variables:
 | `CORS_ORIGINS`       | `["http://localhost:3000"]`        | Allowed frontend origins                     |
 | `LLM_PROVIDER`       | `ollama`                           | One of `ollama`, `openai`, `anthropic`       |
 | `OLLAMA_BASE_URL`    | `http://localhost:11434`           | Local Ollama runtime                         |
+| `OLLAMA_API_KEY`     | (empty)                            | Bearer token for Ollama Cloud; empty = local |
 | `OPENAI_API_KEY`     | (empty)                            | BYOK if using OpenAI                         |
 | `ANTHROPIC_API_KEY`  | (empty)                            | BYOK if using Anthropic                      |
-| `EMBEDDER`           | `ollama/nomic-embed-text`          | Patterns embedder (`<provider>/<model>`)     |
+| `OLLAMA_CHAT_MODEL`  | `qwen3:4b-instruct`                | Model used when `LLM_PROVIDER=ollama`        |
+| `OPENAI_CHAT_MODEL`  | `gpt-4o-mini`                      | Model used when `LLM_PROVIDER=openai`        |
+| `ANTHROPIC_CHAT_MODEL` | `claude-haiku-4-5`               | Model used when `LLM_PROVIDER=anthropic`     |
+| `EMBEDDER`           | `ollama/nomic-embed-text-v2-moe`   | Patterns embedder (`<provider>/<model>`)     |
 | `MAX_INPUT_CHARS`    | `4000`                             | Hard cap on user input length                |
 | `MAX_OUTPUT_TOKENS`  | `2048`                             | Hard cap on LLM output length                |
+
+## Talking to LLMs
+
+Every backend caller goes through the same interface, regardless of which provider is configured:
+
+```python
+from app.schemas.chat import ChatMessage
+from app.schemas.diagram import Diagram
+from app.services.llm import get_llm
+
+llm = get_llm()
+
+# Plain prose
+text = await llm.generate([
+    ChatMessage(role="system", content="You are a system-design tutor."),
+    ChatMessage(role="user", content="What is CQRS?"),
+])
+
+# Structured — physically cannot return a malformed Diagram
+diagram = await llm.generate_structured(
+    [
+        ChatMessage(role="system", content="You produce Tangram diagrams."),
+        ChatMessage(role="user", content="Design a delivery app."),
+    ],
+    schema=Diagram,
+)
+
+# Streaming
+async for chunk in llm.stream([
+    ChatMessage(role="user", content="Explain microservices."),
+]):
+    print(chunk, end="")
+```
+
+Switching provider is a single env-var change: `LLM_PROVIDER=anthropic`. No code changes.
+
+Embeddings have their own factory and can be routed to a different provider via `EMBEDDER=<provider>/<model>`:
+
+```python
+from app.services.llm import get_embedder
+
+embedder = get_embedder()
+vectors = await embedder.embed(["some text", "more text"])
+```
+
+See [ADR-0005](../docs/architecture/0005-patterns-library-and-rag.md) for how this plugs into the patterns library + RAG.
 
 ## Production deployment (optional)
 

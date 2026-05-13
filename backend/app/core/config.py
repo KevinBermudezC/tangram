@@ -35,8 +35,7 @@ class Settings(BaseSettings):
     ollama_base_url: str = Field(
         default="http://localhost:11434",
         description=(
-            "Ollama base URL. Use 'https://ollama.com' for Ollama Cloud — "
-            "requires OLLAMA_API_KEY."
+            "Ollama base URL. Use 'https://ollama.com' for Ollama Cloud — requires OLLAMA_API_KEY."
         ),
     )
     ollama_api_key: str | None = Field(
@@ -45,6 +44,12 @@ class Settings(BaseSettings):
     )
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
+
+    # Chat model per provider. The adapter for the configured LLM_PROVIDER reads
+    # its own value. Cross-provider name normalization is not attempted.
+    ollama_chat_model: str = "qwen3:4b-instruct"
+    openai_chat_model: str = "gpt-4o-mini"
+    anthropic_chat_model: str = "claude-haiku-4-5"
 
     embedder: str = Field(
         default="ollama/nomic-embed-text-v2-moe",
