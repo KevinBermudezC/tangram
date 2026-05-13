@@ -1,0 +1,43 @@
+type: backend
+label: Backend / API
+description: >
+  The server-side process that holds the business logic. Receives requests
+  from the frontend, validates them, talks to the database and other services,
+  and returns a response. The "brain" of most systems.
+
+typical_implementations:
+  - FastAPI / Django / Flask (Python)
+  - Express / Nest / Fastify (Node.js)
+  - Spring Boot (Java)
+  - Rails / Sinatra (Ruby)
+  - ASP.NET Core (C#)
+  - Go net/http or Gin (Go)
+
+common_pairings:
+  - frontend
+  - database
+  - auth
+  - cache
+  - queue
+  - external_service
+  - storage
+
+tradeoffs:
+  - A single backend is simple but a single point of failure. Run multiple instances behind a load balancer once traffic justifies it.
+  - Stateless backends (state lives in the database / cache) scale horizontally trivially. Stateful backends do not.
+  - Choosing the language depends on the team's expertise, not benchmarks. A 10x developer in Python beats a beginner in Rust for almost everything.
+  - Microservices vs monolith is rarely the right MVP question. Start monolith; split when a team boundary or scaling pressure demands it.
+
+anti_patterns:
+  - Skipping input validation because "the frontend already validates." The frontend cannot be trusted.
+  - Leaking internal error messages and stack traces to the client. Use generic messages externally and detailed logs internally.
+  - Putting business logic in the database (stored procedures) and reimplementing it in the backend. Pick one home for each rule.
+  - Designing routes around tables rather than around use cases. Endpoints are a UX surface, not a CRUD reflection.
+  - Forgetting timeouts on outbound calls. An unbounded `await` to a third party can hang every backend worker.
+
+learning_resources:
+  - https://12factor.net
+
+tags:
+  - logic
+  - stateless-by-default

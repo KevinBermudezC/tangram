@@ -1,0 +1,38 @@
+type: cache
+label: Cache
+description: >
+  Fast, often in-memory, storage that holds a copy of expensive-to-compute or
+  expensive-to-fetch data. Reads are fast; the source of truth lives elsewhere
+  (usually the database or an external service).
+
+typical_implementations:
+  - Redis (the standard for distributed caches)
+  - Memcached (simpler, no persistence)
+  - In-process LRU cache (Python's `functools.lru_cache`, Node's `lru-cache`)
+  - HTTP caches / CDNs (Cloudflare, Fastly) for public responses
+  - Browser cache + service workers (frontend layer)
+
+common_pairings:
+  - backend
+  - database
+  - external_service
+
+tradeoffs:
+  - A cache hit is orders of magnitude faster than a database read. A cache miss adds latency vs going direct.
+  - 'Caching introduces a hard problem — invalidation. "There are only two hard things in CS: cache invalidation and naming things." Both are true.'
+  - Distributed caches (Redis) are shared across backend instances. In-process caches are per-instance and inconsistent.
+  - Time-based expiration (TTL) is the easiest correctness policy and the most useful one for most cases.
+
+anti_patterns:
+  - Caching writes. Caches are for reads; writes must go through to the source of truth.
+  - Long TTLs on data that mutates frequently. Stale data is a feature only when you decide it is.
+  - Using cache as the source of truth. The first cache flush will erase your data; treat it as ephemeral always.
+  - Caching personalized data in a shared cache without keying on the user. Cross-user leaks follow.
+  - Premature caching. Profile first; cache the bottleneck, not "everything just in case".
+
+learning_resources:
+  - https://aws.amazon.com/builders-library/caching-challenges-and-strategies/
+
+tags:
+  - performance
+  - ephemeral

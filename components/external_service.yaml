@@ -1,0 +1,36 @@
+type: external_service
+label: External Service / Third-Party API
+description: >
+  A capability you consume from someone else's system — payments, email,
+  maps, SMS, AI inference. Lives outside your control; you call it over HTTP.
+
+typical_implementations:
+  - Stripe / Lemon Squeezy (payments)
+  - SendGrid / Postmark / Resend (transactional email)
+  - Twilio (SMS, voice)
+  - Google Maps / Mapbox (geocoding, routing)
+  - OpenAI / Anthropic (LLM)
+  - Algolia / Meilisearch Cloud (search)
+
+common_pairings:
+  - backend
+
+tradeoffs:
+  - Outsourcing capabilities you do not differentiate on (payments, email) is almost always correct. They have armies of engineers on it; you do not.
+  - Every external call is a network hop that can time out, fail, or rate-limit. Wrap each one with a timeout and a retry policy.
+  - Lock-in risk — their pricing or API can change. Mitigate by keeping integration code thin and behind your own interface.
+  - Webhook integrations are powerful but require an idempotent receiver and a way to handle replays. The webhook contract is part of your system.
+
+anti_patterns:
+  - Calling external APIs synchronously from a user-facing request without a timeout. One slow third party hangs your whole app.
+  - Storing API keys in code or version control. Use env vars + secret managers.
+  - No retry / backoff on transient failures. The internet is unreliable; design for it.
+  - Ignoring their rate limits and getting 429-ed in production. Track usage and degrade gracefully.
+  - Treating their data as ground truth in your database without ever refreshing. APIs change.
+
+learning_resources:
+  - https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+
+tags:
+  - integration
+  - failure-prone

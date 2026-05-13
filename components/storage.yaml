@@ -1,0 +1,36 @@
+type: storage
+label: Object / File Storage
+description: >
+  Persistent storage for unstructured data — images, videos, PDFs, user
+  uploads, backups. Files in, files out, addressable by a key or URL.
+
+typical_implementations:
+  - AWS S3 (the standard)
+  - Cloudflare R2 / Backblaze B2 (S3-compatible, cheaper egress)
+  - Google Cloud Storage / Azure Blob Storage (cloud equivalents)
+  - MinIO (self-hosted, S3-compatible)
+  - Local filesystem (fine for single-user self-hosted)
+
+common_pairings:
+  - backend
+  - frontend
+
+tradeoffs:
+  - Object storage handles arbitrary file sizes; the database handles structured queries. Use both, not one for the other.
+  - Direct browser-to-storage uploads via signed URLs save your backend from being a bandwidth bottleneck. Set this up early if uploads are big.
+  - Egress (data leaving the cloud) is where you bleed money. Cloudflare R2 has zero egress fees and is worth considering.
+  - Versioning and lifecycle policies (auto-delete after N days) are cheap to enable and save you from accidents.
+
+anti_patterns:
+  - Storing files in the database. Database backups grow, queries slow, costs explode.
+  - Letting the frontend upload through the backend for large files. Use signed URLs and have the browser talk to storage directly.
+  - Public buckets by default. Make access explicit. Misconfigured S3 buckets are a perennial breach source.
+  - Storing user-uploaded filenames without sanitizing. Path traversal and weird character bugs follow.
+
+learning_resources:
+  - https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html
+  - https://developers.cloudflare.com/r2/
+
+tags:
+  - stateful
+  - large-payloads
