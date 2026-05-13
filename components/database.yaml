@@ -1,0 +1,37 @@
+type: database
+label: Database
+description: >
+  Persistent storage for your application's structured data. Survives restarts.
+  Usually queried by the backend, never directly by the frontend.
+
+typical_implementations:
+  - PostgreSQL (relational, the safe default)
+  - MySQL / MariaDB (relational)
+  - SQLite (relational, single-file, perfect for self-hosted single-user apps)
+  - MongoDB (document)
+  - DynamoDB / Firestore (managed key-value / document)
+  - Redis (in-memory, also used as cache — see the cache component)
+
+common_pairings:
+  - backend
+
+tradeoffs:
+  - SQL gives you transactions, schema, and joins. NoSQL gives you flexibility and easier horizontal scale.
+  - Choose SQL by default. Switch to NoSQL when you have a concrete reason (write-heavy, denormalized access patterns, schema-on-read).
+  - Managed databases (RDS, Cloud SQL) cost more but save you from being woken up at 3am. For small projects, this trade is almost always worth it.
+  - One database, many services beats one service per database for MVPs. Splitting databases prematurely means distributed transactions, which are painful.
+
+anti_patterns:
+  - Letting the frontend talk to the database directly. Always go through a backend.
+  - Storing files (PDFs, images) as BLOBs in the database. Use object storage and store the URL.
+  - Skipping migrations and editing schemas live. You will regret it the moment you have a teammate.
+  - Using `SELECT *` in production code. Schema additions silently change wire shape; pick columns explicitly.
+  - Putting the database in the same machine as the backend for production. Even a single VM is healthier than co-tenancy.
+
+learning_resources:
+  - https://use-the-index-luke.com
+  - https://www.postgresql.org/docs/current/
+
+tags:
+  - stateful
+  - critical-path

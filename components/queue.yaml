@@ -1,0 +1,36 @@
+type: queue
+label: Message Queue / Job Queue
+description: >
+  A buffer between a producer and a consumer. Decouples the user's request
+  from slow side effects (sending emails, processing images, calling slow
+  APIs). The producer enqueues; a worker dequeues and processes.
+
+typical_implementations:
+  - Redis + BullMQ / RQ / Sidekiq (simple, ubiquitous)
+  - RabbitMQ (mature AMQP broker)
+  - Amazon SQS / Google Cloud Tasks (managed)
+  - Kafka (high-throughput streaming, overkill for most jobs)
+  - Celery (Python-specific, runs on Redis or RabbitMQ)
+
+common_pairings:
+  - backend
+
+tradeoffs:
+  - Queues turn slow synchronous requests into fast acknowledgments. The user gets a 200 immediately; the work happens behind the scenes.
+  - Eventual consistency is the cost — the moment a user sees "200 OK" is no longer the moment the side effect is done.
+  - Worker failures must be tolerable. Design jobs to be idempotent and retryable.
+  - Choosing between "lightweight queue on Redis" and "real broker like RabbitMQ" depends on guarantees you need (at-least-once vs exactly-once, dead letter queues, ordering).
+
+anti_patterns:
+  - Using a queue for things that should be synchronous, like authentication. Latency through a queue is unpredictable.
+  - Non-idempotent jobs. At-least-once delivery means your job will sometimes run twice. Design accordingly.
+  - No dead-letter queue. Jobs that fail repeatedly should land somewhere visible, not vanish silently.
+  - Coupling job code to specific worker hosts. Any worker should be able to pick up any job.
+  - Treating the queue as your source of truth. Persist results to the database; the queue is a buffer, not storage.
+
+learning_resources:
+  - https://aws.amazon.com/builders-library/avoiding-fallback-in-distributed-systems/
+
+tags:
+  - async
+  - decoupling

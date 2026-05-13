@@ -1,0 +1,37 @@
+type: frontend
+label: Frontend
+description: >
+  The user-facing layer — the part of your system the person actually sees and
+  clicks. Web app in a browser, mobile app on a phone, desktop client, or a CLI.
+
+typical_implementations:
+  - React (web)
+  - Vue / Svelte (web)
+  - React Native / Flutter (mobile)
+  - SwiftUI / Jetpack Compose (native mobile)
+  - Electron / Tauri (desktop)
+
+common_pairings:
+  - backend
+  - auth
+  - external_service
+
+tradeoffs:
+  - Web frontends are universal but lose access to OS features (file system, sensors, background tasks).
+  - Native mobile feels best but doubles your platform work — you maintain iOS and Android.
+  - Single-page apps (React, Vue) feel fast after load but have heavy initial bundles. Consider SSR if first paint matters.
+  - The frontend is the only place your users see; everything else can be replaced behind it without them noticing.
+
+anti_patterns:
+  - Calling the database directly from the frontend. Always go through a backend that enforces authorization and validation.
+  - Storing secrets (API keys, JWT signing keys) in frontend code. The browser is not a trust boundary.
+  - Reimplementing business rules in the frontend "for UX". Validate again on the backend; the frontend can lie.
+  - Doing heavy computation on the user's device when the backend could do it once and cache.
+
+learning_resources:
+  - https://web.dev
+  - https://developer.mozilla.org/en-US/docs/Web
+
+tags:
+  - presentation
+  - user-facing

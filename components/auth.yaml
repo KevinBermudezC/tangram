@@ -1,0 +1,37 @@
+type: auth
+label: Authentication / Authorization
+description: >
+  Verifies who a user is (authentication) and what they are allowed to do
+  (authorization). Issues tokens the rest of the system trusts.
+
+typical_implementations:
+  - Auth0 / Clerk / WorkOS (managed, fastest to integrate)
+  - Supabase Auth / Firebase Auth (managed, bundled with their DB offering)
+  - Keycloak (self-hosted, OSS, enterprise-y)
+  - Roll-your-own with bcrypt / Argon2 + JWT (only if you really know what you are doing)
+
+common_pairings:
+  - frontend
+  - backend
+  - external_service
+
+tradeoffs:
+  - Outsourcing auth to a managed provider is almost always the right call early. The threats you avoid (token leaks, timing attacks, password breach handling) compound fast.
+  - Self-hosted is cheaper at scale and gives you full control. Worth it once you have a team that owns it.
+  - JWTs are stateless and scale beautifully but cannot be revoked without extra work (denylist, short TTLs).
+  - Session cookies are stateful (server tracks them) but revocation is trivial. Pick based on what failure mode you care about more.
+
+anti_patterns:
+  - Rolling your own password hashing. Use bcrypt / Argon2 from a library; never SHA-256 of the password.
+  - Putting JWT signing keys in client-side code. The browser is not a vault.
+  - Long-lived access tokens. Use short access tokens (15 min) + refresh tokens with revocation.
+  - Treating "authenticated" as "authorized". A logged-in user is not entitled to every resource.
+  - Forgetting the password reset flow. It is part of auth, and a common attack surface.
+
+learning_resources:
+  - https://owasp.org/www-project-authentication-cheat-sheet/
+  - https://oauth.net/2/
+
+tags:
+  - security-critical
+  - often-outsourced

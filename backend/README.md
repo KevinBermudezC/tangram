@@ -187,6 +187,25 @@ vectors = await embedder.embed(["some text", "more text"])
 
 See [ADR-0005](../docs/architecture/0005-patterns-library-and-rag.md) for how this plugs into the patterns library + RAG.
 
+## Component metadata
+
+The curated knowledge layer for the 8 node types lives at the repo root in `components/<type>.yaml`. Each file describes what the component is, when to use it, common tradeoffs, and anti-patterns. The LLM consults this metadata when reasoning about a diagram.
+
+```python
+from app.schemas.diagram import NodeType
+from app.services.components import get_component, load_components
+
+# All components at once
+catalog = load_components()             # dict[NodeType, ComponentMetadata]
+print(catalog[NodeType.DATABASE].label)
+
+# Or one at a time
+db = get_component(NodeType.DATABASE)
+print(db.tradeoffs)
+```
+
+Contributing to the metadata is one of the lowest-friction ways to help the project — see [`components/README.md`](../components/README.md).
+
 ## Production deployment (optional)
 
 If you want to deploy the backend with Docker:
