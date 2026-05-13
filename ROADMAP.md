@@ -11,9 +11,9 @@ Goal: someone clones the repo, runs `pip install` + `uvicorn` + `npm run dev`, t
 | #  | Capability                                  | Proposal                                     | Status   |
 | -- | ------------------------------------------- | -------------------------------------------- | -------- |
 | 1  | Diagram schema                              | `docs/schema/diagram-v0.md`                  | ✅ Done   |
-| 2  | Backend foundation + storage layout         | `establish-mvp-foundations`                  | 🟡 Active |
-| 3  | LLM provider abstraction (Ollama/OpenAI/Anthropic) | `add-llm-provider-abstraction`        | ⬜ Planned |
-| 4  | **CI pipeline (lint + tests)**              | `add-ci-pipeline`                            | ⬜ Planned |
+| 2  | Backend foundation + storage layout         | `establish-mvp-foundations`                  | ✅ Done   |
+| 3  | LLM provider abstraction (Ollama/OpenAI/Anthropic) | `add-llm-provider-abstraction`        | ✅ Done   |
+| 4  | CI pipeline (lint + test + openspec)        | `add-ci-pipeline`                            | ✅ Done   |
 | 5  | Component metadata files (8 yamls)          | `add-component-metadata`                     | ⬜ Planned |
 | 6  | Anti-pattern rules engine (~5 rules)        | `add-anti-pattern-rules`                     | ⬜ Planned |
 | 7  | Patterns library v0 + RAG via Chroma        | `add-patterns-library-and-rag`               | ⬜ Planned |
@@ -27,7 +27,7 @@ Goal: someone clones the repo, runs `pip install` + `uvicorn` + `npm run dev`, t
 | 15 | Per-node AI explanation panel               | `add-ai-explanation-panel`                   | ⬜ Planned |
 | 16 | Export to Mermaid                           | `add-mermaid-export`                         | ⬜ Planned |
 
-> Why CI lands at #4: we want CI in place before the editor + LLM features start landing rapidly, so regressions are caught in PRs. Earlier than that, there isn't enough code to meaningfully test. Later, it's easy to forget a broken PR for days.
+> CI lands at #4 (post-LLM-abstraction, pre-feature-work) so that the editor + LLM features land with guardrails from day one.
 
 ## Phase 2
 
@@ -72,4 +72,5 @@ Polish, durability, and the features that make Tangram more than a toy.
 - [ ] Pick a font for diagram labels
 - [ ] Add a "copy schema as JSON" button
 - [ ] Translate the UI to additional locales
-- [ ] Add the parity test in `backend/tests/test_schema_parity.py` (task 3.3 in `establish-mvp-foundations`) — done in the foundations PR
+- [ ] Add the `tangram seed` script (Phase 2 item, scaffold welcome as a draft)
+- [ ] Required-status-checks rule on the branch ruleset — flip `lint`, `test`, `openspec` to required (manual UI step now that CI runs green)
