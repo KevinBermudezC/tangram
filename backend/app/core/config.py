@@ -32,12 +32,22 @@ class Settings(BaseSettings):
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
 
     llm_provider: Literal["ollama", "openai", "anthropic"] = "ollama"
-    ollama_base_url: str = "http://localhost:11434"
+    ollama_base_url: str = Field(
+        default="http://localhost:11434",
+        description=(
+            "Ollama base URL. Use 'https://ollama.com' for Ollama Cloud — "
+            "requires OLLAMA_API_KEY."
+        ),
+    )
+    ollama_api_key: str | None = Field(
+        default=None,
+        description="Bearer token for Ollama Cloud. Leave empty for local Ollama.",
+    )
     openai_api_key: str | None = None
     anthropic_api_key: str | None = None
 
     embedder: str = Field(
-        default="ollama/nomic-embed-text",
+        default="ollama/nomic-embed-text-v2-moe",
         description="Embedder used to populate the patterns store. Format: 'provider/model'.",
     )
 
