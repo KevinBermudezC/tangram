@@ -1,5 +1,7 @@
 # Tangram
 
+[![CI](https://github.com/KevinBermudezC/tangram/actions/workflows/ci.yml/badge.svg)](https://github.com/KevinBermudezC/tangram/actions/workflows/ci.yml)
+
 > Architectures, piece by piece.
 
 Open source visual editor for system architecture, with an AI copilot that teaches as you build.

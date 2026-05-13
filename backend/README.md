@@ -91,6 +91,32 @@ ruff check .
 
 Both are part of `[dev]` extras; no extra install needed.
 
+## Continuous integration
+
+Every pull request and every push to `main` triggers `.github/workflows/ci.yml`, which runs three jobs in parallel:
+
+| Job        | Command                                          | Fails when                                  |
+| ---------- | ------------------------------------------------ | ------------------------------------------- |
+| `lint`     | `ruff format --check . && ruff check .`          | Code is unformatted or violates a lint rule |
+| `test`     | `pytest`                                         | Any test fails                              |
+| `openspec` | `openspec validate <change> --strict` for each   | Any active proposal is malformed            |
+
+To reproduce locally before pushing:
+
+```bash
+# from backend/
+ruff format --check .
+ruff check .
+pytest
+
+# from repo root
+for d in openspec/changes/*/; do
+  name=$(basename "$d")
+  [ "$name" = "archive" ] && continue
+  openspec validate "$name" --strict
+done
+```
+
 ## Configuration reference
 
 All configuration is loaded from environment variables (or a `.env` file) via Pydantic Settings. See `app/core/config.py` for the current `Settings` class. **Every field on `Settings` MUST be present in `.env.example`** — see [CONTRIBUTING.md](../CONTRIBUTING.md).

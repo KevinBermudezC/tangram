@@ -28,8 +28,8 @@ Create the ruleset under **Settings → Rules → Rulesets → New branch rulese
 | └ Require review from Code Owners | On | Pairs with `.github/CODEOWNERS`. Only listed owners can satisfy the required approval for a given path. |
 | └ Require approval of the most recent reviewable push | On | The last commit must be approved, not just the original PR. |
 | └ Require conversation resolution before merging | On | All inline review comments must be resolved or explicitly accepted. |
-| **Require status checks to pass** | On (after CI lands — roadmap item #4) | Will require: `lint`, `tests`, `openspec validate`. |
-| └ Require branches to be up to date before merging | On (when CI is on) | Prevents merging stale branches. |
+| **Require status checks to pass** | On — add `lint`, `test`, `openspec` to the required list once the workflow has run successfully at least once on `main` (so the check names are registered with GitHub). | Defined by `.github/workflows/ci.yml`. |
+| └ Require branches to be up to date before merging | On | Prevents merging stale branches against an updated `main`. |
 | **Require signed commits** | Off (for now) | Adds friction for first-time contributors. Reconsider in Phase 2/3 if supply-chain becomes a concern. |
 | **Block creations** | Off | We want contributors to be able to create branches. |
 

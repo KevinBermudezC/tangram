@@ -1,0 +1,99 @@
+name: CI
+
+# Run on every pull request, plus on every push to main as a post-merge sanity check.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel any older runs for the same ref when a new push lands.
+# Saves runner minutes when a contributor force-pushes rapidly.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Lint — ruff format check + ruff check
+  # ---------------------------------------------------------------------------
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: ruff format --check
+        run: ruff format --check .
+
+      - name: ruff check
+        run: ruff check .
+
+  # ---------------------------------------------------------------------------
+  # Test — pytest
+  # ---------------------------------------------------------------------------
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+
+      - name: Install dev dependencies
+        run: pip install -e ".[dev]"
+
+      - name: pytest
+        run: pytest
+
+  # ---------------------------------------------------------------------------
+  # OpenSpec — validate every active change
+  # ---------------------------------------------------------------------------
+  openspec:
+    name: openspec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install OpenSpec CLI
+        run: npm install -g @fission-ai/openspec@latest
+
+      - name: Validate every active change
+        run: |
+          set -e
+          shopt -s nullglob
+          for change_dir in openspec/changes/*/; do
+            change_name=$(basename "$change_dir")
+            # Skip the archive directory and any non-change directory
+            if [ "$change_name" = "archive" ] || [ ! -f "$change_dir/.openspec.yaml" ]; then
+              continue
+            fi
+            echo "Validating $change_name"
+            openspec validate "$change_name" --strict
+          done
+        shell: bash
