@@ -206,6 +206,26 @@ print(db.tradeoffs)
 
 Contributing to the metadata is one of the lowest-friction ways to help the project — see [`components/README.md`](../components/README.md).
 
+## Patterns library
+
+Longer-form architectural patterns live at the repo root in `patterns/<id>.md`. Each pattern describes when to use it, when to avoid it, the components involved, and the common pitfalls. The LLM consults them when explaining or generating diagrams.
+
+```python
+from app.services.patterns import get_pattern, load_patterns
+
+# All patterns
+catalog = load_patterns()           # dict[str, Pattern]
+print(catalog["crud-application"].title)
+
+# One at a time
+p = get_pattern("realtime-chat")
+print(p.body[:200])
+```
+
+Adding a new pattern is a markdown PR — no Python required. See [`patterns/README.md`](../patterns/README.md).
+
+Retrieval (similarity search over this corpus) lands in a follow-up proposal; today callers iterate the dict directly.
+
 ## Anti-pattern rules
 
 The rules engine inspects a `Diagram` and returns structured `Finding`s for known architectural mistakes. It runs in microseconds, never calls the LLM, and is deterministic.
