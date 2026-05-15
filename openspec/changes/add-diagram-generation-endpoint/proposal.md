@@ -39,7 +39,7 @@ This proposal does **not**:
 ## Impact
 
 - **Code**: new `app/schemas/generate.py`, new `app/services/generation/` package, new `app/routers/ai.py`, one line in `app/main.py` to include the router, new tests.
-- **Dependencies**: no new packages. Reuses everything that already exists.
+- **Dependencies**: adds `python-ulid` as a runtime dependency for backend-owned diagram IDs.
 - **Configuration**: no new env vars. Uses existing `LLM_PROVIDER`, `OLLAMA_*`, model selection, `MAX_INPUT_CHARS`, `MAX_OUTPUT_TOKENS`.
 - **Documentation**: short "Generation endpoint" section in `backend/README.md` with a curl example.
 - **Future proposals unblocked**: `add-diagram-analysis-endpoint`, `add-diagram-persistence-routes`, `establish-frontend-foundation` (the UI's first network call is `POST /generate`).
