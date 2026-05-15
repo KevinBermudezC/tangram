@@ -4,7 +4,7 @@ Next.js + React + React Flow + shadcn-style UI. Pre-alpha.
 
 ## Prerequisites
 
-- Node.js 20+
+- Node.js 22+ (matches CI; declared as `engines.node` in `package.json`)
 - **pnpm** as the package manager (auto-provisioned via Corepack)
 - The Tangram backend running (see [`../backend/README.md`](../backend/README.md))
 

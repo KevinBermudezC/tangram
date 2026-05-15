@@ -78,7 +78,10 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Match the frontend job. The OpenSpec CLI itself runs on 18+,
+          # but pinning both jobs to the same major keeps the cache key
+          # consistent across the workflow.
+          node-version: "22"
 
       - name: Install OpenSpec CLI
         run: npm install -g @fission-ai/openspec@latest
@@ -116,7 +119,10 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Match the minimum version declared in frontend/package.json's
+          # `engines.node`. Next.js 16 + React 19 + Tailwind v4 dropped
+          # support for older runtimes.
+          node-version: "22"
           cache: pnpm
           cache-dependency-path: frontend/pnpm-lock.yaml
 

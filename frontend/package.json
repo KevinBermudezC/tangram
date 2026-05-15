@@ -5,6 +5,9 @@
   "description": "Tangram frontend — Next.js + React Flow visual editor for system architecture.",
   "license": "MIT",
   "packageManager": "pnpm@10.33.0",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",

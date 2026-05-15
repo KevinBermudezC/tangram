@@ -77,7 +77,7 @@ This moves the specs from `openspec/changes/` into `openspec/specs/` (where they
 - Tests with `pytest`. Network calls are mocked; no real LLM calls in CI.
 
 **Frontend (TypeScript):**
-- Node.js 20+, Next.js, React 19, React Flow.
+- Node.js 22+, Next.js, React 19, React Flow.
 - **Package manager: pnpm** (pinned via `packageManager` in `package.json`; auto-provisioned through `corepack enable`).
 - TypeScript strict mode; types in `frontend/types/tangram.ts` mirror the backend Pydantic schemas (hand-written until codegen lands).
 - ESLint flat config (`@eslint/js` + `typescript-eslint`). Tests with Vitest + Testing Library.
