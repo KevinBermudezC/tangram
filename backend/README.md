@@ -224,7 +224,23 @@ print(p.body[:200])
 
 Adding a new pattern is a markdown PR — no Python required. See [`patterns/README.md`](../patterns/README.md).
 
-Retrieval (similarity search over this corpus) lands in a follow-up proposal; today callers iterate the dict directly.
+Retrieval (similarity search over this corpus) is available via `app.services.retrieval`; see the section below.
+
+## Pattern retrieval
+
+The retrieval layer ranks patterns by similarity to a user query using the configured embedder + Chroma.
+
+```python
+from app.services.retrieval import retrieve_patterns
+
+matches = await retrieve_patterns("I want to build a chat app", k=3)
+for m in matches:
+    print(m.pattern.id, m.score)
+```
+
+The index auto-builds the first time you call `retrieve_patterns` and rebuilds whenever a pattern file changes or `EMBEDDER` is swapped. Failure modes (Chroma down, Ollama unavailable) return an empty list with a logged warning so the rest of the system keeps working.
+
+See [`app/services/retrieval/README.md`](./app/services/retrieval/README.md) for details.
 
 ## Anti-pattern rules
 
