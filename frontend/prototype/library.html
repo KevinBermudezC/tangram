@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <title>Tangram — Library (prototype)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css?v=6" />
+  </head>
+  <body class="body--library">
+    <!--
+      Library view. Same rail as the home page; the main area becomes
+      a full browser for the user's saved diagrams (grid + filters +
+      templates). Reached via the "Library" nav item in the rail.
+    -->
+
+    <nav class="proto-bar">
+      <span class="proto-bar__label">Prototype views</span>
+      <a class="proto-bar__link" href="./index.html">Home</a>
+      <a class="proto-bar__link" href="./index.html#state=empty">Home · empty</a>
+      <a class="proto-bar__link proto-bar__link--active" href="./library.html">Library</a>
+      <a class="proto-bar__link" href="./editor.html">Editor</a>
+      <a class="proto-bar__link" href="./editor.html#state=loading">Editor · loading</a>
+      <a class="proto-bar__link" href="./editor.html#state=error">Editor · error</a>
+    </nav>
+
+    <div class="appshell">
+      <!-- =================================================================
+           Left rail (identical to home)
+           ================================================================= -->
+      <aside class="rail">
+        <a href="./index.html" class="rail__brand">
+          <span class="brand__mark" aria-hidden="true">T</span>
+          <span class="brand__name">Tangram</span>
+        </a>
+
+        <a href="./editor.html" class="rail__cta">
+          <span aria-hidden="true">＋</span>
+          New diagram
+        </a>
+
+        <label class="rail__search">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5" />
+            <path d="m20 20-4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          <input type="search" placeholder="Search" />
+        </label>
+
+        <ul class="rail__nav">
+          <li>
+            <a href="./index.html" class="rail__item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                <path d="M3 12 12 4l9 8M5 10v9h5v-5h4v5h5v-9" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+              </svg>
+              Home
+            </a>
+          </li>
+          <li>
+            <a href="./library.html" class="rail__item rail__item--active">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                <rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+              Library
+            </a>
+          </li>
+          <li>
+            <a href="#" class="rail__item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+              Templates
+            </a>
+          </li>
+          <li>
+            <a href="#" class="rail__item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09c0 .66.39 1.26 1 1.51.69.28 1.49.13 2.06-.43l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06c-.55.55-.71 1.36-.43 2.06.25.61.85 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.66 0-1.26.39-1.51 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+              </svg>
+              Settings
+            </a>
+          </li>
+        </ul>
+
+        <section class="rail__section">
+          <header class="rail__section-header">
+            <span>Recent</span>
+            <button class="rail__section-toggle" type="button" aria-label="Collapse">
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none">
+                <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </header>
+          <ul class="rail__list">
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot rail__diagram-dot--generated"></span>
+                <span class="rail__diagram-name">Delivery App</span>
+              </a>
+            </li>
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot"></span>
+                <span class="rail__diagram-name">SaaS dashboard</span>
+              </a>
+            </li>
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot rail__diagram-dot--generated"></span>
+                <span class="rail__diagram-name">Twitter clone with notifications</span>
+              </a>
+            </li>
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot rail__diagram-dot--draft"></span>
+                <span class="rail__diagram-name">Untitled diagram</span>
+              </a>
+            </li>
+          </ul>
+        </section>
+
+        <footer class="rail__footer">
+          <a href="https://github.com/KevinBermudezC/tangram" class="rail__footer-link">
+            <svg viewBox="0 0 24 24" width="13" height="13">
+              <path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.1-1.46-1.1-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z" />
+            </svg>
+            GitHub
+          </a>
+          <span class="rail__footer-meta">MIT · Pre-alpha</span>
+        </footer>
+      </aside>
+
+      <!-- =================================================================
+           Main — library grid + filters + templates
+           ================================================================= -->
+      <main class="lib">
+        <header class="lib__header">
+          <div class="lib__title-block">
+            <h1 class="lib__title">Library</h1>
+            <p class="lib__sub">
+              6 diagrams · 1 draft · stored as JSON in
+              <code>data/diagrams/</code>
+            </p>
+          </div>
+          <div class="lib__controls">
+            <div class="seg">
+              <button class="seg__btn seg__btn--active" type="button">All</button>
+              <button class="seg__btn" type="button">Drafts</button>
+              <button class="seg__btn" type="button">Generated</button>
+              <button class="seg__btn" type="button">Manual</button>
+            </div>
+            <label class="search">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+                <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5" />
+                <path d="m20 20-4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+              <input type="search" placeholder="Search diagrams…" />
+            </label>
+            <div class="viewtoggle">
+              <button class="viewtoggle__btn viewtoggle__btn--active" type="button" title="Grid">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+                  <rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                  <rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                  <rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                  <rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </button>
+              <button class="viewtoggle__btn" type="button" title="List">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+                  <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </header>
+
+        <!-- Shared SVG defs (one pattern for all thumbnails) -->
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+          <defs>
+            <pattern id="thumb-grid" width="10" height="10" patternUnits="userSpaceOnUse">
+              <circle cx="0.5" cy="0.5" r="0.5" fill="#E7E1D5" />
+            </pattern>
+          </defs>
+        </svg>
+
+        <ul class="diagrams" id="diagrams-grid">
+          <li class="diagram-card">
+            <a href="./editor.html" class="diagram-card__link">
+              <div class="diagram-card__thumb">
+                <svg viewBox="0 0 200 120" class="diagram-card__svg" aria-hidden="true">
+                  <rect width="200" height="120" fill="#FDFBF5" />
+                  <rect width="200" height="120" fill="url(#thumb-grid)" />
+                  <path d="M28 60 H68" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <path d="M85 50 V28" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <path d="M105 60 H148" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <rect x="10" y="46" width="28" height="28" rx="5" fill="#D8E8F5" stroke="#2B5A82" stroke-width="1" />
+                  <rect x="70" y="46" width="34" height="28" rx="5" fill="#E3EDD9" stroke="#3F6024" stroke-width="1" />
+                  <rect x="70" y="6" width="34" height="22" rx="5" fill="#ECE0F3" stroke="#5A3473" stroke-width="1" />
+                  <rect x="150" y="46" width="34" height="28" rx="5" fill="#F7E3CC" stroke="#8C4E16" stroke-width="1" />
+                  <rect x="150" y="84" width="34" height="22" rx="5" fill="#FBE1D9" stroke="#8D3F25" stroke-width="1" />
+                </svg>
+                <span class="diagram-card__badge diagram-card__badge--generated">AI</span>
+              </div>
+              <div class="diagram-card__body">
+                <p class="diagram-card__name">Delivery App</p>
+                <p class="diagram-card__meta">
+                  <span>5 components</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>5 connections</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>12s ago</span>
+                </p>
+              </div>
+            </a>
+            <button class="diagram-card__more" type="button" aria-label="More actions">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <circle cx="6" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="18" cy="12" r="1.5" />
+              </svg>
+            </button>
+          </li>
+
+          <li class="diagram-card">
+            <a href="./editor.html" class="diagram-card__link">
+              <div class="diagram-card__thumb">
+                <svg viewBox="0 0 200 120" class="diagram-card__svg" aria-hidden="true">
+                  <rect width="200" height="120" fill="#FDFBF5" />
+                  <rect width="200" height="120" fill="url(#thumb-grid)" />
+                  <path d="M40 30 H78" stroke="#9A8F80" stroke-width="1.2" fill="none" />
+                  <path d="M40 90 H78" stroke="#9A8F80" stroke-width="1.2" fill="none" />
+                  <path d="M115 30 V90" stroke="#9A8F80" stroke-width="1.2" fill="none" />
+                  <rect x="12" y="16" width="28" height="28" rx="5" fill="#D8E8F5" stroke="#2B5A82" stroke-width="1" />
+                  <rect x="12" y="76" width="28" height="28" rx="5" fill="#F5D6DD" stroke="#832E44" stroke-width="1" />
+                  <rect x="80" y="16" width="36" height="28" rx="5" fill="#E3EDD9" stroke="#3F6024" stroke-width="1" />
+                  <rect x="80" y="76" width="36" height="28" rx="5" fill="#F5ECC8" stroke="#7A611F" stroke-width="1" />
+                  <rect x="156" y="46" width="32" height="28" rx="5" fill="#F7E3CC" stroke="#8C4E16" stroke-width="1" />
+                </svg>
+                <span class="diagram-card__badge">Manual</span>
+              </div>
+              <div class="diagram-card__body">
+                <p class="diagram-card__name">SaaS dashboard</p>
+                <p class="diagram-card__meta">
+                  <span>5 components</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>4 connections</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>2h ago</span>
+                </p>
+              </div>
+            </a>
+            <button class="diagram-card__more" type="button" aria-label="More actions">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <circle cx="6" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="18" cy="12" r="1.5" />
+              </svg>
+            </button>
+          </li>
+
+          <li class="diagram-card">
+            <a href="./editor.html" class="diagram-card__link">
+              <div class="diagram-card__thumb">
+                <svg viewBox="0 0 200 120" class="diagram-card__svg" aria-hidden="true">
+                  <rect width="200" height="120" fill="#FDFBF5" />
+                  <rect width="200" height="120" fill="url(#thumb-grid)" />
+                  <path d="M40 60 H82" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <path d="M112 60 H152" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <path d="M97 50 V20" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <path d="M97 70 V100" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <rect x="12" y="46" width="28" height="28" rx="5" fill="#D8E8F5" stroke="#2B5A82" stroke-width="1" />
+                  <rect x="83" y="0" width="30" height="22" rx="5" fill="#F5ECC8" stroke="#7A611F" stroke-width="1" />
+                  <rect x="83" y="46" width="30" height="28" rx="5" fill="#E3EDD9" stroke="#3F6024" stroke-width="1" />
+                  <rect x="83" y="98" width="30" height="22" rx="5" fill="#F5D6DD" stroke="#832E44" stroke-width="1" />
+                  <rect x="153" y="46" width="34" height="28" rx="5" fill="#F7E3CC" stroke="#8C4E16" stroke-width="1" />
+                </svg>
+                <span class="diagram-card__badge diagram-card__badge--generated">AI</span>
+              </div>
+              <div class="diagram-card__body">
+                <p class="diagram-card__name">Twitter clone with notifications</p>
+                <p class="diagram-card__meta">
+                  <span>6 components</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>7 connections</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>yesterday</span>
+                </p>
+              </div>
+            </a>
+            <button class="diagram-card__more" type="button" aria-label="More actions">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <circle cx="6" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="18" cy="12" r="1.5" />
+              </svg>
+            </button>
+          </li>
+
+          <li class="diagram-card diagram-card--draft">
+            <a href="./editor.html" class="diagram-card__link">
+              <div class="diagram-card__thumb diagram-card__thumb--draft">
+                <svg viewBox="0 0 200 120" class="diagram-card__svg" aria-hidden="true">
+                  <rect width="200" height="120" fill="#FDFBF5" />
+                  <rect width="200" height="120" fill="url(#thumb-grid)" />
+                  <rect x="58" y="42" width="36" height="28" rx="5" fill="#D8E8F5" stroke="#2B5A82" stroke-width="1" />
+                  <rect x="110" y="42" width="36" height="28" rx="5" fill="none" stroke="#B3AA9C" stroke-width="1" stroke-dasharray="3 3" />
+                </svg>
+                <span class="diagram-card__badge diagram-card__badge--draft">Draft</span>
+              </div>
+              <div class="diagram-card__body">
+                <p class="diagram-card__name">Untitled diagram</p>
+                <p class="diagram-card__meta">
+                  <span>1 component</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>not saved</span>
+                </p>
+              </div>
+            </a>
+            <button class="diagram-card__more" type="button" aria-label="More actions">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <circle cx="6" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="18" cy="12" r="1.5" />
+              </svg>
+            </button>
+          </li>
+
+          <li class="diagram-card">
+            <a href="./editor.html" class="diagram-card__link">
+              <div class="diagram-card__thumb">
+                <svg viewBox="0 0 200 120" class="diagram-card__svg" aria-hidden="true">
+                  <rect width="200" height="120" fill="#FDFBF5" />
+                  <rect width="200" height="120" fill="url(#thumb-grid)" />
+                  <path d="M44 60 H100" stroke="#9A8F80" stroke-width="1.2" fill="none" />
+                  <path d="M120 50 V20" stroke="#9A8F80" stroke-width="1.2" fill="none" />
+                  <path d="M120 70 V100" stroke="#9A8F80" stroke-width="1.2" fill="none" />
+                  <rect x="14" y="46" width="30" height="28" rx="5" fill="#D8E8F5" stroke="#2B5A82" stroke-width="1" />
+                  <rect x="100" y="0" width="40" height="22" rx="5" fill="#ECE0F3" stroke="#5A3473" stroke-width="1" />
+                  <rect x="100" y="46" width="40" height="28" rx="5" fill="#E3EDD9" stroke="#3F6024" stroke-width="1" />
+                  <rect x="100" y="98" width="40" height="22" rx="5" fill="#F7E3CC" stroke="#8C4E16" stroke-width="1" />
+                </svg>
+                <span class="diagram-card__badge">Manual</span>
+              </div>
+              <div class="diagram-card__body">
+                <p class="diagram-card__name">Internal auth playground</p>
+                <p class="diagram-card__meta">
+                  <span>4 components</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>3 connections</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>3 days ago</span>
+                </p>
+              </div>
+            </a>
+            <button class="diagram-card__more" type="button" aria-label="More actions">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <circle cx="6" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="18" cy="12" r="1.5" />
+              </svg>
+            </button>
+          </li>
+
+          <li class="diagram-card">
+            <a href="./editor.html" class="diagram-card__link">
+              <div class="diagram-card__thumb">
+                <svg viewBox="0 0 200 120" class="diagram-card__svg" aria-hidden="true">
+                  <rect width="200" height="120" fill="#FDFBF5" />
+                  <rect width="200" height="120" fill="url(#thumb-grid)" />
+                  <path d="M40 36 H78" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <path d="M40 84 H78" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <path d="M110 36 H150" stroke="#9A8F80" stroke-width="1.2" stroke-dasharray="3 2" fill="none" />
+                  <rect x="12" y="20" width="28" height="32" rx="5" fill="#D8E8F5" stroke="#2B5A82" stroke-width="1" />
+                  <rect x="12" y="68" width="28" height="32" rx="5" fill="#D8E8F5" stroke="#2B5A82" stroke-width="1" />
+                  <rect x="80" y="20" width="30" height="32" rx="5" fill="#E3EDD9" stroke="#3F6024" stroke-width="1" />
+                  <rect x="80" y="68" width="30" height="32" rx="5" fill="#F5ECC8" stroke="#7A611F" stroke-width="1" />
+                  <rect x="152" y="20" width="34" height="32" rx="5" fill="#F7E3CC" stroke="#8C4E16" stroke-width="1" />
+                </svg>
+                <span class="diagram-card__badge diagram-card__badge--generated">AI</span>
+              </div>
+              <div class="diagram-card__body">
+                <p class="diagram-card__name">Multi-tenant CRM</p>
+                <p class="diagram-card__meta">
+                  <span>5 components</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>4 connections</span>
+                  <span class="diagram-card__sep">·</span>
+                  <span>last week</span>
+                </p>
+              </div>
+            </a>
+            <button class="diagram-card__more" type="button" aria-label="More actions">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+                <circle cx="6" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="18" cy="12" r="1.5" />
+              </svg>
+            </button>
+          </li>
+        </ul>
+
+        <!-- Templates -->
+        <section class="templates">
+          <header class="lib__section-header">
+            <h2 class="lib__section-title">Templates</h2>
+            <p class="lib__section-sub">
+              Curated starting points. Fork into your library and edit.
+            </p>
+          </header>
+          <ul class="diagrams diagrams--templates">
+            <li class="template-card">
+              <a href="./editor.html" class="diagram-card__link">
+                <div class="template-card__thumb">
+                  <span class="palette-card__icon palette-card__icon--backend">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                      <rect x="3" y="4" width="18" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                      <rect x="3" y="14" width="18" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                      <circle cx="7" cy="7" r="0.8" fill="currentColor" />
+                      <circle cx="7" cy="17" r="0.8" fill="currentColor" />
+                    </svg>
+                  </span>
+                </div>
+                <p class="template-card__name">Three-tier web app</p>
+                <p class="template-card__hint">Frontend → Backend → DB. The classic.</p>
+              </a>
+            </li>
+            <li class="template-card">
+              <a href="./editor.html" class="diagram-card__link">
+                <div class="template-card__thumb">
+                  <span class="palette-card__icon palette-card__icon--queue">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                      <rect x="3" y="9" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.5" />
+                      <rect x="10" y="9" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.5" />
+                      <rect x="17" y="9" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                  </span>
+                </div>
+                <p class="template-card__name">Background jobs</p>
+                <p class="template-card__hint">Producer → queue → workers.</p>
+              </a>
+            </li>
+            <li class="template-card">
+              <a href="./editor.html" class="diagram-card__link">
+                <div class="template-card__thumb">
+                  <span class="palette-card__icon palette-card__icon--cache">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                      <path d="M13 3 4 14h7l-1 7 9-11h-7l1-7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+                    </svg>
+                  </span>
+                </div>
+                <p class="template-card__name">Read-heavy with cache</p>
+                <p class="template-card__hint">Backend ↔ Redis ↔ DB.</p>
+              </a>
+            </li>
+            <li class="template-card">
+              <a href="./editor.html" class="diagram-card__link">
+                <div class="template-card__thumb">
+                  <span class="palette-card__icon palette-card__icon--auth">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                      <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.5" />
+                      <path d="M8 11V8a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="1.5" />
+                    </svg>
+                  </span>
+                </div>
+                <p class="template-card__name">OAuth flow</p>
+                <p class="template-card__hint">Frontend → Auth → Backend.</p>
+              </a>
+            </li>
+          </ul>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

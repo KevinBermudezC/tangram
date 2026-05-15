@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <title>Tangram — Editor (prototype)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css?v=3" />
+  </head>
+  <body class="body--editor">
+    <!--
+      Editor view. Three-column shell:
+        left:   components palette — draggable to canvas
+        center: toolbar + React-Flow-shaped canvas (grid bg, node cards, minimap)
+        right:  AI chat panel — converse about the architecture
+
+      The diagram below is hand-coded SVG/HTML to mimic what React Flow will
+      render. The real implementation keeps using React Flow; only the
+      surrounding chrome + node card styling + chat panel are new.
+    -->
+
+    <nav class="proto-bar">
+      <span class="proto-bar__label">Prototype views</span>
+      <a class="proto-bar__link" href="./index.html">Landing</a>
+      <a class="proto-bar__link proto-bar__link--active" href="./editor.html"
+        >Editor</a
+      >
+      <a class="proto-bar__link" href="./editor.html#state=loading"
+        >Editor · loading</a
+      >
+      <a class="proto-bar__link" href="./editor.html#state=error"
+        >Editor · error</a
+      >
+    </nav>
+
+    <div class="shell shell--editor">
+      <!-- =================================================================
+           Left sidebar: components palette
+           ================================================================= -->
+      <aside class="shell__sidebar shell__sidebar--left">
+        <a href="./index.html" class="brand">
+          <span class="brand__mark" aria-hidden="true">T</span>
+          <span class="brand__name">Tangram</span>
+        </a>
+
+        <div class="palette">
+          <p class="palette__heading">Components</p>
+          <ul class="palette__list">
+            <li class="palette-card" draggable="true" data-type="frontend">
+              <span class="palette-card__icon palette-card__icon--frontend">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                  <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="13"
+                    rx="2"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <path
+                    d="M8 21h8M12 17v4"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                  />
+                </svg>
+              </span>
+              <div class="palette-card__text">
+                <span class="palette-card__name">Frontend</span>
+                <span class="palette-card__hint">Drag to canvas</span>
+              </div>
+            </li>
+            <li class="palette-card" draggable="true" data-type="backend">
+              <span class="palette-card__icon palette-card__icon--backend">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                  <rect
+                    x="3"
+                    y="4"
+                    width="18"
+                    height="6"
+                    rx="1.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <rect
+                    x="3"
+                    y="14"
+                    width="18"
+                    height="6"
+                    rx="1.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <circle cx="7" cy="7" r="0.8" fill="currentColor" />
+                  <circle cx="7" cy="17" r="0.8" fill="currentColor" />
+                </svg>
+              </span>
+              <div class="palette-card__text">
+                <span class="palette-card__name">Backend</span>
+                <span class="palette-card__hint">Drag to canvas</span>
+              </div>
+            </li>
+            <li class="palette-card" draggable="true" data-type="database">
+              <span class="palette-card__icon palette-card__icon--database">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                  <ellipse
+                    cx="12"
+                    cy="5.5"
+                    rx="8"
+                    ry="2.5"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <path
+                    d="M4 5.5v6c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-6"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <path
+                    d="M4 11.5v6c0 1.4 3.6 2.5 8 2.5s8-1.1 8-2.5v-6"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                </svg>
+              </span>
+              <div class="palette-card__text">
+                <span class="palette-card__name">Database</span>
+                <span class="palette-card__hint">Drag to canvas</span>
+              </div>
+            </li>
+            <li class="palette-card" draggable="true" data-type="auth">
+              <span class="palette-card__icon palette-card__icon--auth">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                  <rect
+                    x="5"
+                    y="11"
+                    width="14"
+                    height="9"
+                    rx="2"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <path
+                    d="M8 11V8a4 4 0 0 1 8 0v3"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                </svg>
+              </span>
+              <div class="palette-card__text">
+                <span class="palette-card__name">Auth</span>
+                <span class="palette-card__hint">Drag to canvas</span>
+              </div>
+            </li>
+            <li class="palette-card" draggable="true" data-type="storage">
+              <span class="palette-card__icon palette-card__icon--storage">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                  <path
+                    d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V7M3 7l2-3h14l2 3M3 7h18M8 12h8"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              <div class="palette-card__text">
+                <span class="palette-card__name">Storage</span>
+                <span class="palette-card__hint">Drag to canvas</span>
+              </div>
+            </li>
+            <li class="palette-card" draggable="true" data-type="external">
+              <span class="palette-card__icon palette-card__icon--external">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="8"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <path
+                    d="M4 12h16M12 4c2.5 2.5 4 5 4 8s-1.5 5.5-4 8c-2.5-2.5-4-5-4-8s1.5-5.5 4-8z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                </svg>
+              </span>
+              <div class="palette-card__text">
+                <span class="palette-card__name">External API</span>
+                <span class="palette-card__hint">Drag to canvas</span>
+              </div>
+            </li>
+            <li class="palette-card" draggable="true" data-type="queue">
+              <span class="palette-card__icon palette-card__icon--queue">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                  <rect
+                    x="3"
+                    y="9"
+                    width="4"
+                    height="6"
+                    rx="1"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <rect
+                    x="10"
+                    y="9"
+                    width="4"
+                    height="6"
+                    rx="1"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                  <rect
+                    x="17"
+                    y="9"
+                    width="4"
+                    height="6"
+                    rx="1"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                  />
+                </svg>
+              </span>
+              <div class="palette-card__text">
+                <span class="palette-card__name">Queue</span>
+                <span class="palette-card__hint">Drag to canvas</span>
+              </div>
+            </li>
+            <li class="palette-card" draggable="true" data-type="cache">
+              <span class="palette-card__icon palette-card__icon--cache">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+                  <path
+                    d="M13 3 4 14h7l-1 7 9-11h-7l1-7z"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linejoin="round"
+                  />
+                </svg>
+              </span>
+              <div class="palette-card__text">
+                <span class="palette-card__name">Cache</span>
+                <span class="palette-card__hint">Drag to canvas</span>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <p class="shell__sidebar-footer">
+          Drag components onto the canvas. Connect them by dragging from
+          handle to handle.
+        </p>
+      </aside>
+
+      <!-- =================================================================
+           Center: toolbar + canvas + minimap
+           ================================================================= -->
+      <main class="shell__main shell__main--editor">
+        <header class="topbar">
+          <div class="topbar__group topbar__group--meta">
+            <span class="topbar__title">Delivery App</span>
+            <span class="topbar__meta">
+              <span class="topbar__stat">5 components</span>
+              <span class="topbar__stat-sep">·</span>
+              <span class="topbar__stat">5 connections</span>
+              <span class="topbar__stat-sep">·</span>
+              <span class="topbar__stat">Saved 12s ago</span>
+            </span>
+          </div>
+          <div class="topbar__group topbar__group--actions">
+            <button class="iconbtn" type="button" title="New diagram">
+              <span aria-hidden="true">＋</span> New
+            </button>
+            <button class="iconbtn" type="button" title="Hide chat">
+              Hide AI
+            </button>
+            <button class="iconbtn" type="button">Export</button>
+            <button class="iconbtn iconbtn--danger" type="button">Clear</button>
+            <span class="topbar__divider" aria-hidden="true"></span>
+            <button class="iconbtn iconbtn--ghost" type="button" title="Dark mode">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none">
+                <path
+                  d="M20 14A8 8 0 1 1 10 4a7 7 0 0 0 10 10z"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <a class="iconbtn iconbtn--ghost" href="#" title="GitHub">
+              <svg viewBox="0 0 24 24" width="14" height="14">
+                <path
+                  fill="currentColor"
+                  d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.1-1.46-1.1-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z"
+                />
+              </svg>
+            </a>
+          </div>
+        </header>
+
+        <div class="canvas">
+          <!-- React-Flow-shaped canvas (mock) -->
+          <svg
+            viewBox="0 0 900 540"
+            preserveAspectRatio="xMidYMid meet"
+            class="canvas__svg"
+            aria-hidden="true"
+          >
+            <defs>
+              <pattern
+                id="dotgrid"
+                width="22"
+                height="22"
+                patternUnits="userSpaceOnUse"
+              >
+                <circle cx="1" cy="1" r="1" fill="#E1DDD3" />
+              </pattern>
+              <marker
+                id="edge-arrow"
+                viewBox="0 0 10 10"
+                refX="9"
+                refY="5"
+                markerWidth="6"
+                markerHeight="6"
+                orient="auto-start-reverse"
+              >
+                <path d="M0 0 L10 5 L0 10 z" fill="#9A8F80" />
+              </marker>
+            </defs>
+            <rect width="900" height="540" fill="url(#dotgrid)" />
+
+            <!-- Edges (drawn first so they sit below the nodes) -->
+            <g class="edges">
+              <path
+                d="M210 270 H320"
+                class="edge edge--ai"
+                marker-end="url(#edge-arrow)"
+              />
+              <text x="265" y="262" text-anchor="middle" class="edge-label">
+                browse / order
+              </text>
+
+              <path
+                d="M390 230 V160"
+                class="edge edge--ai"
+                marker-end="url(#edge-arrow)"
+              />
+              <text x="410" y="200" text-anchor="start" class="edge-label">
+                sign in
+              </text>
+
+              <path
+                d="M460 130 H580"
+                class="edge edge--ai"
+                marker-end="url(#edge-arrow)"
+              />
+              <text x="520" y="122" text-anchor="middle" class="edge-label">
+                identity
+              </text>
+
+              <path
+                d="M460 270 C540 270 540 130 580 130"
+                class="edge edge--ai"
+                marker-end="url(#edge-arrow)"
+              />
+              <text x="540" y="208" text-anchor="start" class="edge-label">
+                read / write
+              </text>
+
+              <path
+                d="M460 270 C540 270 540 410 580 410"
+                class="edge edge--manual"
+                marker-end="url(#edge-arrow)"
+              />
+              <text x="540" y="346" text-anchor="start" class="edge-label">
+                store images
+              </text>
+            </g>
+
+            <!-- Nodes -->
+            <!-- Frontend (selected) -->
+            <g class="node node--frontend node--selected" transform="translate(70,230)">
+              <rect width="140" height="80" rx="10" class="node__card" />
+              <g transform="translate(14,14)">
+                <rect
+                  x="0"
+                  y="0"
+                  width="22"
+                  height="22"
+                  rx="5"
+                  class="node__icon-bg"
+                />
+                <g transform="translate(3,3)">
+                  <rect
+                    x="0"
+                    y="0"
+                    width="16"
+                    height="12"
+                    rx="2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                  />
+                  <path
+                    d="M5 17h6M8 13v4"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                    stroke-linecap="round"
+                  />
+                </g>
+              </g>
+              <text x="46" y="28" class="node__type">FRONTEND</text>
+              <text x="46" y="46" class="node__name">Customer</text>
+              <text x="14" y="68" class="node__sub">Web (Next.js)</text>
+              <!-- Connection handles -->
+              <circle cx="0" cy="40" r="4" class="node__handle" />
+              <circle cx="140" cy="40" r="4" class="node__handle" />
+              <circle cx="70" cy="0" r="4" class="node__handle" />
+              <circle cx="70" cy="80" r="4" class="node__handle" />
+            </g>
+
+            <!-- Backend -->
+            <g class="node node--backend" transform="translate(320,230)">
+              <rect width="140" height="80" rx="10" class="node__card" />
+              <g transform="translate(14,14)">
+                <rect
+                  x="0"
+                  y="0"
+                  width="22"
+                  height="22"
+                  rx="5"
+                  class="node__icon-bg"
+                />
+                <g transform="translate(3,3)">
+                  <rect
+                    x="0"
+                    y="0"
+                    width="16"
+                    height="6"
+                    rx="1.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                  />
+                  <rect
+                    x="0"
+                    y="10"
+                    width="16"
+                    height="6"
+                    rx="1.5"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                  />
+                  <circle cx="3" cy="3" r="0.8" fill="currentColor" />
+                  <circle cx="3" cy="13" r="0.8" fill="currentColor" />
+                </g>
+              </g>
+              <text x="46" y="28" class="node__type">BACKEND</text>
+              <text x="46" y="46" class="node__name">Orders API</text>
+              <text x="14" y="68" class="node__sub">FastAPI + Pydantic</text>
+              <circle cx="0" cy="40" r="4" class="node__handle" />
+              <circle cx="140" cy="40" r="4" class="node__handle" />
+              <circle cx="70" cy="0" r="4" class="node__handle" />
+              <circle cx="70" cy="80" r="4" class="node__handle" />
+            </g>
+
+            <!-- Auth -->
+            <g class="node node--auth" transform="translate(320,90)">
+              <rect width="140" height="80" rx="10" class="node__card" />
+              <g transform="translate(14,14)">
+                <rect
+                  x="0"
+                  y="0"
+                  width="22"
+                  height="22"
+                  rx="5"
+                  class="node__icon-bg"
+                />
+                <g transform="translate(3,3)">
+                  <rect
+                    x="1"
+                    y="7"
+                    width="14"
+                    height="9"
+                    rx="2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                  />
+                  <path
+                    d="M4 7V4a4 4 0 0 1 8 0v3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                  />
+                </g>
+              </g>
+              <text x="46" y="28" class="node__type">AUTH</text>
+              <text x="46" y="46" class="node__name">Auth Service</text>
+              <text x="14" y="68" class="node__sub">OAuth2 / JWT</text>
+              <circle cx="0" cy="40" r="4" class="node__handle" />
+              <circle cx="140" cy="40" r="4" class="node__handle" />
+              <circle cx="70" cy="0" r="4" class="node__handle" />
+              <circle cx="70" cy="80" r="4" class="node__handle" />
+            </g>
+
+            <!-- Database -->
+            <g class="node node--database" transform="translate(580,90)">
+              <rect width="140" height="80" rx="10" class="node__card" />
+              <g transform="translate(14,14)">
+                <rect
+                  x="0"
+                  y="0"
+                  width="22"
+                  height="22"
+                  rx="5"
+                  class="node__icon-bg"
+                />
+                <g transform="translate(3,3)">
+                  <ellipse
+                    cx="8"
+                    cy="3"
+                    rx="6"
+                    ry="2"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                  />
+                  <path
+                    d="M2 3v9c0 1.1 2.7 2 6 2s6-.9 6-2V3"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                  />
+                </g>
+              </g>
+              <text x="46" y="28" class="node__type">DATABASE</text>
+              <text x="46" y="46" class="node__name">orders_db</text>
+              <text x="14" y="68" class="node__sub">PostgreSQL</text>
+              <circle cx="0" cy="40" r="4" class="node__handle" />
+              <circle cx="140" cy="40" r="4" class="node__handle" />
+              <circle cx="70" cy="0" r="4" class="node__handle" />
+              <circle cx="70" cy="80" r="4" class="node__handle" />
+            </g>
+
+            <!-- Storage -->
+            <g class="node node--storage" transform="translate(580,370)">
+              <rect width="140" height="80" rx="10" class="node__card" />
+              <g transform="translate(14,14)">
+                <rect
+                  x="0"
+                  y="0"
+                  width="22"
+                  height="22"
+                  rx="5"
+                  class="node__icon-bg"
+                />
+                <g transform="translate(3,3)">
+                  <path
+                    d="M0 3v9c0 .9.7 1.5 1.5 1.5h13c.8 0 1.5-.6 1.5-1.5V3M0 3l1.5-2h13L16 3M0 3h16M4 8h8"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.3"
+                    stroke-linejoin="round"
+                  />
+                </g>
+              </g>
+              <text x="46" y="28" class="node__type">STORAGE</text>
+              <text x="46" y="46" class="node__name">assets</text>
+              <text x="14" y="68" class="node__sub">S3-compatible</text>
+              <circle cx="0" cy="40" r="4" class="node__handle" />
+              <circle cx="140" cy="40" r="4" class="node__handle" />
+              <circle cx="70" cy="0" r="4" class="node__handle" />
+              <circle cx="70" cy="80" r="4" class="node__handle" />
+            </g>
+          </svg>
+
+          <!-- Loading overlay (only visible when #state=loading) -->
+          <div class="canvas-overlay canvas-overlay--loading" data-state="loading">
+            <div class="canvas-overlay__inner">
+              <div class="canvas-overlay__spinner" aria-hidden="true"></div>
+              <p class="canvas-overlay__title">Sketching your architecture…</p>
+              <p class="canvas-overlay__caption">
+                Composing prompt · retrieving patterns · waiting on model
+              </p>
+            </div>
+          </div>
+
+          <!-- Error overlay -->
+          <div class="canvas-overlay canvas-overlay--error" data-state="error">
+            <div class="canvas-overlay__inner">
+              <div class="canvas-overlay__icon" aria-hidden="true">!</div>
+              <p class="canvas-overlay__title">Generation failed</p>
+              <p class="canvas-overlay__caption">
+                Composed prompt is 18,445 chars, exceeding the configured
+                <code>MAX_LLM_INPUT_CHARS</code> cap of 4,000. Increase
+                <code>MAX_LLM_INPUT_CHARS</code> in your <code>.env</code>.
+              </p>
+              <button class="btn btn--primary" type="button">
+                Try again →
+              </button>
+            </div>
+          </div>
+
+          <!-- Canvas controls (zoom + fit + lock) -->
+          <div class="canvas-controls" aria-hidden="true">
+            <button class="canvas-controls__btn" title="Zoom in">＋</button>
+            <button class="canvas-controls__btn" title="Zoom out">−</button>
+            <button class="canvas-controls__btn" title="Fit view">⛶</button>
+            <button class="canvas-controls__btn" title="Lock canvas">🔒</button>
+          </div>
+
+          <!-- Minimap -->
+          <div class="minimap" aria-hidden="true">
+            <span class="minimap__dot minimap__dot--frontend" style="left: 12%; top: 50%"></span>
+            <span class="minimap__dot minimap__dot--backend" style="left: 38%; top: 50%"></span>
+            <span class="minimap__dot minimap__dot--auth" style="left: 38%; top: 22%"></span>
+            <span class="minimap__dot minimap__dot--database" style="left: 68%; top: 22%"></span>
+            <span class="minimap__dot minimap__dot--storage" style="left: 68%; top: 78%"></span>
+            <span class="minimap__viewport"></span>
+          </div>
+        </div>
+      </main>
+
+      <!-- =================================================================
+           Right sidebar: AI chat panel
+           ================================================================= -->
+      <aside class="shell__sidebar shell__sidebar--right chat">
+        <header class="chat__header">
+          <span class="chat__title">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+              <path
+                d="M12 3v3M5 6l2 2M3 13h3M5 20l2-2M12 21v-3M19 20l-2-2M21 13h-3M19 6l-2 2"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+              <circle cx="12" cy="13" r="3.5" stroke="currentColor" stroke-width="1.5" />
+            </svg>
+            AI Teaching Assistant
+          </span>
+          <span class="chat__context">
+            <span class="chat__context-label">Selected</span>
+            <span class="chat__context-pill chat__context-pill--frontend">
+              Frontend · Customer
+            </span>
+          </span>
+        </header>
+
+        <div class="chat__scroll" role="log" aria-live="polite">
+          <article class="msg msg--ai">
+            <span class="msg__avatar" aria-hidden="true">AI</span>
+            <div class="msg__bubble">
+              <p>
+                I drafted this from your prompt. It's a fairly standard
+                three-tier shape with auth pulled out as a separate service.
+                Click any node and ask me about it.
+              </p>
+            </div>
+          </article>
+
+          <article class="msg msg--user">
+            <div class="msg__bubble">
+              <p>Why is Auth on its own and not inside the Backend?</p>
+            </div>
+          </article>
+
+          <article class="msg msg--ai">
+            <span class="msg__avatar" aria-hidden="true">AI</span>
+            <div class="msg__bubble">
+              <p>
+                Two reasons most teams split it eventually:
+              </p>
+              <ul class="msg__bullets">
+                <li>
+                  <strong>Blast radius.</strong> Auth tends to be the
+                  highest-value attack target. Isolating it makes it easier
+                  to audit, scale, and patch independently.
+                </li>
+                <li>
+                  <strong>Reuse.</strong> Once you have a second backend or a
+                  mobile client, they all need to validate identity the same
+                  way. A dedicated service avoids duplicating that logic.
+                </li>
+              </ul>
+              <div class="msg__card msg__card--watch">
+                <span class="msg__card-kicker">Watch out</span>
+                <p>
+                  Direct database connections from the frontend are a
+                  security risk. Always go through the backend.
+                </p>
+              </div>
+            </div>
+          </article>
+
+          <article class="msg msg--user">
+            <div class="msg__bubble">
+              <p>What if I'm building a tiny side project?</p>
+            </div>
+          </article>
+
+          <article class="msg msg--ai">
+            <span class="msg__avatar" aria-hidden="true">AI</span>
+            <div class="msg__bubble">
+              <p>
+                Fair — for a solo MVP, folding auth into the backend is
+                perfectly reasonable. You can split it later. Want me to
+                merge Auth into Backend on the canvas?
+              </p>
+              <div class="msg__actions">
+                <button class="msg-chip" type="button">
+                  Yes, merge them
+                </button>
+                <button class="msg-chip" type="button">
+                  Keep it as-is
+                </button>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <form class="chat__form" onsubmit="event.preventDefault()">
+          <div class="chat__suggested">
+            <button class="msg-chip msg-chip--ghost" type="button">
+              Explain this node
+            </button>
+            <button class="msg-chip msg-chip--ghost" type="button">
+              What's missing?
+            </button>
+            <button class="msg-chip msg-chip--ghost" type="button">
+              Suggest a queue
+            </button>
+          </div>
+          <div class="chat__inputrow">
+            <textarea
+              class="chat__input"
+              rows="2"
+              placeholder="Ask about this architecture…"
+            ></textarea>
+            <button class="btn btn--primary btn--send" type="submit">
+              Send
+              <span class="btn__arrow" aria-hidden="true">→</span>
+            </button>
+          </div>
+        </form>
+      </aside>
+    </div>
+
+    <!--
+      Tiny helper: read #state=loading / #state=error from the URL hash so the
+      prototype links at the top of every page can flip the canvas overlay
+      without duplicating the whole document.
+    -->
+    <script>
+      (function () {
+        const hash = window.location.hash || "";
+        const match = hash.match(/state=(\w+)/);
+        const state = match ? match[1] : "ready";
+        document.body.dataset.state = state;
+      })();
+    </script>
+  </body>
+</html>
