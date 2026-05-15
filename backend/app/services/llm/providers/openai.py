@@ -70,7 +70,7 @@ class OpenAIProvider(_OpenAIBase):
             response = await self._client.chat.completions.create(
                 model=self._model,
                 messages=[m.model_dump() for m in messages],
-                max_tokens=capped,
+                max_completion_tokens=capped,
                 temperature=temperature,
             )
         except _APITimeoutError as e:
@@ -102,7 +102,7 @@ class OpenAIProvider(_OpenAIBase):
             response = await self._client.chat.completions.create(
                 model=self._model,
                 messages=[m.model_dump() for m in messages],
-                max_tokens=capped,
+                max_completion_tokens=capped,
                 temperature=temperature,
                 response_format=schema_payload,
             )
@@ -136,7 +136,7 @@ class OpenAIProvider(_OpenAIBase):
             stream = await self._client.chat.completions.create(
                 model=self._model,
                 messages=[m.model_dump() for m in messages],
-                max_tokens=capped,
+                max_completion_tokens=capped,
                 temperature=temperature,
                 stream=True,
             )
