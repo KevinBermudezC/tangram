@@ -17,13 +17,19 @@ def _isolate(monkeypatch: pytest.MonkeyPatch) -> None:
     Note: we patch `get_embedder` at the call sites (builder + retriever),
     not at the factory module. `from x import y` creates a local binding
     that a patch on `x.y` does not reach.
+
+    EphemeralClient instances share underlying tenant/database state by
+    default, so we explicitly delete the collection at fixture setup to
+    guarantee a clean start across test ordering.
     """
     store.set_client_for_tests(chromadb.EphemeralClient())
+    store.delete_collection()
     fake = FakeEmbedder()
     monkeypatch.setattr("app.services.retrieval.builder.get_embedder", lambda: fake)
     monkeypatch.setattr("app.services.retrieval.retriever.get_embedder", lambda: fake)
     reset_patterns()
     yield
+    store.delete_collection()
     store.set_client_for_tests(None)
     reset_patterns()
 
