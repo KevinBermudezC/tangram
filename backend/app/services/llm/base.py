@@ -94,6 +94,45 @@ class Embedder(Protocol):
         """Return one vector per input text. Order matches input order."""
 
 
+# --- Shared helpers ---------------------------------------------------------
+
+
+def strip_markdown_fence(text: str) -> str:
+    """Remove a ```json ... ``` (or plain ```) wrapper from `text` if present.
+
+    Some smaller / less obedient models return their structured output wrapped
+    in a markdown code fence even when asked for raw JSON. This helper makes
+    the parsing tolerant of that pattern.
+
+    No-op when `text` is not fenced. Handles:
+
+        ```json
+        {...}
+        ```
+
+        ```
+        {...}
+        ```
+
+    A trailing fence is removed only when it appears alone on the last line.
+    """
+    stripped = text.strip()
+    if not stripped.startswith("```"):
+        return text
+
+    lines = stripped.split("\n")
+    # Drop the opening fence line (e.g. "```json" or "```")
+    if len(lines) < 2:
+        return text
+    lines = lines[1:]
+    # Drop the closing fence if it sits alone on the last non-empty line
+    while lines and not lines[-1].strip():
+        lines.pop()
+    if lines and lines[-1].strip() == "```":
+        lines = lines[:-1]
+    return "\n".join(lines).strip()
+
+
 # --- Shared base for concrete adapters --------------------------------------
 
 

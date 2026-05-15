@@ -8,7 +8,7 @@ from typing import TypeVar
 from openai import APITimeoutError as _APITimeoutError
 from openai import AsyncOpenAI
 from openai import RateLimitError as _RateLimitError
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel
 
 from app.schemas.chat import ChatMessage
 from app.services.llm.base import (
@@ -69,7 +69,7 @@ class OpenAIProvider(_OpenAIBase):
             response = await self._client.chat.completions.create(
                 model=self._model,
                 messages=[m.model_dump() for m in messages],
-                max_tokens=capped,
+                max_completion_tokens=capped,
                 temperature=temperature,
             )
         except _APITimeoutError as e:
@@ -86,41 +86,46 @@ class OpenAIProvider(_OpenAIBase):
         max_tokens: int | None = None,
         temperature: float = 0.3,
     ) -> T:
+        """Use OpenAI's parse() helper.
+
+        Why `parse()` instead of `create(response_format=...)`: OpenAI's
+        strict mode requires `additionalProperties: false` on every object,
+        every field listed under `required`, no defaults, no format
+        annotations. Pydantic's `model_json_schema()` doesn't produce that
+        dialect. The SDK's `parse()` helper does the munging for us and
+        returns a parsed Pydantic instance directly.
+        """
         self._check_input(messages)
         capped = self._apply_caps(max_tokens)
-        schema_payload = {
-            "type": "json_schema",
-            "json_schema": {
-                "name": schema.__name__,
-                "schema": schema.model_json_schema(),
-                "strict": True,
-            },
-        }
-
-        async def _call() -> str:
-            response = await self._client.chat.completions.create(
+        try:
+            response = await self._client.chat.completions.parse(
                 model=self._model,
                 messages=[m.model_dump() for m in messages],
-                max_tokens=capped,
+                max_completion_tokens=capped,
                 temperature=temperature,
-                response_format=schema_payload,
+                response_format=schema,
             )
-            return response.choices[0].message.content or ""
+        except _APITimeoutError as e:
+            raise LLMTimeoutError(self._redact(str(e))) from None
+        except _RateLimitError as e:
+            raise LLMRateLimited(self._redact(str(e))) from None
 
-        first = await _call()
-        try:
-            return schema.model_validate_json(first)
-        except ValidationError:
-            # OpenAI's strict JSON Schema mode should never produce invalid JSON;
-            # if it does, one retry, then fail.
-            try:
-                second = await _call()
-                return schema.model_validate_json(second)
-            except ValidationError as e:
-                raise LLMInvalidResponse(
-                    f"OpenAI returned invalid JSON for schema {schema.__name__} "
-                    f"after retry: {self._redact(str(e))}"
-                ) from None
+        message = response.choices[0].message
+
+        # `refusal` is OpenAI's safety mechanism for prompts they refuse to
+        # answer; surface it as an invalid response.
+        if getattr(message, "refusal", None):
+            raise LLMInvalidResponse(
+                f"OpenAI refused the request for schema {schema.__name__}: "
+                f"{self._redact(message.refusal)}"
+            )
+
+        parsed = getattr(message, "parsed", None)
+        if parsed is None:
+            raise LLMInvalidResponse(
+                f"OpenAI returned no parsed content for schema {schema.__name__}"
+            )
+        return parsed
 
     async def stream(
         self,
@@ -135,7 +140,7 @@ class OpenAIProvider(_OpenAIBase):
             stream = await self._client.chat.completions.create(
                 model=self._model,
                 messages=[m.model_dump() for m in messages],
-                max_tokens=capped,
+                max_completion_tokens=capped,
                 temperature=temperature,
                 stream=True,
             )
