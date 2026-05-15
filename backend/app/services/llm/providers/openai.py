@@ -17,6 +17,7 @@ from app.services.llm.base import (
     LLMProviderBase,
     LLMRateLimited,
     LLMTimeoutError,
+    strip_markdown_fence,
 )
 
 T = TypeVar("T", bound=BaseModel)
@@ -107,14 +108,14 @@ class OpenAIProvider(_OpenAIBase):
             )
             return response.choices[0].message.content or ""
 
-        first = await _call()
+        first = strip_markdown_fence(await _call())
         try:
             return schema.model_validate_json(first)
         except ValidationError:
             # OpenAI's strict JSON Schema mode should never produce invalid JSON;
             # if it does, one retry, then fail.
             try:
-                second = await _call()
+                second = strip_markdown_fence(await _call())
                 return schema.model_validate_json(second)
             except ValidationError as e:
                 raise LLMInvalidResponse(

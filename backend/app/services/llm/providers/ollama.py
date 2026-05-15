@@ -21,6 +21,7 @@ from app.services.llm.base import (
     LLMProviderBase,
     LLMRateLimited,
     LLMTimeoutError,
+    strip_markdown_fence,
 )
 
 T = TypeVar("T", bound=BaseModel)
@@ -109,7 +110,7 @@ class OllamaProvider(_OllamaBase):
             )
             return response["message"]["content"]
 
-        first = await _call(messages)
+        first = strip_markdown_fence(await _call(messages))
         try:
             return schema.model_validate_json(first)
         except ValidationError:
@@ -119,12 +120,13 @@ class OllamaProvider(_OllamaBase):
                     role="user",
                     content=(
                         "Your previous response did not match the required JSON schema. "
-                        "Respond again with valid JSON that exactly matches the schema."
+                        "Respond again with valid JSON that exactly matches the schema. "
+                        "Do not wrap it in markdown code fences."
                     ),
                 ),
             ]
             try:
-                second = await _call(stricter)
+                second = strip_markdown_fence(await _call(stricter))
                 return schema.model_validate_json(second)
             except ValidationError as e:
                 raise LLMInvalidResponse(
