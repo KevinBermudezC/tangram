@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="Cache-Control" content="no-store" />
+    <title>Tangram — Home (prototype)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./style.css?v=6" />
+  </head>
+  <body class="body--home">
+    <!--
+      Home (in-app entry point). Minimal v0-style:
+        - left rail with brand, "New diagram", search, nav, recents
+        - main area with a single big centered prompt
+      The library grid + filters live behind the "All diagrams" link
+      (not in this prototype yet) so the home stays focused.
+    -->
+
+    <nav class="proto-bar">
+      <span class="proto-bar__label">Prototype views</span>
+      <a class="proto-bar__link proto-bar__link--active" href="./index.html">Home</a>
+      <a class="proto-bar__link" href="./index.html#state=empty">Home · empty</a>
+      <a class="proto-bar__link" href="./library.html">Library</a>
+      <a class="proto-bar__link" href="./editor.html">Editor</a>
+      <a class="proto-bar__link" href="./editor.html#state=loading">Editor · loading</a>
+      <a class="proto-bar__link" href="./editor.html#state=error">Editor · error</a>
+    </nav>
+
+    <div class="appshell">
+      <!-- =================================================================
+           Left rail (slim, v0-style)
+           ================================================================= -->
+      <aside class="rail">
+        <a href="./index.html" class="rail__brand">
+          <span class="brand__mark" aria-hidden="true">T</span>
+          <span class="brand__name">Tangram</span>
+        </a>
+
+        <a href="./editor.html" class="rail__cta">
+          <span aria-hidden="true">＋</span>
+          New diagram
+        </a>
+
+        <label class="rail__search">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" aria-hidden="true">
+            <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="1.5" />
+            <path d="m20 20-4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          </svg>
+          <input type="search" placeholder="Search" />
+        </label>
+
+        <ul class="rail__nav">
+          <li>
+            <a href="./index.html" class="rail__item rail__item--active">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                <path d="M3 12 12 4l9 8M5 10v9h5v-5h4v5h5v-9" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" />
+              </svg>
+              Home
+            </a>
+          </li>
+          <li>
+            <a href="./library.html" class="rail__item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                <rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+                <rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+              Library
+            </a>
+          </li>
+          <li>
+            <a href="#" class="rail__item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" stroke="currentColor" stroke-width="1.5" />
+              </svg>
+              Templates
+            </a>
+          </li>
+          <li>
+            <a href="#" class="rail__item">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" aria-hidden="true">
+                <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09c0 .66.39 1.26 1 1.51.69.28 1.49.13 2.06-.43l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06c-.55.55-.71 1.36-.43 2.06.25.61.85 1 1.51 1H21a2 2 0 0 1 0 4h-.09c-.66 0-1.26.39-1.51 1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" />
+              </svg>
+              Settings
+            </a>
+          </li>
+        </ul>
+
+        <section class="rail__section">
+          <header class="rail__section-header">
+            <span>Recent</span>
+            <button class="rail__section-toggle" type="button" aria-label="Collapse">
+              <svg viewBox="0 0 24 24" width="10" height="10" fill="none">
+                <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </header>
+          <ul class="rail__list">
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot rail__diagram-dot--generated" aria-hidden="true"></span>
+                <span class="rail__diagram-name">Delivery App</span>
+              </a>
+            </li>
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot" aria-hidden="true"></span>
+                <span class="rail__diagram-name">SaaS dashboard</span>
+              </a>
+            </li>
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot rail__diagram-dot--generated" aria-hidden="true"></span>
+                <span class="rail__diagram-name">Twitter clone with notifications</span>
+              </a>
+            </li>
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot rail__diagram-dot--draft" aria-hidden="true"></span>
+                <span class="rail__diagram-name">Untitled diagram</span>
+              </a>
+            </li>
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot" aria-hidden="true"></span>
+                <span class="rail__diagram-name">Internal auth playground</span>
+              </a>
+            </li>
+            <li>
+              <a href="./editor.html" class="rail__diagram">
+                <span class="rail__diagram-dot rail__diagram-dot--generated" aria-hidden="true"></span>
+                <span class="rail__diagram-name">Multi-tenant CRM</span>
+              </a>
+            </li>
+            <li>
+              <a href="#" class="rail__more">More →</a>
+            </li>
+          </ul>
+        </section>
+
+        <footer class="rail__footer">
+          <a href="https://github.com/KevinBermudezC/tangram" class="rail__footer-link">
+            <svg viewBox="0 0 24 24" width="13" height="13">
+              <path fill="currentColor" d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.15-1.1-1.46-1.1-1.46-.9-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.02a9.56 9.56 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2z" />
+            </svg>
+            GitHub
+          </a>
+          <span class="rail__footer-meta">MIT · Pre-alpha</span>
+        </footer>
+      </aside>
+
+      <!-- =================================================================
+           Main — single big prompt, centered
+           ================================================================= -->
+      <main class="canvas-home">
+        <div class="canvas-home__inner">
+          <h1 class="canvas-home__title">
+            What do you want to design?
+          </h1>
+
+          <form class="ask" onsubmit="event.preventDefault()">
+            <textarea
+              class="ask__input"
+              rows="3"
+              placeholder="Describe an architecture — e.g. a food delivery app with realtime tracking…"
+            ></textarea>
+            <div class="ask__footer">
+              <div class="ask__hints">
+                <button class="example-chip" type="button">Food delivery</button>
+                <button class="example-chip" type="button">Twitter clone</button>
+                <button class="example-chip" type="button">E-commerce</button>
+              </div>
+              <div class="ask__actions">
+                <a href="./editor.html" class="ask__blank">
+                  Blank canvas
+                </a>
+                <a href="./editor.html" class="btn btn--primary ask__send">
+                  Generate
+                  <span class="btn__arrow" aria-hidden="true">→</span>
+                </a>
+              </div>
+            </div>
+          </form>
+
+          <p class="canvas-home__note" data-show-when="ready">
+            Diagrams live as JSON in <code>data/diagrams/</code>. The AI
+            teaches as you build — click any node in the editor to ask why
+            it's there.
+          </p>
+
+          <div class="empty-hint" data-show-when="empty">
+            <p>No diagrams yet. Describe an architecture above, or
+              <a href="./editor.html">open a blank canvas →</a></p>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        const hash = window.location.hash || "";
+        const match = hash.match(/state=(\w+)/);
+        const state = match ? match[1] : "ready";
+        document.body.dataset.state = state;
+      })();
+    </script>
+  </body>
+</html>

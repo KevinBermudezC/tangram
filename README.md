@@ -8,7 +8,7 @@ I'm building Tangram because I keep seeing junior devs hit the same wall: system
 
 Tangram is the tool I wish I'd had: drag a few boxes onto a canvas, connect them, and an AI that *teaches* (not just generates) explains what each piece does, why it's there, and what usually goes wrong. Self-hosted, MIT, BYOK or Ollama. No SaaS to sign up for.
 
-**Status:** pre-alpha. There is no UI yet. The backend can talk to LLMs and the curated knowledge layer is in place, but you can't actually use Tangram as a product today. Watch this space.
+**Status:** pre-alpha. The backend can generate diagrams via LLM, and a minimal read-only web UI is now in place. Editing the diagram (drag, connect, edit labels) is still ahead.
 
 ## What it'll be (and what it won't)
 
@@ -28,7 +28,7 @@ Three reasons, in honesty order:
 
 ## Stack
 
-- **Frontend:** Next.js + React Flow + TypeScript (not built yet)
+- **Frontend:** Next.js 16 + React 19 + React Flow + TypeScript (Node.js 22+)
 - **Backend:** FastAPI + Pydantic v2 on Python 3.11+
 - **Storage:** JSON files for diagrams, Chroma for embeddings. No Postgres in MVP.
 - **AI:** Ollama by default. OpenAI or Anthropic with your own key.
@@ -37,7 +37,9 @@ No Docker required to run locally. A `Dockerfile` exists if you want to deploy.
 
 ## Quick start
 
-The backend works. The frontend doesn't exist yet, so this gets you `/health` and a working LLM provider, but no UI.
+Two terminals.
+
+**Terminal 1 — backend:**
 
 ```bash
 git clone https://github.com/KevinBermudezC/tangram
@@ -45,13 +47,22 @@ cd tangram/backend
 python -m venv .venv
 source .venv/bin/activate            # Windows: .venv\Scripts\Activate.ps1
 pip install -e ".[dev]"
-cp .env.example .env
+cp .env.example .env                 # edit if using BYOK or Ollama Cloud
 uvicorn app.main:app --reload
 ```
 
-Then `curl http://localhost:8000/health` should answer.
+**Terminal 2 — frontend:**
 
-The full backend reference, including how to talk to the LLM layer, is in [`backend/README.md`](./backend/README.md).
+```bash
+corepack enable                  # one-time, lets Node manage pnpm via packageManager
+cd tangram/frontend
+pnpm install
+pnpm dev
+```
+
+Open <http://localhost:3000>, type a prompt, hit Generate.
+
+More detail: [`backend/README.md`](./backend/README.md), [`frontend/README.md`](./frontend/README.md).
 
 ## Where we are
 
@@ -73,7 +84,7 @@ components/          Curated YAML, one per node type, fully readable as docs
 docs/
   architecture/      ADRs — the durable decisions
   schema/            Diagram schema reference
-frontend/            Next.js + React Flow (not yet)
+frontend/            Next.js + React 19 + React Flow (read-only viewer)
 openspec/
   changes/           In-flight change proposals
   specs/             Accepted specs, current ground truth

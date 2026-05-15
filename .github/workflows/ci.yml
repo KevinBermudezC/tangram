@@ -78,7 +78,10 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Match the frontend job. The OpenSpec CLI itself runs on 18+,
+          # but pinning both jobs to the same major keeps the cache key
+          # consistent across the workflow.
+          node-version: "22"
 
       - name: Install OpenSpec CLI
         run: npm install -g @fission-ai/openspec@latest
@@ -97,3 +100,52 @@ jobs:
             openspec validate "$change_name" --strict
           done
         shell: bash
+
+  # ---------------------------------------------------------------------------
+  # Frontend — lint + typecheck + tests (pnpm via Corepack)
+  # ---------------------------------------------------------------------------
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      # Install pnpm BEFORE setup-node. Setup-node's `cache: pnpm` runs
+      # `pnpm store path` to figure out what to cache; if pnpm isn't on
+      # PATH yet, it records an empty path and then fails the post-job
+      # cache-save step with a Path Validation Error.
+      #
+      # `pnpm/action-setup` reads `packageManager` from package.json, so
+      # the version still stays pinned (no Corepack flake) and contributors
+      # locally still use Corepack via the same `packageManager` field.
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          # `packageManager` lives in `frontend/package.json` (not the
+          # repo root), so we have to point the action at it explicitly.
+          package_json_file: frontend/package.json
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # Match the minimum version declared in frontend/package.json's
+          # `engines.node`. Next.js 16 + React 19 + Tailwind v4 dropped
+          # support for older runtimes.
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: TypeScript typecheck
+        run: pnpm typecheck
+
+      - name: Vitest
+        run: pnpm test

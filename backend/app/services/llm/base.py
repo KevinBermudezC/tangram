@@ -161,7 +161,11 @@ class LLMProviderBase:
         total = sum(len(m.content) for m in messages)
         if total > self._max_input_chars:
             raise LLMInputTooLarge(
-                f"Input length {total} chars exceeds MAX_INPUT_CHARS={self._max_input_chars}"
+                f"Composed prompt is {total} chars, exceeding the configured "
+                f"MAX_LLM_INPUT_CHARS cap of {self._max_input_chars}. "
+                f"Increase MAX_LLM_INPUT_CHARS in your .env — the cap covers "
+                f"the mode prompt + component summaries + retrieved patterns "
+                f"+ user prompt (RAG retrieval adds ~10-12k chars when on)."
             )
 
     def _apply_caps(self, max_tokens: int | None) -> int:
