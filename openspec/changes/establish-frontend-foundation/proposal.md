@@ -50,4 +50,16 @@ This proposal does **not** add:
 - **Configuration**: one new env var (`NEXT_PUBLIC_API_URL`, defaults to `http://localhost:8000`).
 - **Documentation**: `frontend/README.md` (new); top-level README quick-start expanded.
 - **Future proposals unblocked**: `add-diagram-editor`, `add-ai-explanation-panel`, `add-openapi-typescript-codegen`, `add-mermaid-export`.
-- **First public demo**: with backend running and Ollama (local or cloud) configured, `npm run dev` opens a browser at `http://localhost:3000` where typing a prompt produces a rendered diagram.
+- **First public demo**: with backend running and Ollama (local or cloud) configured, `pnpm dev` opens a browser at `http://localhost:3000` where typing a prompt produces a rendered diagram.
+
+## Post-merge addendum — UI shell port (2026-05-15)
+
+The original proposal scope was a single read-only page. While implementing, that minimal shape proved hard to demo to anyone outside the team — a single page with a textarea felt like a tech preview, not a product. So before the PR merged, the branch grew to include a full UI shell ported from `frontend/prototype/`:
+
+- Three routes (`/`, `/library`, `/editor`) sharing a left rail with brand + nav + recent diagrams + backend status pill.
+- A shadcn-style primitive layer in `components/ui/` (Button, Card, Badge, Input, Textarea, Separator, DropdownMenu).
+- A TanStack Query data layer in `lib/hooks.ts` so every backend call (today: `/generate`, `/health`; tomorrow: `/diagrams`, `/chat`) lives in one place.
+- An AI chat panel in the editor using `@ai-sdk/react` + Streamdown against a mock `/api/chat` route that streams canned Markdown. The protocol is correct, only the data is fake; when the real chat endpoint lands the route becomes a proxy.
+- `MockCanvas` for blank / generating states; the real `<DiagramCanvas>` (React Flow) renders the moment a generated diagram arrives.
+
+The original capabilities + tasks above all still apply. The follow-ups for editing, persistence, chat backend, dark mode, OpenAPI codegen, and Mermaid export are tracked in `ROADMAP.md`'s "Frontend follow-ups" and "Good first issues" sections rather than expanding this proposal further.
