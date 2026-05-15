@@ -266,6 +266,51 @@ Sub-system failures (retrieval down, rules raising) degrade gracefully — the a
 
 Adding a new mode is a markdown PR. See [`modes/README.md`](../modes/README.md).
 
+## Generation endpoint
+
+`POST /generate` is Tangram's first end-to-end LLM endpoint. Send a text prompt, get back a fully validated `Diagram` with positions assigned.
+
+```bash
+curl -X POST http://localhost:8000/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "I want to build a delivery app"}'
+```
+
+To actually run this against a real LLM, set up one of:
+
+**Option A — Local Ollama (free, no key)**
+```bash
+ollama pull qwen3:4b-instruct
+ollama serve   # often already running
+# .env:
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=http://localhost:11434
+```
+
+**Option B — Ollama Cloud (managed, requires key)**
+```bash
+# .env:
+LLM_PROVIDER=ollama
+OLLAMA_BASE_URL=https://ollama.com
+OLLAMA_API_KEY=<your-ollama-cloud-token>
+```
+
+**Option C — OpenAI (BYOK)**
+```bash
+# .env:
+LLM_PROVIDER=openai
+OPENAI_API_KEY=sk-...
+```
+
+**Option D — Anthropic (BYOK)**
+```bash
+# .env:
+LLM_PROVIDER=anthropic
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+If something is misconfigured, the endpoint returns a typed error (503 / 502 / 504 / 429 / 413) with a stable `code` field so the frontend can branch on it.
+
 ## Anti-pattern rules
 
 The rules engine inspects a `Diagram` and returns structured `Finding`s for known architectural mistakes. It runs in microseconds, never calls the LLM, and is deterministic.

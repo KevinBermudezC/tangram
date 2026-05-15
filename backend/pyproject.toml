@@ -12,6 +12,7 @@ dependencies = [
   "pydantic-settings>=2.6",
   "pyyaml>=6.0",
   "python-frontmatter>=1.0",
+  "python-ulid>=2.2",
   "httpx>=0.27",
   "chromadb>=0.5",
   "anthropic>=0.39",
