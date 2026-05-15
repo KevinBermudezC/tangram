@@ -3,11 +3,15 @@
 The LLM is asked for `GeneratedDiagramContent` — just the parts the model
 should decide. The backend wraps that into a full `Diagram` by adding a
 ULID, server timestamps, and positions assigned by auto_layout.
+
+All nested objects use closed schemas (typed fields, no free-form `dict`).
+That's required for OpenAI's strict JSON Schema mode, which rejects
+`additionalProperties: true` anywhere in the schema tree. Even providers
+that don't enforce strict mode benefit: the model gets sharper signal
+about what fields are useful.
 """
 
 from __future__ import annotations
-
-from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -42,13 +46,35 @@ class GeneratedNodeAI(BaseModel):
     confidence: float | None = Field(default=None, ge=0, le=1)
 
 
+class GeneratedNodeProperties(BaseModel):
+    """Closed set of node-level properties the LLM may fill.
+
+    Replaces the previous `dict[str, Any]` which was incompatible with
+    OpenAI's strict JSON Schema mode (free-form dicts imply
+    `additionalProperties: true`). Two fields cover the most common
+    needs: a concrete technology choice and a short note.
+    """
+
+    technology: str | None = Field(
+        default=None,
+        description=(
+            "Concrete implementation suggestion (e.g. 'PostgreSQL', "
+            "'Redis + BullMQ', 'React Native')."
+        ),
+    )
+    notes: str | None = Field(
+        default=None,
+        description="Optional short free-text note about this node.",
+    )
+
+
 class GeneratedNode(BaseModel):
     """A node as the LLM is asked to produce it (no position)."""
 
     id: str = Field(min_length=1, description="LLM-chosen unique id within this diagram.")
     type: NodeType
     label: str = Field(min_length=1)
-    properties: dict[str, Any] = Field(default_factory=dict)
+    properties: GeneratedNodeProperties = Field(default_factory=GeneratedNodeProperties)
     ai: GeneratedNodeAI | None = None
 
 

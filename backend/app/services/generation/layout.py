@@ -66,7 +66,7 @@ def auto_layout(generated_nodes: list[GeneratedNode]) -> list[Node]:
                 type=gen.type,
                 label=gen.label,
                 position=Position(x=x, y=y),
-                properties=dict(gen.properties),
+                properties=gen.properties.model_dump(exclude_none=True),
                 ai=_translate_ai(gen.ai),
             )
         )
