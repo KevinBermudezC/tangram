@@ -2,17 +2,17 @@
 
 ### Requirement: Next.js workspace under `frontend/`
 
-The repository SHALL include a Next.js 15 + TypeScript workspace at `frontend/`. A contributor with Node.js 20+ installed SHALL be able to run `npm install && npm run dev` and see the application on `http://localhost:3000`.
+The repository SHALL include a Next.js 16 + TypeScript workspace at `frontend/`. A contributor with Node.js 22+ installed SHALL be able to run `corepack enable && pnpm install && pnpm dev` from `frontend/` and see the application on `http://localhost:3000`. pnpm is pinned via the `packageManager` field in `frontend/package.json`; Corepack provisions the matching version automatically.
 
 #### Scenario: Fresh install and run
 
-- **WHEN** a contributor clones a fresh repo, runs `cd frontend && npm install && npm run dev`
+- **WHEN** a contributor clones a fresh repo, runs `corepack enable`, then `cd frontend && pnpm install && pnpm dev`
 - **THEN** the dev server boots without errors
 - **AND** `http://localhost:3000` returns 200
 
 #### Scenario: TypeScript strict mode is on
 
-- **WHEN** `npm run typecheck` is run
+- **WHEN** `pnpm typecheck` is run from `frontend/`
 - **THEN** TypeScript runs with `strict: true` and the project has zero type errors
 
 ### Requirement: Prompt → Generate → Render flow

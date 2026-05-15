@@ -11,7 +11,7 @@ The backend has produced the entire MVP up to the moment of "what does the user 
 
 **Goals:**
 
-- One Next.js workspace under `frontend/` that runs with `npm install && npm run dev`.
+- One Next.js workspace under `frontend/` that runs with `corepack enable && pnpm install && pnpm dev`.
 - A single page that lets a user generate and view a diagram.
 - React Flow renders the diagram with the auto-layout positions the backend assigned.
 - Typed error handling — the backend's `code` field maps to user-readable messages.
@@ -28,9 +28,9 @@ The backend has produced the entire MVP up to the moment of "what does the user 
 
 ## Decisions
 
-### Next.js 15 with the App Router
+### Next.js 16 with the App Router
 
-Next.js is the default React metaframework, App Router is the current shape, the team behind Tangram has TypeScript experience. This needs no further argument.
+Next.js is the default React metaframework, App Router is the current shape, the team behind Tangram has TypeScript experience. This needs no further argument. Originally drafted against Next.js 15; bumped to 16 during implementation to pick up the React 19 + Turbopack defaults. Node.js floor moved with it (16 wants 22+).
 
 **Alternatives considered**: Vite + React Router (rejected — Next.js is more common in this space, smaller leap for contributors), Remix (rejected — losing momentum vs Next.js in 2025), plain React + Vite (rejected — we'll likely want SSR later for sharing diagrams).
 
@@ -72,7 +72,7 @@ The frontend needs to know where the backend lives. Defaults to `http://localhos
 
 ### ESLint via `eslint-config-next`, no separate Prettier
 
-Next.js 15 ships an ESLint preset that covers most of what Prettier would do. Adding Prettier means setting up the ESLint/Prettier compatibility shim, which is one more thing to break. Skip until we feel the pain.
+Next.js 16 ships an ESLint preset that covers most of what Prettier would do. Adding Prettier means setting up the ESLint/Prettier compatibility shim, which is one more thing to break. Skip until we feel the pain.
 
 **Alternatives considered**: ESLint + Prettier with `eslint-config-prettier` (rejected — extra config surface), Biome (rejected — appealing but the Next.js community is still mostly on ESLint; contributor familiarity wins), no linter (rejected — obviously not).
 
@@ -84,7 +84,7 @@ Vitest is fast, ESM-native, and has first-class Vite/Next.js integration in 2025
 
 ### CI integration as a separate job
 
-The existing CI has `lint`, `test`, `openspec` Python jobs. We add a fourth: `frontend`. Runs `npm ci`, `lint`, `typecheck`, `test`. Parallel to the others.
+The existing CI has `lint`, `test`, `openspec` Python jobs. We add a fourth: `frontend`. Runs `pnpm install --frozen-lockfile`, then `pnpm lint`, `pnpm typecheck`, `pnpm test`. Parallel to the others. pnpm is installed via `pnpm/action-setup@v4` before `actions/setup-node@v4` so the `cache: pnpm` feature can resolve the store path.
 
 **Alternatives considered**: extend the existing `lint` and `test` jobs to also run frontend (rejected — mixes Python and Node tooling per job, makes failures harder to read).
 

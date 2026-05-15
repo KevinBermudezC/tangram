@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, OctagonAlert } from "lucide-react";
 import { toast } from "sonner";
@@ -45,30 +45,44 @@ function EditorInner() {
   const [chatHidden, setChatHidden] = useState(false);
   const generation = useGenerate();
 
+  // Single entry point for kicking off a generation. Used both by the
+  // first-paint effect (when ?prompt=… is present) and the Try-again
+  // button on the error overlay. Wrapped in useCallback so the effect's
+  // dep array stays stable.
+  const runGenerate = useCallback(
+    (prompt: string) => {
+      generation.mutate(prompt, {
+        onError: (err) => {
+          const detail =
+            err instanceof TangramApiError
+              ? err.detail
+              : err instanceof Error
+                ? err.message
+                : "Unknown error";
+          toast.error("Generation failed", { description: detail });
+        },
+        onSuccess: (diagram) => {
+          toast.success("Diagram generated", {
+            description: `${diagram.nodes.length} components · ${diagram.edges.length} connections`,
+          });
+        },
+      });
+    },
+    [generation],
+  );
+
   // Fire one mutation as soon as we land with ?prompt=…
   useEffect(() => {
     if (!initialPrompt) return;
-    if (generation.isPending || generation.isSuccess) return;
-    generation.mutate(initialPrompt, {
-      onError: (err) => {
-        const detail =
-          err instanceof TangramApiError
-            ? err.detail
-            : err instanceof Error
-              ? err.message
-              : "Unknown error";
-        toast.error("Generation failed", {
-          description: detail,
-        });
-      },
-      onSuccess: (diagram) => {
-        toast.success("Diagram generated", {
-          description: `${diagram.nodes.length} components · ${diagram.edges.length} connections`,
-        });
-      },
-    });
-    // Intentionally key on `initialPrompt` only: we want one mutation per
-    // visit, not a re-fire when generation state changes.
+    if (generation.isPending || generation.isSuccess || generation.isError) {
+      return;
+    }
+    runGenerate(initialPrompt);
+    // Intentionally key on `initialPrompt` only. `runGenerate` would
+    // change reference every render; including it would re-fire the
+    // mutation on each render and is exactly the bug we're avoiding.
+    // The project's flat ESLint config doesn't have react-hooks rules
+    // wired, so there's no warning to silence.
   }, [initialPrompt]);
 
   const diagram = generation.data ?? null;
@@ -89,7 +103,13 @@ function EditorInner() {
         <ErrorOverlay
           detail={error.detail}
           code={error.code}
-          onRetry={() => generation.reset()}
+          onRetry={() => {
+            // Clear the failed state AND immediately re-issue the request.
+            // Just `reset()` would leave us on a blank canvas because the
+            // first-paint effect won't re-fire (initialPrompt is unchanged).
+            generation.reset();
+            if (initialPrompt) runGenerate(initialPrompt);
+          }}
         />
       )}
     </div>

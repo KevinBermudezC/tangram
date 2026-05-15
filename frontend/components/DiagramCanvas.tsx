@@ -1,7 +1,10 @@
 "use client";
 
 import { Background, Controls, MiniMap, ReactFlow } from "@xyflow/react";
-import "@xyflow/react/dist/style.css";
+// React Flow's stylesheet is imported once globally in `app/globals.css`
+// (Next.js requires global CSS imports to come from the root layout's
+// import graph). Importing it here too would duplicate the rules and
+// is rejected by Next during build.
 
 import { useMemo } from "react";
 

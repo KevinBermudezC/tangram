@@ -123,6 +123,10 @@ jobs:
       # locally still use Corepack via the same `packageManager` field.
       - name: Install pnpm
         uses: pnpm/action-setup@v4
+        with:
+          # `packageManager` lives in `frontend/package.json` (not the
+          # repo root), so we have to point the action at it explicitly.
+          package_json_file: frontend/package.json
 
       - name: Set up Node
         uses: actions/setup-node@v4

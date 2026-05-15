@@ -20,7 +20,7 @@ The repository SHALL run continuous integration checks automatically on every pu
 
 ### Requirement: Frontend CI job
 
-The CI workflow SHALL include a `frontend` job that runs on the same triggers as the existing Python jobs. The job SHALL execute `npm ci`, `npm run lint`, `npm run typecheck`, and `npm run test` from the `frontend/` directory. Any failure of those subcommands SHALL fail the job.
+The CI workflow SHALL include a `frontend` job that runs on the same triggers as the existing Python jobs. The job SHALL install pnpm via `pnpm/action-setup@v4` (reading the version from `frontend/package.json`'s `packageManager` field), set up Node.js 22 with `actions/setup-node@v4` using the pnpm cache, then execute `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, and `pnpm test` from the `frontend/` directory. Any failure of those subcommands SHALL fail the job.
 
 #### Scenario: Failing TypeScript fails the job
 

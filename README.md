@@ -28,7 +28,7 @@ Three reasons, in honesty order:
 
 ## Stack
 
-- **Frontend:** Next.js 15 + React 19 + React Flow + TypeScript
+- **Frontend:** Next.js 16 + React 19 + React Flow + TypeScript (Node.js 22+)
 - **Backend:** FastAPI + Pydantic v2 on Python 3.11+
 - **Storage:** JSON files for diagrams, Chroma for embeddings. No Postgres in MVP.
 - **AI:** Ollama by default. OpenAI or Anthropic with your own key.

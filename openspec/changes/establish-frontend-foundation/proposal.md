@@ -9,11 +9,12 @@ Scope is deliberately narrow: a **read-only** diagram viewer. The user types a p
 ## What Changes
 
 - Add a `frontend/` workspace at the repo root with:
-  - Next.js 15 (App Router) + TypeScript strict mode.
-  - Tailwind CSS for styling.
+  - Next.js 16 (App Router) + TypeScript strict mode. Node.js 22+.
+  - pnpm via Corepack (pinned through `packageManager` in `package.json`).
+  - Tailwind CSS v4 for styling.
   - React Flow (`@xyflow/react`) for the diagram canvas.
   - Vitest + Testing Library for tests.
-  - ESLint via `eslint-config-next`.
+  - ESLint flat config (`@eslint/js` + `typescript-eslint`).
 - A single page (`app/page.tsx`) that:
   - Has a textarea for the user prompt.
   - Has a Generate button that POSTs to `/generate`.

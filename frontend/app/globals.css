@@ -1,6 +1,19 @@
+/* Import order matters here.
+ *
+ *   1. Google Fonts            — must come first (CSS spec: @import before
+ *                                  any other rule).
+ *   2. React Flow's stylesheet — comes BEFORE Tailwind so our own
+ *                                  utilities (added later in the cascade)
+ *                                  win against React Flow's defaults
+ *                                  without `!important`.
+ *   3. Tailwind                — last so utilities override everything.
+ *
+ * If you swap (2) and (3), tiny things like `bg-canvas` on a node body
+ * stop overriding `@xyflow/react`'s default fill.
+ */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
-@import "tailwindcss";
 @import "@xyflow/react/dist/style.css";
+@import "tailwindcss";
 
 /* -----------------------------------------------------------------------------
    Tangram design tokens.
