@@ -2,17 +2,25 @@
 
 Wires the public HTTP shape to the generator service. The error-mapping in
 this module is the contract the frontend will branch on: every internal
-LLMError subclass becomes a typed HTTP response with a stable `code`.
+LLMError subclass becomes a typed HTTP response with a stable top-level
+`code` field.
+
+Error responses are emitted via `TangramHTTPError`, which the app-level
+exception handler (registered in app.main) serializes as a flat
+`{"detail": str, "code": str}` body. We avoid raising raw FastAPI
+HTTPExceptions for typed errors because FastAPI wraps their detail under
+an extra `"detail"` key, which would nest `code` one level too deep.
 """
 
 from __future__ import annotations
 
 import logging
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, status
 from pydantic import BaseModel
 
 from app.core.config import get_settings
+from app.errors import TangramHTTPError
 from app.schemas.diagram import Diagram
 from app.schemas.generate import GenerateRequest
 from app.services.generation import generate_diagram
@@ -31,6 +39,8 @@ router = APIRouter(tags=["ai"])
 
 
 class ErrorBody(BaseModel):
+    """Flat error body the frontend can branch on."""
+
     detail: str
     code: str
 
@@ -40,7 +50,7 @@ class ErrorBody(BaseModel):
     response_model=Diagram,
     responses={
         413: {"model": ErrorBody, "description": "Prompt too long"},
-        422: {"description": "Invalid request body"},
+        422: {"description": "Invalid request body (FastAPI default shape)"},
         429: {"model": ErrorBody, "description": "LLM provider rate-limited the request"},
         500: {"model": ErrorBody, "description": "Unexpected error"},
         502: {"model": ErrorBody, "description": "LLM returned an invalid response"},
@@ -52,13 +62,13 @@ async def post_generate(request: GenerateRequest) -> Diagram:
     """Generate a Diagram from a free-text prompt."""
     settings = get_settings()
     if len(request.prompt) > settings.max_input_chars:
-        raise HTTPException(
+        raise TangramHTTPError(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=_error_body(
+            detail=(
                 "Prompt exceeds the configured input length cap "
-                f"({len(request.prompt)} > {settings.max_input_chars}).",
-                code="prompt_too_long",
+                f"({len(request.prompt)} > {settings.max_input_chars})."
             ),
+            code="prompt_too_long",
         )
 
     try:
@@ -68,33 +78,43 @@ async def post_generate(request: GenerateRequest) -> Diagram:
         # also includes the composed system prompt. If it's still too long,
         # surface the same 413 contract.
         logger.warning("LLM input too large: %s", e)
-        raise _http(
-            status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, str(e), "llm_input_too_large"
+        raise TangramHTTPError(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=str(e),
+            code="llm_input_too_large",
         ) from None
     except LLMRateLimited as e:
         logger.warning("LLM rate limited: %s", e)
-        raise _http(status.HTTP_429_TOO_MANY_REQUESTS, str(e), "llm_rate_limited") from None
+        raise TangramHTTPError(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=str(e),
+            code="llm_rate_limited",
+        ) from None
     except LLMTimeoutError as e:
         logger.warning("LLM timed out: %s", e)
-        raise _http(status.HTTP_504_GATEWAY_TIMEOUT, str(e), "llm_timeout") from None
+        raise TangramHTTPError(
+            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
+            detail=str(e),
+            code="llm_timeout",
+        ) from None
     except LLMInvalidResponse as e:
         logger.warning("LLM returned invalid response: %s", e)
-        raise _http(status.HTTP_502_BAD_GATEWAY, str(e), "llm_invalid_response") from None
+        raise TangramHTTPError(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=str(e),
+            code="llm_invalid_response",
+        ) from None
     except LLMConfigError as e:
         logger.error("LLM misconfigured: %s", e)
-        raise _http(status.HTTP_503_SERVICE_UNAVAILABLE, str(e), "llm_config_error") from None
+        raise TangramHTTPError(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(e),
+            code="llm_config_error",
+        ) from None
     except LLMError as e:
         logger.exception("Unexpected LLM error")
-        raise _http(
-            status.HTTP_500_INTERNAL_SERVER_ERROR,
-            str(e) or "Unexpected LLM error",
-            "llm_error",
+        raise TangramHTTPError(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e) or "Unexpected LLM error",
+            code="llm_error",
         ) from None
-
-
-def _error_body(detail: str, code: str) -> dict:
-    return {"detail": detail, "code": code}
-
-
-def _http(status_code: int, detail: str, code: str) -> HTTPException:
-    return HTTPException(status_code=status_code, detail=_error_body(detail, code))
