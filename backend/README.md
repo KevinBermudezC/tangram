@@ -242,6 +242,30 @@ The index auto-builds the first time you call `retrieve_patterns` and rebuilds w
 
 See [`app/services/retrieval/README.md`](./app/services/retrieval/README.md) for details.
 
+## Modes and prompt composition
+
+A mode is the LLM's persona — how it talks and what it pays attention to. Modes live in markdown at the repo root in `modes/<id>.md`. MVP ships one: `tutor`.
+
+The `compose_prompt` function is the single bridge between everything else and the LLM. It assembles the active mode's system prompt, a compact summary of every component type, the top-k patterns retrieved for the user's request, and the rule findings for a supplied diagram, then returns the `ChatMessage` list to send.
+
+```python
+from app.services.prompts import compose_prompt
+
+# For a /generate call — no diagram yet
+messages = await compose_prompt("I want to build a delivery app")
+
+# For a /analyze call — diagram supplied
+messages = await compose_prompt("what's wrong here?", diagram=my_diagram)
+
+# Then send to the LLM
+from app.services.llm import get_llm
+result = await get_llm().generate(messages)
+```
+
+Sub-system failures (retrieval down, rules raising) degrade gracefully — the affected section is omitted with a warning, and composition continues. The only error `compose_prompt` propagates is `ModeNotFoundError` (bad `mode_id`).
+
+Adding a new mode is a markdown PR. See [`modes/README.md`](../modes/README.md).
+
 ## Anti-pattern rules
 
 The rules engine inspects a `Diagram` and returns structured `Finding`s for known architectural mistakes. It runs in microseconds, never calls the LLM, and is deterministic.

@@ -13,11 +13,13 @@ from tests._fake_embedder import FakeEmbedder
 @pytest.fixture(autouse=True)
 def _isolate(monkeypatch: pytest.MonkeyPatch) -> None:
     store.set_client_for_tests(chromadb.EphemeralClient())
+    store.delete_collection()
     fake = FakeEmbedder()
     monkeypatch.setattr("app.services.retrieval.builder.get_embedder", lambda: fake)
     monkeypatch.setattr("app.services.retrieval.retriever.get_embedder", lambda: fake)
     reset_patterns()
     yield
+    store.delete_collection()
     store.set_client_for_tests(None)
     reset_patterns()
 
