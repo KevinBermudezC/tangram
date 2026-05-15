@@ -54,9 +54,10 @@ uvicorn app.main:app --reload
 **Terminal 2 — frontend:**
 
 ```bash
+corepack enable                  # one-time, lets Node manage pnpm via packageManager
 cd tangram/frontend
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 Open <http://localhost:3000>, type a prompt, hit Generate.

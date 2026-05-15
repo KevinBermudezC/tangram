@@ -1,24 +1,30 @@
 # Tangram frontend
 
-Next.js 15 + React 19 + React Flow. Pre-alpha.
+Next.js + React + React Flow. Pre-alpha.
 
 ## Prerequisites
 
 - Node.js 20+
+- **pnpm** as the package manager (auto-provisioned via Corepack)
 - The Tangram backend running (see [`../backend/README.md`](../backend/README.md))
 
 ## Quick start
 
 ```bash
+# One-time: let Node manage pnpm versions via Corepack
+corepack enable
+
 cd frontend
-npm install
+pnpm install
 cp .env.example .env.local   # optional — defaults to http://localhost:8000
-npm run dev
+pnpm dev
 ```
 
 Open <http://localhost:3000>. Type a prompt, click Generate, see a diagram.
 
 The page expects the backend at `NEXT_PUBLIC_API_URL` (default `http://localhost:8000`). The backend's default `CORS_ORIGINS` already allows `http://localhost:3000`, so the round trip works without any further config.
+
+> The exact pnpm version is pinned via the `packageManager` field in `package.json`. Corepack reads that and uses the matching version, so contributors don't need to install pnpm globally or worry about version drift.
 
 ## Project layout
 
@@ -46,15 +52,15 @@ frontend/
 
 ## Commands
 
-| Command            | What it does                                  |
-| ------------------ | --------------------------------------------- |
-| `npm run dev`      | Start dev server with hot reload              |
-| `npm run build`    | Production build                              |
-| `npm run start`    | Start the built app                           |
-| `npm run lint`     | ESLint (Next.js preset)                       |
-| `npm run typecheck`| `tsc --noEmit` against the strict config      |
-| `npm run test`     | Run the Vitest suite once                     |
-| `npm run test:watch`| Vitest in watch mode                         |
+| Command           | What it does                                  |
+| ----------------- | --------------------------------------------- |
+| `pnpm dev`        | Start dev server with hot reload              |
+| `pnpm build`      | Production build                              |
+| `pnpm start`      | Start the built app                           |
+| `pnpm lint`       | ESLint flat config                            |
+| `pnpm typecheck`  | `tsc --noEmit` against the strict config      |
+| `pnpm test`       | Run the Vitest suite once                     |
+| `pnpm test:watch` | Vitest in watch mode                          |
 
 ## What this version does
 
