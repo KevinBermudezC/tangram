@@ -22,21 +22,21 @@ def get_llm() -> LLMProvider:
             base_url=s.ollama_base_url,
             api_key=s.ollama_api_key,
             model=s.ollama_chat_model,
-            max_input_chars=s.max_input_chars,
+            max_input_chars=s.max_llm_input_chars,
             max_output_tokens=s.max_output_tokens,
         )
     if s.llm_provider == "openai":
         return OpenAIProvider(
             api_key=s.openai_api_key,
             model=s.openai_chat_model,
-            max_input_chars=s.max_input_chars,
+            max_input_chars=s.max_llm_input_chars,
             max_output_tokens=s.max_output_tokens,
         )
     if s.llm_provider == "anthropic":
         return AnthropicProvider(
             api_key=s.anthropic_api_key,
             model=s.anthropic_chat_model,
-            max_input_chars=s.max_input_chars,
+            max_input_chars=s.max_llm_input_chars,
             max_output_tokens=s.max_output_tokens,
         )
     raise LLMConfigError(
@@ -62,14 +62,14 @@ def get_embedder() -> Embedder:
             base_url=s.ollama_base_url,
             api_key=s.ollama_api_key,
             model=model,
-            max_input_chars=s.max_input_chars,
+            max_input_chars=s.max_llm_input_chars,
             max_output_tokens=s.max_output_tokens,
         )
     if provider == "openai":
         return OpenAIEmbedder(
             api_key=s.openai_api_key,
             model=model,
-            max_input_chars=s.max_input_chars,
+            max_input_chars=s.max_llm_input_chars,
             max_output_tokens=s.max_output_tokens,
         )
     if provider == "anthropic":

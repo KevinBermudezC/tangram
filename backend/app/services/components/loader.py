@@ -84,5 +84,11 @@ def get_component(node_type: NodeType) -> ComponentMetadata:
 
 
 def reset_for_tests() -> None:
-    """Drop the cached load. Tests call this between cases."""
-    load_components.cache_clear()
+    """Drop the cached load. Tests call this between cases.
+
+    Tolerant of `load_components` being monkeypatched away by a test — in
+    that case there is no cache to clear and we silently no-op.
+    """
+    clear = getattr(load_components, "cache_clear", None)
+    if clear is not None:
+        clear()
