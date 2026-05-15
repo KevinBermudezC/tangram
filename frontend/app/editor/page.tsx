@@ -3,23 +3,32 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Loader2, OctagonAlert } from "lucide-react";
+import { toast } from "sonner";
 
 import { ChatPanel } from "@/components/editor/chat-panel";
+import { DiagramCanvas } from "@/components/DiagramCanvas";
 import { EditorPalette } from "@/components/editor/palette";
 import { EditorTopbar } from "@/components/editor/topbar";
 import { MockCanvas } from "@/components/editor/mock-canvas";
 import { Button } from "@/components/ui/button";
-import { generate, TangramApiError } from "@/lib/api";
+import { useGenerate } from "@/lib/hooks";
+import { TangramApiError } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import type { Diagram } from "@/types/tangram";
 
 /**
  * Editor page.
  *
- * Three-column shell that mirrors the prototype: palette on the left,
- * mock canvas + topbar in the middle, AI chat on the right. Drag/connect
- * isn't wired yet (that lands in `add-diagram-editor`); for now the canvas
- * is visual chrome only.
+ * Three-column shell that mirrors the prototype: palette / canvas / chat.
+ *
+ * Canvas behaviour by state:
+ *   - no prompt, no diagram   → blank `MockCanvas` with empty hint
+ *   - generating              → mock demo placeholder behind overlay
+ *   - error                   → blank canvas + error overlay
+ *   - success                 → real `<DiagramCanvas>` (React Flow) with
+ *                               the generated diagram
+ *
+ * Drag/connect editing isn't wired yet (lands in `add-diagram-editor`);
+ * React Flow is read-only here.
  */
 export default function EditorPage() {
   return (
@@ -33,67 +42,59 @@ function EditorInner() {
   const searchParams = useSearchParams();
   const initialPrompt = searchParams.get("prompt") ?? "";
 
-  const [diagram, setDiagram] = useState<Diagram | null>(null);
-  const [error, setError] = useState<{ detail: string; code: string } | null>(
-    null,
-  );
-  const [generating, setGenerating] = useState(false);
   const [chatHidden, setChatHidden] = useState(false);
+  const generation = useGenerate();
 
-  // Auto-generate when the user arrives with ?prompt=…
+  // Fire one mutation as soon as we land with ?prompt=…
   useEffect(() => {
-    if (!initialPrompt || diagram || generating) return;
-    let cancelled = false;
-    setGenerating(true);
-    setError(null);
-    generate(initialPrompt)
-      .then((d) => {
-        if (!cancelled) setDiagram(d);
-      })
-      .catch((err: unknown) => {
-        if (cancelled) return;
-        if (err instanceof TangramApiError) {
-          setError({ detail: err.detail, code: err.code });
-        } else if (err instanceof Error) {
-          setError({ detail: err.message, code: "network_error" });
-        } else {
-          setError({ detail: "Unknown error", code: "unknown_error" });
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setGenerating(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [initialPrompt, diagram, generating]);
+    if (!initialPrompt) return;
+    if (generation.isPending || generation.isSuccess) return;
+    generation.mutate(initialPrompt, {
+      onError: (err) => {
+        const detail =
+          err instanceof TangramApiError
+            ? err.detail
+            : err instanceof Error
+              ? err.message
+              : "Unknown error";
+        toast.error("Generation failed", {
+          description: detail,
+        });
+      },
+      onSuccess: (diagram) => {
+        toast.success("Diagram generated", {
+          description: `${diagram.nodes.length} components · ${diagram.edges.length} connections`,
+        });
+      },
+    });
+    // Intentionally key on `initialPrompt` only: we want one mutation per
+    // visit, not a re-fire when generation state changes.
+  }, [initialPrompt]);
 
-  // Show the canned demo only as a placeholder while the LLM is generating
-  // for the first time. Blank canvases and post-success states render empty
-  // until the real React Flow editor wires up.
-  const showDemoPlaceholder = generating;
+  const diagram = generation.data ?? null;
+  const generating = generation.isPending;
+  const error = generation.isError
+    ? errorToOverlay(generation.error)
+    : null;
 
   const content = (
     <div className="relative flex-1">
-      <MockCanvas demo={showDemoPlaceholder} />
+      {diagram ? (
+        <DiagramCanvas diagram={diagram} />
+      ) : (
+        <MockCanvas demo={generating} />
+      )}
       {generating && <GeneratingOverlay prompt={initialPrompt} />}
       {error && (
         <ErrorOverlay
           detail={error.detail}
           code={error.code}
-          onRetry={() => {
-            setError(null);
-            setDiagram(null);
-          }}
+          onRetry={() => generation.reset()}
         />
       )}
     </div>
   );
 
-  // Topbar labels reflect the current state of the canvas:
-  //   - generated diagram (success)  → its name + counts + "saved just now"
-  //   - generating                    → prompt as name + "generating…"
-  //   - blank canvas (no prompt yet)  → "Untitled" + 0/0 + "not saved"
   const blank = !diagram && !generating && !initialPrompt;
   const diagramName = diagram?.metadata.name ?? (blank ? "Untitled" : "New diagram");
   const componentCount = diagram?.nodes.length ?? 0;
@@ -115,6 +116,16 @@ function EditorInner() {
       savedLabel={savedLabel}
     />
   );
+}
+
+function errorToOverlay(err: unknown): { detail: string; code: string } {
+  if (err instanceof TangramApiError) {
+    return { detail: err.detail, code: err.code };
+  }
+  if (err instanceof Error) {
+    return { detail: err.message, code: "network_error" };
+  }
+  return { detail: "Unknown error", code: "unknown_error" };
 }
 
 interface EditorShellProps {

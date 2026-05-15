@@ -1,6 +1,26 @@
 import type { ApiErrorBody, Diagram } from "@/types/tangram";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+
+/** Shape of `GET /health`. The backend returns `{status: "ok"}`. */
+export interface HealthResponse {
+  status: string;
+  app?: string;
+  version?: string;
+}
+
+/** GET /health. Throws on non-2xx or network failure. */
+export async function getHealth(): Promise<HealthResponse> {
+  const response = await fetch(`${API_BASE_URL}/health`, {
+    // Short timeout via AbortSignal — health should be instant.
+    signal: AbortSignal.timeout(2_500),
+  });
+  if (!response.ok) {
+    throw new Error(`Health check returned ${response.status}`);
+  }
+  return (await response.json()) as HealthResponse;
+}
 
 /** Typed error mirroring the backend's `{detail, code}` shape. */
 export class TangramApiError extends Error {

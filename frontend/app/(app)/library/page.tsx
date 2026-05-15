@@ -6,7 +6,7 @@ import { useState } from "react";
 import { DiagramCard } from "@/components/diagram-card";
 import { Input } from "@/components/ui/input";
 import { TemplatesStrip } from "@/components/templates-strip";
-import { recentDiagrams } from "@/lib/mock-data";
+import { useDiagrams } from "@/lib/hooks";
 import type { DiagramSource } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,10 @@ export default function LibraryPage() {
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
 
-  const filtered = recentDiagrams.filter((d) => {
+  const { data, isLoading } = useDiagrams();
+  const all = data ?? [];
+
+  const filtered = all.filter((d) => {
     if (!matchesFilter(d.source, filter)) return false;
     if (query && !d.name.toLowerCase().includes(query.toLowerCase())) {
       return false;
@@ -38,8 +41,8 @@ export default function LibraryPage() {
     return true;
   });
 
-  const draftCount = recentDiagrams.filter((d) => d.source === "draft").length;
-  const nonDraftCount = recentDiagrams.length - draftCount;
+  const draftCount = all.filter((d) => d.source === "draft").length;
+  const nonDraftCount = all.length - draftCount;
 
   return (
     <main className="flex flex-col gap-6 p-8">
@@ -115,7 +118,22 @@ export default function LibraryPage() {
         </div>
       </header>
 
-      {filtered.length === 0 ? (
+      {isLoading ? (
+        <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <li
+              key={i}
+              className="overflow-hidden rounded-[var(--radius-lg)] border border-line bg-card"
+            >
+              <div className="aspect-[5/3] animate-pulse bg-black/[0.04]" />
+              <div className="flex flex-col gap-2 px-4 py-3">
+                <span className="h-3.5 w-32 animate-pulse rounded-sm bg-black/[0.06]" />
+                <span className="h-3 w-48 animate-pulse rounded-sm bg-black/[0.04]" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : filtered.length === 0 ? (
         <div className="rounded-[var(--radius-lg)] border border-dashed border-line-strong p-12 text-center">
           <p className="text-[14px] text-ink-muted">
             No diagrams match this filter yet.

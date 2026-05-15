@@ -12,11 +12,12 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { BackendStatus } from "@/components/backend-status";
 import { Brand } from "@/components/brand";
 import { GithubMark } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { recentDiagrams } from "@/lib/mock-data";
+import { useDiagrams } from "@/lib/hooks";
 import type { DiagramSource } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
@@ -116,6 +117,7 @@ export function AppRail() {
           <GithubMark size={13} />
           GitHub
         </a>
+        <BackendStatus />
         <span className="text-[11px] text-ink-faint">MIT · Pre-alpha</span>
       </div>
     </aside>
@@ -123,6 +125,9 @@ export function AppRail() {
 }
 
 function RecentDiagrams() {
+  const { data, isLoading } = useDiagrams();
+  const diagrams = data ?? [];
+
   return (
     <section className="mt-1.5 flex flex-col gap-1">
       <header className="flex items-center justify-between px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-ink-faint">
@@ -136,25 +141,42 @@ function RecentDiagrams() {
         </button>
       </header>
       <ul className="flex flex-col gap-px">
-        {recentDiagrams.slice(0, 6).map((d) => (
-          <li key={d.id}>
+        {isLoading ? (
+          // Skeleton rows while React Query resolves. Mock returns instantly
+          // today so these only flash; once a real endpoint backs this they
+          // matter.
+          Array.from({ length: 3 }).map((_, i) => (
+            <li key={i} className="px-2.5 py-1.5">
+              <span className="block h-3 w-32 animate-pulse rounded-sm bg-black/[0.06]" />
+            </li>
+          ))
+        ) : diagrams.length === 0 ? (
+          <li className="px-2.5 py-1 text-[12px] text-ink-faint">
+            No diagrams yet.
+          </li>
+        ) : (
+          diagrams.slice(0, 6).map((d) => (
+            <li key={d.id}>
+              <Link
+                href="/editor"
+                className="flex items-center gap-2.5 truncate rounded-md px-2.5 py-1.5 text-[13px] text-ink-body hover:bg-black/[0.04] hover:text-ink-strong"
+              >
+                <SourceDot source={d.source} />
+                <span className="truncate">{d.name}</span>
+              </Link>
+            </li>
+          ))
+        )}
+        {diagrams.length > 0 && (
+          <li>
             <Link
-              href="/editor"
-              className="flex items-center gap-2.5 truncate rounded-md px-2.5 py-1.5 text-[13px] text-ink-body hover:bg-black/[0.04] hover:text-ink-strong"
+              href="/library"
+              className="inline-block px-2.5 py-1.5 text-[12px] text-ink-muted hover:text-ink-strong"
             >
-              <SourceDot source={d.source} />
-              <span className="truncate">{d.name}</span>
+              More →
             </Link>
           </li>
-        ))}
-        <li>
-          <Link
-            href="/library"
-            className="inline-block px-2.5 py-1.5 text-[12px] text-ink-muted hover:text-ink-strong"
-          >
-            More →
-          </Link>
-        </li>
+        )}
       </ul>
     </section>
   );
