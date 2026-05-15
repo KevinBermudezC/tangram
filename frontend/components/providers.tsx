@@ -46,7 +46,7 @@ export function Providers({ children }: { children: ReactNode }) {
     <QueryClientProvider client={client}>
       {children}
       <Toaster
-        position="bottom-right"
+        position="top-right"
         toastOptions={{
           style: {
             background: "var(--color-card)",
@@ -55,10 +55,24 @@ export function Providers({ children }: { children: ReactNode }) {
           },
         }}
       />
-      <ReactQueryDevtools
-        initialIsOpen={false}
-        buttonPosition="bottom-left"
-      />
+      {/*
+        React Query devtools — dev-only, bottom-right.
+
+        `bottom-left` collided with the rail footer (BackendStatus + GitHub
+        link), so the button got positioned on top of "Checking…" and
+        "Pre-alpha". The right corner only competes with Next.js's own
+        dev-mode indicator, which is fine.
+
+        The library no-ops in production builds anyway, but we gate it
+        explicitly so the bundle stays clean and there's no chance of a
+        contributor seeing a stray devtools chip in a deployed preview.
+      */}
+      {process.env.NODE_ENV === "development" && (
+        <ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition="bottom-right"
+        />
+      )}
     </QueryClientProvider>
   );
 }
