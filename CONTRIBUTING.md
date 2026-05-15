@@ -76,7 +76,11 @@ This moves the specs from `openspec/changes/` into `openspec/specs/` (where they
 - Format with `ruff format`. Lint with `ruff check`. Both run in CI.
 - Tests with `pytest`. Network calls are mocked; no real LLM calls in CI.
 
-**Frontend (TypeScript):** coming once `establish-frontend-foundation` lands.
+**Frontend (TypeScript):**
+- Node.js 20+, Next.js 15, React 19, React Flow.
+- TypeScript strict mode; types in `frontend/types/tangram.ts` mirror the backend Pydantic schemas (hand-written until codegen lands).
+- ESLint via `eslint-config-next`. Tests with Vitest + Testing Library.
+- From `frontend/`: `npm run lint`, `npm run typecheck`, `npm run test`. CI runs all three.
 
 **Commits:** imperative present tense (`add provider`, not `added provider`). Use [conventional-commit](https://www.conventionalcommits.org/) prefixes (`feat`, `fix`, `chore`, `docs`, `refactor`). Scope optional but appreciated: `feat(llm): add Mistral adapter`.
 
