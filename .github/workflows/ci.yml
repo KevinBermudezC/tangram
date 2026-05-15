@@ -113,8 +113,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Enable Corepack (provides pnpm pinned via packageManager)
-        run: corepack enable
+      # Install pnpm BEFORE setup-node. Setup-node's `cache: pnpm` runs
+      # `pnpm store path` to figure out what to cache; if pnpm isn't on
+      # PATH yet, it records an empty path and then fails the post-job
+      # cache-save step with a Path Validation Error.
+      #
+      # `pnpm/action-setup` reads `packageManager` from package.json, so
+      # the version still stays pinned (no Corepack flake) and contributors
+      # locally still use Corepack via the same `packageManager` field.
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
 
       - name: Set up Node
         uses: actions/setup-node@v4
