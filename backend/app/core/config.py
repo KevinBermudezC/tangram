@@ -56,7 +56,16 @@ class Settings(BaseSettings):
         description="Embedder used to populate the patterns store. Format: 'provider/model'.",
     )
 
+    # User-facing input cap. Used by the HTTP layer to reject oversized
+    # `prompt` bodies before any LLM work is done.
     max_input_chars: int = 4000
+
+    # LLM-facing input cap. Used by every LLMProvider adapter against the
+    # full composed message list (mode prompt + component summaries +
+    # retrieved patterns + rule findings + user prompt). This cap protects
+    # against runaway prompt composition; it is NOT a user-input cap.
+    max_llm_input_chars: int = 32000
+
     max_output_tokens: int = 2048
 
 
