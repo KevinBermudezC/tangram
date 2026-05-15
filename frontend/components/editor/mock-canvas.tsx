@@ -1,9 +1,21 @@
 "use client";
 
-import { Lock, Maximize2, Minus, Plus } from "lucide-react";
+import { Lock, Maximize2, Minus, MousePointer2, Plus } from "lucide-react";
 
 import type { NodeType } from "@/types/tangram";
 import { nodeColors } from "@/lib/node-style";
+
+interface MockCanvasProps {
+  /**
+   * Render the canned 5-node "Delivery App" example.
+   *
+   * Off by default — `/editor` opened directly (Blank canvas, future
+   * `?id=…` load) starts truly empty so the user sees what a blank canvas
+   * looks like. Turn this on when a generated diagram is about to render
+   * (placeholder behind the loading overlay) or for marketing screenshots.
+   */
+  demo?: boolean;
+}
 
 /**
  * Static-shaped canvas used until the real React Flow editor lands.
@@ -13,7 +25,7 @@ import { nodeColors } from "@/lib/node-style";
  * style) lives in this component intentionally so the visual upgrade is
  * already done by the time the editor logic is wired in.
  */
-export function MockCanvas() {
+export function MockCanvas({ demo = false }: MockCanvasProps) {
   return (
     <div className="relative flex-1 overflow-hidden bg-canvas">
       <svg
@@ -40,45 +52,70 @@ export function MockCanvas() {
         </defs>
         <rect width="900" height="540" fill="url(#dotgrid)" />
 
-        {/* Edges */}
-        <g>
-          <Edge d="M210 270 H320" dashed label="browse / order" labelX={265} labelY={262} />
-          <Edge d="M390 230 V160" dashed label="sign in" labelX={410} labelY={200} anchor="start" />
-          <Edge d="M460 130 H580" dashed label="identity" labelX={520} labelY={122} />
-          <Edge
-            d="M460 270 C540 270 540 130 580 130"
-            dashed
-            label="read / write"
-            labelX={540}
-            labelY={208}
-            anchor="start"
-          />
-          <Edge
-            d="M460 270 C540 270 540 410 580 410"
-            label="store images"
-            labelX={540}
-            labelY={346}
-            anchor="start"
-          />
-        </g>
-
-        {/* Nodes */}
-        <NodeCard
-          type="frontend"
-          x={70}
-          y={230}
-          label="Customer"
-          sub="Web (Next.js)"
-          selected
-        />
-        <NodeCard type="backend" x={320} y={230} label="Orders API" sub="FastAPI + Pydantic" />
-        <NodeCard type="auth" x={320} y={90} label="Auth Service" sub="OAuth2 / JWT" />
-        <NodeCard type="database" x={580} y={90} label="orders_db" sub="PostgreSQL" />
-        <NodeCard type="storage" x={580} y={370} label="assets" sub="S3-compatible" />
+        {demo && (
+          <>
+            <g>
+              <Edge d="M210 270 H320" dashed label="browse / order" labelX={265} labelY={262} />
+              <Edge d="M390 230 V160" dashed label="sign in" labelX={410} labelY={200} anchor="start" />
+              <Edge d="M460 130 H580" dashed label="identity" labelX={520} labelY={122} />
+              <Edge
+                d="M460 270 C540 270 540 130 580 130"
+                dashed
+                label="read / write"
+                labelX={540}
+                labelY={208}
+                anchor="start"
+              />
+              <Edge
+                d="M460 270 C540 270 540 410 580 410"
+                label="store images"
+                labelX={540}
+                labelY={346}
+                anchor="start"
+              />
+            </g>
+            <NodeCard
+              type="frontend"
+              x={70}
+              y={230}
+              label="Customer"
+              sub="Web (Next.js)"
+              selected
+            />
+            <NodeCard type="backend" x={320} y={230} label="Orders API" sub="FastAPI + Pydantic" />
+            <NodeCard type="auth" x={320} y={90} label="Auth Service" sub="OAuth2 / JWT" />
+            <NodeCard type="database" x={580} y={90} label="orders_db" sub="PostgreSQL" />
+            <NodeCard type="storage" x={580} y={370} label="assets" sub="S3-compatible" />
+          </>
+        )}
       </svg>
 
+      {!demo && <EmptyCanvasHint />}
+
       <CanvasControls />
-      <MiniMap />
+      <MiniMap demo={demo} />
+    </div>
+  );
+}
+
+function EmptyCanvasHint() {
+  return (
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+      <div className="flex max-w-sm flex-col items-center gap-2 text-center">
+        <span
+          aria-hidden
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-dashed border-line-strong text-ink-faint"
+        >
+          <MousePointer2 size={16} />
+        </span>
+        <p className="text-[14px] font-medium text-ink-strong">
+          Empty canvas
+        </p>
+        <p className="text-[12.5px] leading-relaxed text-ink-muted">
+          Drag a component from the palette to start. Or open the AI panel
+          and describe what you want — it'll sketch a starting point.
+        </p>
+      </div>
     </div>
   );
 }
@@ -213,14 +250,16 @@ function CanvasControls() {
   );
 }
 
-function MiniMap() {
-  const dots: { x: number; y: number; type: NodeType }[] = [
-    { x: 12, y: 50, type: "frontend" },
-    { x: 38, y: 50, type: "backend" },
-    { x: 38, y: 22, type: "auth" },
-    { x: 68, y: 22, type: "database" },
-    { x: 68, y: 78, type: "storage" },
-  ];
+function MiniMap({ demo }: { demo: boolean }) {
+  const dots: { x: number; y: number; type: NodeType }[] = demo
+    ? [
+        { x: 12, y: 50, type: "frontend" },
+        { x: 38, y: 50, type: "backend" },
+        { x: 38, y: 22, type: "auth" },
+        { x: 68, y: 22, type: "database" },
+        { x: 68, y: 78, type: "storage" },
+      ]
+    : [];
   return (
     <div className="absolute bottom-4 right-4 h-[110px] w-[160px] overflow-hidden rounded-[var(--radius)] border border-line bg-card shadow-sm">
       {dots.map((d, i) => (
@@ -235,10 +274,12 @@ function MiniMap() {
           }}
         />
       ))}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-x-[8%] inset-y-[14%] rounded border-[1.5px] border-accent/55"
-      />
+      {demo && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-[8%] inset-y-[14%] rounded border-[1.5px] border-accent/55"
+        />
+      )}
     </div>
   );
 }

@@ -23,7 +23,7 @@ import type { Diagram } from "@/types/tangram";
  */
 export default function EditorPage() {
   return (
-    <Suspense fallback={<EditorShell content={<MockCanvas />} />}>
+    <Suspense fallback={<EditorShell content={<MockCanvas demo={false} />} />}>
       <EditorInner />
     </Suspense>
   );
@@ -68,9 +68,14 @@ function EditorInner() {
     };
   }, [initialPrompt, diagram, generating]);
 
+  // Show the canned demo only as a placeholder while the LLM is generating
+  // for the first time. Blank canvases and post-success states render empty
+  // until the real React Flow editor wires up.
+  const showDemoPlaceholder = generating;
+
   const content = (
     <div className="relative flex-1">
-      <MockCanvas />
+      <MockCanvas demo={showDemoPlaceholder} />
       {generating && <GeneratingOverlay prompt={initialPrompt} />}
       {error && (
         <ErrorOverlay
@@ -85,15 +90,29 @@ function EditorInner() {
     </div>
   );
 
+  // Topbar labels reflect the current state of the canvas:
+  //   - generated diagram (success)  → its name + counts + "saved just now"
+  //   - generating                    → prompt as name + "generating…"
+  //   - blank canvas (no prompt yet)  → "Untitled" + 0/0 + "not saved"
+  const blank = !diagram && !generating && !initialPrompt;
+  const diagramName = diagram?.metadata.name ?? (blank ? "Untitled" : "New diagram");
+  const componentCount = diagram?.nodes.length ?? 0;
+  const connectionCount = diagram?.edges.length ?? 0;
+  const savedLabel = diagram
+    ? "saved just now"
+    : generating
+      ? "generating…"
+      : "not saved";
+
   return (
     <EditorShell
       content={content}
       chatHidden={chatHidden}
       onToggleChat={() => setChatHidden((v) => !v)}
-      diagramName={diagram?.metadata.name ?? (initialPrompt ? "Untitled" : "Delivery App")}
-      componentCount={diagram?.nodes.length ?? 5}
-      connectionCount={diagram?.edges.length ?? 5}
-      savedLabel={diagram ? "saved just now" : "demo content"}
+      diagramName={diagramName}
+      componentCount={componentCount}
+      connectionCount={connectionCount}
+      savedLabel={savedLabel}
     />
   );
 }
@@ -112,10 +131,10 @@ function EditorShell({
   content,
   chatHidden = false,
   onToggleChat = () => undefined,
-  diagramName = "Delivery App",
-  componentCount = 5,
-  connectionCount = 5,
-  savedLabel = "demo content",
+  diagramName = "Untitled",
+  componentCount = 0,
+  connectionCount = 0,
+  savedLabel = "not saved",
 }: EditorShellProps) {
   return (
     <div
@@ -138,7 +157,7 @@ function EditorShell({
         />
         {content}
       </main>
-      {!chatHidden && <ChatPanel selectedNode={{ name: "Customer", type: "Frontend" }} />}
+      {!chatHidden && <ChatPanel />}
     </div>
   );
 }
