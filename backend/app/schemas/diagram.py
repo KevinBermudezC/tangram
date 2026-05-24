@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class NodeType(StrEnum):
@@ -86,3 +86,33 @@ class Diagram(BaseModel):
     nodes: list[Node]
     edges: list[Edge]
     conversation: list[Message] = Field(default_factory=list)
+
+
+class DiagramSummary(BaseModel):
+    """Lightweight projection of a Diagram for list views (no nodes/edges).
+
+    Backs `GET /diagrams`: the library only needs enough to render a card and
+    open the full diagram by id, not every node and edge.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str
+    name: str
+    description: str | None = None
+    created_at: datetime = Field(alias="createdAt")
+    updated_at: datetime = Field(alias="updatedAt")
+    node_count: int = Field(alias="nodeCount")
+    edge_count: int = Field(alias="edgeCount")
+
+    @classmethod
+    def from_diagram(cls, diagram: Diagram) -> "DiagramSummary":
+        return cls(
+            id=diagram.id,
+            name=diagram.metadata.name,
+            description=diagram.metadata.description,
+            created_at=diagram.metadata.created_at,
+            updated_at=diagram.metadata.updated_at,
+            node_count=len(diagram.nodes),
+            edge_count=len(diagram.edges),
+        )
