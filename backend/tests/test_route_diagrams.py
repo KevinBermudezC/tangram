@@ -62,7 +62,7 @@ def test_list_returns_summaries(client: TestClient) -> None:
     assert response.status_code == 200
     items = response.json()
     assert len(items) == 2
-    # Summary shape: counts present, full arrays absent.
+    # Summary shape: counts + thumb present, full arrays absent.
     assert set(items[0]) == {
         "id",
         "name",
@@ -71,9 +71,13 @@ def test_list_returns_summaries(client: TestClient) -> None:
         "updatedAt",
         "nodeCount",
         "edgeCount",
+        "thumb",
     }
     assert items[0]["nodeCount"] == 1
     assert items[0]["edgeCount"] == 0
+    # Thumb is a geometry-only projection (no labels/properties).
+    assert items[0]["thumb"]["nodes"][0]["type"] == "backend"
+    assert "label" not in items[0]["thumb"]["nodes"][0]
 
 
 def test_get_missing_returns_typed_404(client: TestClient) -> None:

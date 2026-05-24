@@ -5,15 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { Loader2, OctagonAlert } from "lucide-react";
 import { toast } from "sonner";
 
-import { ChatPanel } from "@/components/editor/chat-panel";
 import { DiagramCanvas } from "@/components/DiagramCanvas";
-import { EditorPalette } from "@/components/editor/palette";
-import { EditorTopbar } from "@/components/editor/topbar";
+import { EditorShell } from "@/components/editor/editor-shell";
 import { MockCanvas } from "@/components/editor/mock-canvas";
 import { Button } from "@/components/ui/button";
-import { useGenerate } from "@/lib/hooks";
+import { useGenerate, useSaveDiagram } from "@/lib/hooks";
 import { TangramApiError } from "@/lib/api";
-import { cn } from "@/lib/utils";
 
 /**
  * Editor page.
@@ -44,6 +41,7 @@ function EditorInner() {
 
   const [chatHidden, setChatHidden] = useState(false);
   const generation = useGenerate();
+  const save = useSaveDiagram();
 
   // Single entry point for kicking off a generation. Used both by the
   // first-paint effect (when ?prompt=… is present) and the Try-again
@@ -65,10 +63,18 @@ function EditorInner() {
           toast.success("Diagram generated", {
             description: `${diagram.nodes.length} components · ${diagram.edges.length} connections`,
           });
+          // Persist it so it shows up in the library and survives a refresh.
+          save.mutate(diagram, {
+            onError: (err) => {
+              const detail =
+                err instanceof TangramApiError ? err.detail : "Could not save";
+              toast.error("Save failed", { description: detail });
+            },
+          });
         },
       });
     },
-    [generation],
+    [generation, save],
   );
 
   // Fire one mutation as soon as we land with ?prompt=…
@@ -119,11 +125,15 @@ function EditorInner() {
   const diagramName = diagram?.metadata.name ?? (blank ? "Untitled" : "New diagram");
   const componentCount = diagram?.nodes.length ?? 0;
   const connectionCount = diagram?.edges.length ?? 0;
-  const savedLabel = diagram
-    ? "saved just now"
-    : generating
-      ? "generating…"
-      : "not saved";
+  const savedLabel = generating
+    ? "generating…"
+    : save.isPending
+      ? "saving…"
+      : save.isSuccess
+        ? "saved just now"
+        : diagram
+          ? "unsaved"
+          : "not saved";
 
   return (
     <EditorShell
@@ -146,51 +156,6 @@ function errorToOverlay(err: unknown): { detail: string; code: string } {
     return { detail: err.message, code: "network_error" };
   }
   return { detail: "Unknown error", code: "unknown_error" };
-}
-
-interface EditorShellProps {
-  content: React.ReactNode;
-  chatHidden?: boolean;
-  onToggleChat?: () => void;
-  diagramName?: string;
-  componentCount?: number;
-  connectionCount?: number;
-  savedLabel?: string;
-}
-
-function EditorShell({
-  content,
-  chatHidden = false,
-  onToggleChat = () => undefined,
-  diagramName = "Untitled",
-  componentCount = 0,
-  connectionCount = 0,
-  savedLabel = "not saved",
-}: EditorShellProps) {
-  return (
-    <div
-      className={cn(
-        "grid h-screen",
-        chatHidden
-          ? "grid-cols-[260px_1fr]"
-          : "grid-cols-[260px_1fr_360px]",
-      )}
-    >
-      <EditorPalette />
-      <main className="flex min-w-0 flex-col">
-        <EditorTopbar
-          name={diagramName}
-          componentCount={componentCount}
-          connectionCount={connectionCount}
-          savedLabel={savedLabel}
-          onToggleChat={onToggleChat}
-          chatHidden={chatHidden}
-        />
-        {content}
-      </main>
-      {!chatHidden && <ChatPanel />}
-    </div>
-  );
 }
 
 function GeneratingOverlay({ prompt }: { prompt: string }) {

@@ -42,7 +42,9 @@ The backend SHALL expose `POST /diagrams` that accepts a `Diagram` body, persist
 
 ### Requirement: List diagram summaries
 
-The backend SHALL expose `GET /diagrams` that returns a list of lightweight summaries — `id`, `name`, `description`, `createdAt`, `updatedAt`, `nodeCount`, `edgeCount` — and SHALL NOT return full node and edge data. Summaries SHALL be ordered by `id` descending so that the most recently created diagrams (ULID-sortable) appear first.
+The backend SHALL expose `GET /diagrams` that returns a list of lightweight summaries — `id`, `name`, `description`, `createdAt`, `updatedAt`, `nodeCount`, `edgeCount`, and a geometry-only `thumb` — and SHALL NOT return full node and edge data (labels, properties, AI annotations). Summaries SHALL be ordered by `id` descending so that the most recently created diagrams (ULID-sortable) appear first.
+
+The `thumb` SHALL be a downscaled projection of the diagram into a fixed 200×120 coordinate space: a list of node rects (`type`, `x`, `y`, `w`, `h`) and a list of edge lines (`from`/`to` points at node-rect centers, plus a `dashed` flag). It SHALL carry no node labels, properties, or AI annotations, so it remains lightweight while letting the frontend render an SVG preview without fetching every full diagram.
 
 #### Scenario: Empty store
 
@@ -52,9 +54,15 @@ The backend SHALL expose `GET /diagrams` that returns a list of lightweight summ
 #### Scenario: Summaries are newest-first and lightweight
 
 - **WHEN** `GET /diagrams` is called and several diagrams exist
-- **THEN** each item contains `id`, `name`, `description`, `createdAt`, `updatedAt`, `nodeCount`, `edgeCount`
+- **THEN** each item contains `id`, `name`, `description`, `createdAt`, `updatedAt`, `nodeCount`, `edgeCount`, `thumb`
 - **AND** the items are ordered by `id` descending
 - **AND** no item includes the full `nodes` or `edges` arrays
+
+#### Scenario: Thumb is a bounded geometry-only projection
+
+- **WHEN** a summary's `thumb` is produced for a diagram with one or more nodes
+- **THEN** each thumb node rect lies fully within the 200×120 viewBox
+- **AND** each thumb node carries only `type` and geometry (`x`, `y`, `w`, `h`), never a label or properties
 
 ### Requirement: Fetch a diagram by id
 

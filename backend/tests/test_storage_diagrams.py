@@ -100,6 +100,16 @@ def test_list_summary_has_counts_and_no_nodes(_data_dir: Path) -> None:
     assert "edges" not in dumped
 
 
+def test_list_summary_thumb_fits_viewbox(_data_dir: Path) -> None:
+    storage.save_diagram(_diagram("", nodes=4))
+    thumb = storage.list_diagrams()[0].thumb
+    assert len(thumb.nodes) == 4
+    for n in thumb.nodes:
+        # Node rect stays inside the 200x120 viewBox.
+        assert 0 <= n.x <= 200 - n.w
+        assert 0 <= n.y <= 120 - n.h
+
+
 def test_list_skips_corrupt_file(_data_dir: Path) -> None:
     good = storage.save_diagram(_diagram(""))
     # Drop a non-JSON file into the diagrams dir.

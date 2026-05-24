@@ -1,11 +1,17 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { generate, getHealth } from "@/lib/api";
-import { recentDiagrams } from "@/lib/mock-data";
+import {
+  generate,
+  getDiagram,
+  getHealth,
+  listDiagrams,
+  saveDiagram,
+} from "@/lib/api";
+import { relativeTime } from "@/lib/format";
 import type { MockDiagram } from "@/lib/mock-data";
-import type { Diagram } from "@/types/tangram";
+import type { Diagram, DiagramSummary } from "@/types/tangram";
 
 /**
  * Tangram backend hooks.
@@ -14,14 +20,17 @@ import type { Diagram } from "@/types/tangram";
  * and error normalization live in a single layer. Components stay
  * declarative.
  *
- * Roadmap:
- *   - useHealth        → live now, polls /health
- *   - useGenerate      → live now, wraps POST /generate as a mutation
- *   - useDiagrams      → MOCK until `add-diagram-persistence-routes` lands
- *   - useDiagram(id)   → MOCK until same
+ * Status:
+ *   - useHealth        → polls /health
+ *   - useGenerate      → wraps POST /generate as a mutation
+ *   - useDiagrams      → GET /diagrams (live), mapped to the card view model
+ *   - useDiagram(id)   → GET /diagrams/{id} (live)
+ *   - useSaveDiagram   → POST /diagrams (live), invalidates the list
  *   - useChat          → uses /api/chat (the local mock route) — switches
  *                        transparently when the real chat endpoint exists
  */
+
+const DIAGRAMS_KEY = ["diagrams"] as const;
 
 // --- Health probe -----------------------------------------------------------
 
@@ -49,22 +58,54 @@ export function useGenerate() {
   });
 }
 
-// --- Library (mocked) -------------------------------------------------------
+// --- Library (GET /diagrams) ------------------------------------------------
 
 /**
- * Mock-backed list of saved diagrams.
+ * Map a backend summary to the card/rail view model.
  *
- * Returns the same data the rail and library page hand-import today; it
- * exists as a hook now so the call site never knows it's mock, and the
- * day a `GET /diagrams` endpoint exists this body changes without
- * touching the components.
+ * `source` isn't tracked server-side yet; every persisted diagram today comes
+ * from generation, so we label it "ai". The thumb geometry comes straight
+ * from the backend projection.
  */
+function summaryToCard(summary: DiagramSummary): MockDiagram {
+  return {
+    id: summary.id,
+    name: summary.name,
+    source: "ai",
+    components: summary.nodeCount,
+    connections: summary.edgeCount,
+    updatedLabel: relativeTime(summary.updatedAt),
+    thumb: summary.thumb,
+  };
+}
+
+/** Live list of saved diagrams, newest first, shaped for the cards. */
 export function useDiagrams() {
   return useQuery<MockDiagram[]>({
-    queryKey: ["diagrams"],
-    queryFn: async () => recentDiagrams,
-    // No real network — the staleTime is just to prevent the
-    // refetchInterval default from kicking in.
-    staleTime: Infinity,
+    queryKey: DIAGRAMS_KEY,
+    queryFn: async () => (await listDiagrams()).map(summaryToCard),
+    staleTime: 10_000,
+  });
+}
+
+/** Load one full diagram by id (for `/editor/[id]`). */
+export function useDiagram(id: string | undefined) {
+  return useQuery<Diagram>({
+    queryKey: ["diagram", id],
+    queryFn: () => getDiagram(id as string),
+    enabled: Boolean(id),
+    retry: 0,
+  });
+}
+
+/** Persist a diagram, then refresh the library list. */
+export function useSaveDiagram() {
+  const queryClient = useQueryClient();
+  return useMutation<Diagram, Error, Diagram>({
+    mutationKey: ["save-diagram"],
+    mutationFn: (diagram) => saveDiagram(diagram),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: DIAGRAMS_KEY });
+    },
   });
 }
