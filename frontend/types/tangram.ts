@@ -79,6 +79,45 @@ export interface Diagram {
   conversation: ConversationMessage[];
 }
 
+// --- Diagram summary (GET /diagrams) -----------------------------------------
+// Lightweight list projection. Mirrors backend DiagramSummary + its geometry-
+// only thumbnail. No full nodes/edges — just enough to render a library card.
+
+export interface ThumbPoint {
+  x: number;
+  y: number;
+}
+
+export interface ThumbNode {
+  type: NodeType;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+
+export interface ThumbEdge {
+  from: ThumbPoint;
+  to: ThumbPoint;
+  dashed: boolean;
+}
+
+export interface DiagramThumb {
+  nodes: ThumbNode[];
+  edges: ThumbEdge[];
+}
+
+export interface DiagramSummary {
+  id: string;
+  name: string;
+  description?: string | null;
+  createdAt: string; // ISO 8601
+  updatedAt: string; // ISO 8601
+  nodeCount: number;
+  edgeCount: number;
+  thumb: DiagramThumb;
+}
+
 // --- API error contract ------------------------------------------------------
 
 export interface ApiErrorBody {

@@ -21,7 +21,7 @@ interface DiagramCardProps {
 export function DiagramCard({ diagram }: DiagramCardProps) {
   return (
     <article className="group relative overflow-hidden rounded-[var(--radius-lg)] border border-line bg-card transition-all hover:-translate-y-px hover:border-line-strong hover:shadow-md">
-      <Link href="/editor" className="block no-underline">
+      <Link href={`/editor/${diagram.id}`} className="block no-underline">
         <div className="relative aspect-[5/3] border-b border-line bg-canvas">
           <DiagramThumb diagram={diagram} />
           <span className="absolute left-2 top-2">

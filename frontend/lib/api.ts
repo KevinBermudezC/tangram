@@ -1,4 +1,4 @@
-import type { ApiErrorBody, Diagram } from "@/types/tangram";
+import type { ApiErrorBody, Diagram, DiagramSummary } from "@/types/tangram";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -37,6 +37,31 @@ export class TangramApiError extends Error {
   }
 }
 
+/**
+ * Throw a normalized TangramApiError for a non-2xx response.
+ *
+ * FastAPI's typed errors are `{detail, code}`, but its default 422 is
+ * `{detail: [...]}`. Normalize both so every caller sees a string + a code.
+ */
+async function throwApiError(response: Response): Promise<never> {
+  let body: ApiErrorBody;
+  try {
+    body = (await response.json()) as ApiErrorBody;
+  } catch {
+    body = {
+      detail: `Backend returned ${response.status} with non-JSON body`,
+      code: "unknown_error",
+    };
+  }
+  throw new TangramApiError(response.status, {
+    detail:
+      typeof body.detail === "string"
+        ? body.detail
+        : JSON.stringify(body.detail),
+    code: body.code ?? "validation_error",
+  });
+}
+
 /** POST /generate. Throws TangramApiError on non-2xx. */
 export async function generate(prompt: string): Promise<Diagram> {
   const response = await fetch(`${API_BASE_URL}/generate`, {
@@ -44,28 +69,41 @@ export async function generate(prompt: string): Promise<Diagram> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ prompt }),
   });
-
-  if (!response.ok) {
-    let body: ApiErrorBody;
-    try {
-      body = (await response.json()) as ApiErrorBody;
-    } catch {
-      body = {
-        detail: `Backend returned ${response.status} with non-JSON body`,
-        code: "unknown_error",
-      };
-    }
-    // FastAPI's default 422 returns `{detail: [...]}` not `{detail, code}`.
-    // Normalize so callers always see a string + a code.
-    const normalized: ApiErrorBody = {
-      detail:
-        typeof body.detail === "string"
-          ? body.detail
-          : JSON.stringify(body.detail),
-      code: body.code ?? "validation_error",
-    };
-    throw new TangramApiError(response.status, normalized);
-  }
-
+  if (!response.ok) await throwApiError(response);
   return (await response.json()) as Diagram;
+}
+
+// --- Diagram persistence (/diagrams) ----------------------------------------
+
+/** GET /diagrams. Lightweight summaries, newest first. */
+export async function listDiagrams(): Promise<DiagramSummary[]> {
+  const response = await fetch(`${API_BASE_URL}/diagrams`);
+  if (!response.ok) await throwApiError(response);
+  return (await response.json()) as DiagramSummary[];
+}
+
+/** GET /diagrams/{id}. Full diagram, or throws a 404 TangramApiError. */
+export async function getDiagram(id: string): Promise<Diagram> {
+  const response = await fetch(`${API_BASE_URL}/diagrams/${id}`);
+  if (!response.ok) await throwApiError(response);
+  return (await response.json()) as Diagram;
+}
+
+/** POST /diagrams. Persists a diagram and returns its stored form. */
+export async function saveDiagram(diagram: Diagram): Promise<Diagram> {
+  const response = await fetch(`${API_BASE_URL}/diagrams`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(diagram),
+  });
+  if (!response.ok) await throwApiError(response);
+  return (await response.json()) as Diagram;
+}
+
+/** DELETE /diagrams/{id}. Resolves on 204; throws on 404. */
+export async function deleteDiagram(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/diagrams/${id}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) await throwApiError(response);
 }

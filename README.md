@@ -4,6 +4,8 @@
 
 > Architectures, piece by piece.
 
+![Tangram home — the prompt-to-diagram entry point](docs/screenshots/home.png)
+
 I'm building Tangram because I keep seeing junior devs hit the same wall: system design feels like memorizing flashcards. *"When do I add a queue? Why use a cache here? Is this Postgres or Mongo?"* The answers usually live in 40-minute YouTube videos or behind senior-dev coffee chats.
 
 Tangram is the tool I wish I'd had: drag a few boxes onto a canvas, connect them, and an AI that *teaches* (not just generates) explains what each piece does, why it's there, and what usually goes wrong. Self-hosted, MIT, BYOK or Ollama. No SaaS to sign up for.

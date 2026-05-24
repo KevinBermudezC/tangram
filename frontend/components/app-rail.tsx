@@ -158,7 +158,7 @@ function RecentDiagrams() {
           diagrams.slice(0, 6).map((d) => (
             <li key={d.id}>
               <Link
-                href="/editor"
+                href={`/editor/${d.id}`}
                 className="flex items-center gap-2.5 truncate rounded-md px-2.5 py-1.5 text-[13px] text-ink-body hover:bg-black/[0.04] hover:text-ink-strong"
               >
                 <SourceDot source={d.source} />

@@ -152,7 +152,7 @@ export default function LibraryPage() {
           {filtered.map((d) => (
             <li key={d.id}>
               <a
-                href="/editor"
+                href={`/editor/${d.id}`}
                 className="flex items-center gap-3 border-b border-line px-4 py-3 text-[13.5px] text-ink-body last:border-b-0 hover:bg-sidebar"
               >
                 <span className="font-medium text-ink-strong">{d.name}</span>

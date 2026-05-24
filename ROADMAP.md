@@ -22,7 +22,7 @@ Goal: someone clones the repo, runs `pip install` + `uvicorn` + `pnpm dev`, type
 | 10 | `POST /generate` (text → diagram)           | `add-diagram-generation-endpoint`            | 🟢 Merged  |
 | 11 | Frontend foundation + UI shell              | `establish-frontend-foundation`              | 🟡 Active  |
 | 12 | `POST /analyze` (diagram → feedback + rule findings) | `add-diagram-analysis-endpoint`     | ⬜ Planned  |
-| 13 | Diagram persistence routes (filesystem)     | `add-diagram-persistence-routes`             | ⬜ Planned  |
+| 13 | Diagram persistence routes (filesystem)     | `add-diagram-persistence-routes`             | 🟡 Active  |
 | 14 | OpenAPI → TypeScript codegen                | `add-openapi-typescript-codegen`             | ⬜ Planned  |
 | 15 | Editor: drag/drop/connect/edit              | `add-diagram-editor`                         | ⬜ Planned  |
 | 16 | Per-node AI explanation panel               | `add-ai-explanation-panel`                   | ⬜ Planned  |
@@ -79,7 +79,7 @@ Most of these are ⬜ Planned and good first issues for contributors (see below)
 | Capability                                  | Depends on                                  | Notes                                                                                                          |
 | ------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Real chat endpoint                          | `add-chat-about-diagram` (backend)          | The frontend already speaks the AI SDK + Streamdown stream protocol against `/api/chat` (a local mock route). Once the backend ships, the route becomes a thin proxy. |
-| Library / Recent backed by real data         | `add-diagram-persistence-routes`            | `lib/hooks.ts:useDiagrams` is the single touch point. Today it returns mock from `lib/mock-data.ts`; swap the body for a `GET /diagrams` call. |
+| Library / Recent backed by real data         | `add-diagram-persistence-routes` (backend done) | `lib/hooks.ts:useDiagrams` is the single touch point. Today it returns mock from `lib/mock-data.ts`; swap the body for a `GET /diagrams` call. The backend routes (`POST/GET/DELETE /diagrams`) now exist; this is pure frontend wiring. |
 | `/editor/[id]` route                         | persistence                                  | Open a saved diagram by ULID. Pairs with a `useDiagram(id)` query.                                              |
 | Drag-and-drop palette → canvas               | `add-diagram-editor`                        | The palette in `components/editor/palette.tsx` is already `draggable=true`; the drop target on the canvas is a no-op until React Flow editor wires up. |
 | Theme toggle (dark / light)                  | —                                           | The button exists in the editor topbar; wire `next-themes` and add dark color variables in `app/globals.css`. CSS already uses semantic tokens, so the work is one variables file + a toggle. |
