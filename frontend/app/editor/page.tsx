@@ -9,7 +9,7 @@ import { DiagramCanvas } from "@/components/DiagramCanvas";
 import { EditorShell } from "@/components/editor/editor-shell";
 import { MockCanvas } from "@/components/editor/mock-canvas";
 import { Button } from "@/components/ui/button";
-import { useGenerate, useSaveDiagram } from "@/lib/hooks";
+import { useAnalyze, useGenerate, useSaveDiagram } from "@/lib/hooks";
 import { TangramApiError } from "@/lib/api";
 
 /**
@@ -42,6 +42,7 @@ function EditorInner() {
   const [chatHidden, setChatHidden] = useState(false);
   const generation = useGenerate();
   const save = useSaveDiagram();
+  const analysis = useAnalyze();
 
   // Single entry point for kicking off a generation. Used both by the
   // first-paint effect (when ?prompt=… is present) and the Try-again
@@ -49,6 +50,8 @@ function EditorInner() {
   // dep array stays stable.
   const runGenerate = useCallback(
     (prompt: string) => {
+      // A fresh generation invalidates any prior analysis.
+      analysis.reset();
       generation.mutate(prompt, {
         onError: (err) => {
           const detail =
@@ -74,7 +77,7 @@ function EditorInner() {
         },
       });
     },
-    [generation, save],
+    [generation, save, analysis],
   );
 
   // Fire one mutation as soon as we land with ?prompt=…
@@ -93,6 +96,26 @@ function EditorInner() {
 
   const diagram = generation.data ?? null;
   const generating = generation.isPending;
+
+  const runAnalyze = useCallback(() => {
+    if (!diagram) return;
+    analysis.mutate(
+      { diagram },
+      {
+        onError: (err) => {
+          const detail =
+            err instanceof TangramApiError ? err.detail : "Could not analyze";
+          toast.error("Analysis failed", { description: detail });
+        },
+      },
+    );
+  }, [diagram, analysis]);
+
+  const analyzeError = analysis.isError
+    ? analysis.error instanceof TangramApiError
+      ? analysis.error.detail
+      : "Could not analyze this diagram."
+    : null;
   const error = generation.isError
     ? errorToOverlay(generation.error)
     : null;
@@ -144,6 +167,11 @@ function EditorInner() {
       componentCount={componentCount}
       connectionCount={connectionCount}
       savedLabel={savedLabel}
+      hasDiagram={Boolean(diagram)}
+      analysis={analysis.data ?? null}
+      analyzing={analysis.isPending}
+      analyzeError={analyzeError}
+      onAnalyze={runAnalyze}
     />
   );
 }
