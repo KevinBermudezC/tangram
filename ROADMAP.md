@@ -21,7 +21,7 @@ Goal: someone clones the repo, runs `pip install` + `uvicorn` + `pnpm dev`, type
 | 9  | Tutor mode + system prompt v0               | `add-tutor-mode`                             | 🟢 Merged  |
 | 10 | `POST /generate` (text → diagram)           | `add-diagram-generation-endpoint`            | 🟢 Merged  |
 | 11 | Frontend foundation + UI shell              | `establish-frontend-foundation`              | 🟡 Active  |
-| 12 | `POST /analyze` (diagram → feedback + rule findings) | `add-diagram-analysis-endpoint`     | ⬜ Planned  |
+| 12 | `POST /analyze` (diagram → feedback + rule findings) | `add-diagram-analysis-endpoint`     | ✅ Done    |
 | 13 | Diagram persistence routes (filesystem)     | `add-diagram-persistence-routes`             | 🟡 Active  |
 | 14 | OpenAPI → TypeScript codegen                | `add-openapi-typescript-codegen`             | ⬜ Planned  |
 | 15 | Editor: drag/drop/connect/edit              | `add-diagram-editor`                         | ⬜ Planned  |
