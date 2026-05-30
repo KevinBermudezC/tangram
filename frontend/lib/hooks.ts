@@ -3,6 +3,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
+  analyze,
   generate,
   getDiagram,
   getHealth,
@@ -11,7 +12,11 @@ import {
 } from "@/lib/api";
 import { relativeTime } from "@/lib/format";
 import type { MockDiagram } from "@/lib/mock-data";
-import type { Diagram, DiagramSummary } from "@/types/tangram";
+import type {
+  AnalyzeResponse,
+  Diagram,
+  DiagramSummary,
+} from "@/types/tangram";
 
 /**
  * Tangram backend hooks.
@@ -23,6 +28,7 @@ import type { Diagram, DiagramSummary } from "@/types/tangram";
  * Status:
  *   - useHealth        → polls /health
  *   - useGenerate      → wraps POST /generate as a mutation
+ *   - useAnalyze       → wraps POST /analyze as a mutation (on-demand)
  *   - useDiagrams      → GET /diagrams (live), mapped to the card view model
  *   - useDiagram(id)   → GET /diagrams/{id} (live)
  *   - useSaveDiagram   → POST /diagrams (live), invalidates the list
@@ -55,6 +61,16 @@ export function useGenerate() {
   return useMutation<Diagram, Error, string>({
     mutationKey: ["generate"],
     mutationFn: (prompt) => generate(prompt),
+  });
+}
+
+// --- Analyze (POST /analyze) ------------------------------------------------
+
+/** Run anti-pattern analysis + tutor feedback on a diagram, on demand. */
+export function useAnalyze() {
+  return useMutation<AnalyzeResponse, Error, { diagram: Diagram; modeId?: string }>({
+    mutationKey: ["analyze"],
+    mutationFn: ({ diagram, modeId }) => analyze(diagram, modeId),
   });
 }
 

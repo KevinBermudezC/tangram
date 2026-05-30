@@ -1,4 +1,9 @@
-import type { ApiErrorBody, Diagram, DiagramSummary } from "@/types/tangram";
+import type {
+  AnalyzeResponse,
+  ApiErrorBody,
+  Diagram,
+  DiagramSummary,
+} from "@/types/tangram";
 
 export const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
@@ -71,6 +76,24 @@ export async function generate(prompt: string): Promise<Diagram> {
   });
   if (!response.ok) await throwApiError(response);
   return (await response.json()) as Diagram;
+}
+
+/**
+ * POST /analyze. Send an existing diagram, get deterministic rule findings
+ * plus an LLM prose critique. Read-only — never persists. Throws
+ * TangramApiError on non-2xx.
+ */
+export async function analyze(
+  diagram: Diagram,
+  modeId?: string,
+): Promise<AnalyzeResponse> {
+  const response = await fetch(`${API_BASE_URL}/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(modeId ? { diagram, modeId } : { diagram }),
+  });
+  if (!response.ok) await throwApiError(response);
+  return (await response.json()) as AnalyzeResponse;
 }
 
 // --- Diagram persistence (/diagrams) ----------------------------------------
