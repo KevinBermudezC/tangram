@@ -311,6 +311,33 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 If something is misconfigured, the endpoint returns a typed error (503 / 502 / 504 / 429 / 413) with a stable `code` field so the frontend can branch on it.
 
+## Analysis endpoint
+
+`POST /analyze` is the inverse of `/generate`: send an existing `Diagram`, get back the deterministic rule findings plus an LLM-generated prose critique. It is read-only — the diagram is never mutated or persisted.
+
+```bash
+curl -X POST http://localhost:8000/analyze \
+  -H "Content-Type: application/json" \
+  -d '{
+    "diagram": {
+      "id": "demo",
+      "metadata": {"name": "demo", "createdAt": "2026-01-01T00:00:00Z", "updatedAt": "2026-01-01T00:00:00Z"},
+      "nodes": [
+        {"id": "front", "type": "frontend", "label": "Web", "position": {"x": 0, "y": 0}},
+        {"id": "db", "type": "database", "label": "DB", "position": {"x": 200, "y": 0}}
+      ],
+      "edges": [{"id": "e1", "source": "front", "target": "db"}]
+    }
+  }'
+```
+
+The response shape is `{ "findings": Finding[], "feedback": str }`:
+
+- `findings` comes straight from the rules engine — deterministic, independent of the LLM, returned even when empty.
+- `feedback` is the tutor's narrative grounded in those findings.
+
+Optionally pass `"modeId": "<mode>"` to pick the persona (defaults to `tutor`). The same LLM setup (Options A–D above) applies, and the same typed error contract — plus `413 diagram_too_large` for an oversized diagram and `422 unknown_mode` for an unknown mode.
+
 ## Anti-pattern rules
 
 The rules engine inspects a `Diagram` and returns structured `Finding`s for known architectural mistakes. It runs in microseconds, never calls the LLM, and is deterministic.
