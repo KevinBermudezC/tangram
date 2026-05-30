@@ -6,6 +6,7 @@ import { ChatPanel } from "@/components/editor/chat-panel";
 import { EditorPalette } from "@/components/editor/palette";
 import { EditorTopbar } from "@/components/editor/topbar";
 import { cn } from "@/lib/utils";
+import type { AnalyzeResponse } from "@/types/tangram";
 
 export interface EditorShellProps {
   content: ReactNode;
@@ -15,6 +16,12 @@ export interface EditorShellProps {
   componentCount?: number;
   connectionCount?: number;
   savedLabel?: string;
+  /** Analysis wiring, forwarded to the chat panel. */
+  hasDiagram?: boolean;
+  analysis?: AnalyzeResponse | null;
+  analyzing?: boolean;
+  analyzeError?: string | null;
+  onAnalyze?: () => void;
 }
 
 /**
@@ -30,6 +37,11 @@ export function EditorShell({
   componentCount = 0,
   connectionCount = 0,
   savedLabel = "not saved",
+  hasDiagram = false,
+  analysis = null,
+  analyzing = false,
+  analyzeError = null,
+  onAnalyze,
 }: EditorShellProps) {
   return (
     <div
@@ -50,7 +62,15 @@ export function EditorShell({
         />
         {content}
       </main>
-      {!chatHidden && <ChatPanel />}
+      {!chatHidden && (
+        <ChatPanel
+          hasDiagram={hasDiagram}
+          analysis={analysis}
+          analyzing={analyzing}
+          analyzeError={analyzeError}
+          onAnalyze={onAnalyze}
+        />
+      )}
     </div>
   );
 }

@@ -1,14 +1,15 @@
 "use client";
 
-import { use } from "react";
+import { use, useCallback } from "react";
 import Link from "next/link";
 import { Loader2, OctagonAlert } from "lucide-react";
+import { toast } from "sonner";
 
 import { DiagramCanvas } from "@/components/DiagramCanvas";
 import { EditorShell } from "@/components/editor/editor-shell";
 import { Button } from "@/components/ui/button";
 import { TangramApiError } from "@/lib/api";
-import { useDiagram } from "@/lib/hooks";
+import { useAnalyze, useDiagram } from "@/lib/hooks";
 
 /**
  * Open a saved diagram by id.
@@ -25,6 +26,27 @@ export default function EditorByIdPage({
   const { id } = use(params);
   const query = useDiagram(id);
   const diagram = query.data ?? null;
+  const analysis = useAnalyze();
+
+  const runAnalyze = useCallback(() => {
+    if (!diagram) return;
+    analysis.mutate(
+      { diagram },
+      {
+        onError: (err) => {
+          const detail =
+            err instanceof TangramApiError ? err.detail : "Could not analyze";
+          toast.error("Analysis failed", { description: detail });
+        },
+      },
+    );
+  }, [diagram, analysis]);
+
+  const analyzeError = analysis.isError
+    ? analysis.error instanceof TangramApiError
+      ? analysis.error.detail
+      : "Could not analyze this diagram."
+    : null;
 
   const notFound =
     query.isError &&
@@ -55,6 +77,11 @@ export default function EditorByIdPage({
       componentCount={diagram?.nodes.length ?? 0}
       connectionCount={diagram?.edges.length ?? 0}
       savedLabel={diagram ? "saved" : query.isLoading ? "loading…" : "—"}
+      hasDiagram={Boolean(diagram)}
+      analysis={analysis.data ?? null}
+      analyzing={analysis.isPending}
+      analyzeError={analyzeError}
+      onAnalyze={runAnalyze}
     />
   );
 }

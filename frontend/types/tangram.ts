@@ -118,6 +118,26 @@ export interface DiagramSummary {
   thumb: DiagramThumb;
 }
 
+// --- Analysis (POST /analyze) ------------------------------------------------
+// Mirrors backend app/schemas/finding.py and app/schemas/analyze.py. The
+// rule-engine fields are snake_case on the wire (no aliases on Finding).
+
+export type Severity = "error" | "warning" | "info";
+
+export interface Finding {
+  rule_id: string;
+  severity: Severity;
+  message: string;
+  rationale: string;
+  node_ids: string[];
+  edge_ids: string[];
+}
+
+export interface AnalyzeResponse {
+  findings: Finding[];
+  feedback: string;
+}
+
 // --- API error contract ------------------------------------------------------
 
 export interface ApiErrorBody {
