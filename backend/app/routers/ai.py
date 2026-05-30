@@ -1,9 +1,10 @@
-"""AI-driven endpoints: /generate now, /analyze later.
+"""AI-driven endpoints: /generate and /analyze.
 
-Wires the public HTTP shape to the generator service. The error-mapping in
-this module is the contract the frontend will branch on: every internal
-LLMError subclass becomes a typed HTTP response with a stable top-level
-`code` field.
+Wires the public HTTP shape to the generator and analyzer services. The
+error-mapping in this module is the contract the frontend will branch on:
+every internal LLMError subclass becomes a typed HTTP response with a stable
+top-level `code` field. Both routes share the same mapping via
+`_raise_for_llm_error` so they can never silently diverge.
 
 Error responses are emitted via `TangramHTTPError`, which the app-level
 exception handler (registered in app.main) serializes as a flat
@@ -15,14 +16,17 @@ an extra `"detail"` key, which would nest `code` one level too deep.
 from __future__ import annotations
 
 import logging
+from typing import NoReturn
 
 from fastapi import APIRouter, status
 from pydantic import BaseModel
 
 from app.core.config import get_settings
 from app.errors import TangramHTTPError
+from app.schemas.analyze import AnalyzeRequest, AnalyzeResponse
 from app.schemas.diagram import Diagram
 from app.schemas.generate import GenerateRequest
+from app.services.analysis import analyze_diagram
 from app.services.generation import generate_diagram
 from app.services.llm import (
     LLMConfigError,
@@ -32,6 +36,7 @@ from app.services.llm import (
     LLMRateLimited,
     LLMTimeoutError,
 )
+from app.services.modes import ModeNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +48,42 @@ class ErrorBody(BaseModel):
 
     detail: str
     code: str
+
+
+# Maps the LLM error families to (HTTP status, stable `code`). Shared by every
+# AI route. `LLMError` is the catch-all and is handled last.
+_LLM_ERROR_MAP: list[tuple[type[LLMError], int, str]] = [
+    (LLMInputTooLarge, status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, "llm_input_too_large"),
+    (LLMRateLimited, status.HTTP_429_TOO_MANY_REQUESTS, "llm_rate_limited"),
+    (LLMTimeoutError, status.HTTP_504_GATEWAY_TIMEOUT, "llm_timeout"),
+    (LLMInvalidResponse, status.HTTP_502_BAD_GATEWAY, "llm_invalid_response"),
+    (LLMConfigError, status.HTTP_503_SERVICE_UNAVAILABLE, "llm_config_error"),
+]
+
+
+def _raise_for_llm_error(exc: LLMError) -> NoReturn:
+    """Translate any LLMError into the shared typed HTTP response.
+
+    Every AI route funnels its LLM failures through here so the status/code
+    contract stays identical across endpoints.
+    """
+    for err_type, status_code, code in _LLM_ERROR_MAP:
+        if isinstance(exc, err_type):
+            log = logger.error if status_code >= 500 else logger.warning
+            log("LLM error (%s): %s", code, exc)
+            raise TangramHTTPError(
+                status_code=status_code,
+                detail=str(exc),
+                code=code,
+            ) from None
+
+    # Unclassified LLMError → 500.
+    logger.exception("Unexpected LLM error")
+    raise TangramHTTPError(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        detail=str(exc) or "Unexpected LLM error",
+        code="llm_error",
+    ) from None
 
 
 @router.post(
@@ -73,48 +114,51 @@ async def post_generate(request: GenerateRequest) -> Diagram:
 
     try:
         return await generate_diagram(request.prompt)
-    except LLMInputTooLarge as e:
-        # Defensive: prompt-length is already pre-checked above, but LLM input
-        # also includes the composed system prompt. If it's still too long,
-        # surface the same 413 contract.
-        logger.warning("LLM input too large: %s", e)
+    except LLMError as e:
+        _raise_for_llm_error(e)
+
+
+@router.post(
+    "/analyze",
+    response_model=AnalyzeResponse,
+    responses={
+        413: {"model": ErrorBody, "description": "Diagram too large"},
+        422: {"description": "Invalid request body or unknown mode"},
+        429: {"model": ErrorBody, "description": "LLM provider rate-limited the request"},
+        500: {"model": ErrorBody, "description": "Unexpected error"},
+        502: {"model": ErrorBody, "description": "LLM returned an invalid response"},
+        503: {"model": ErrorBody, "description": "LLM provider misconfigured or unavailable"},
+        504: {"model": ErrorBody, "description": "LLM provider timed out"},
+    },
+)
+async def post_analyze(request: AnalyzeRequest) -> AnalyzeResponse:
+    """Analyze a Diagram: deterministic rule findings plus LLM prose feedback.
+
+    Read-only: the diagram is never mutated or persisted. `findings` come from
+    the rules engine and are returned even when empty; `feedback` is the
+    tutor's narrative. If the LLM call fails the whole request fails with the
+    mapped status — we do not return a findings-only partial success.
+    """
+    settings = get_settings()
+    serialized_len = len(request.diagram.model_dump_json(by_alias=True))
+    if serialized_len > settings.max_input_chars:
         raise TangramHTTPError(
             status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=str(e),
-            code="llm_input_too_large",
-        ) from None
-    except LLMRateLimited as e:
-        logger.warning("LLM rate limited: %s", e)
+            detail=(
+                "Diagram exceeds the configured input length cap "
+                f"({serialized_len} > {settings.max_input_chars})."
+            ),
+            code="diagram_too_large",
+        )
+
+    try:
+        return await analyze_diagram(request.diagram, mode_id=request.mode_id)
+    except ModeNotFoundError:
+        logger.warning("Unknown mode requested: %r", request.mode_id)
         raise TangramHTTPError(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=str(e),
-            code="llm_rate_limited",
-        ) from None
-    except LLMTimeoutError as e:
-        logger.warning("LLM timed out: %s", e)
-        raise TangramHTTPError(
-            status_code=status.HTTP_504_GATEWAY_TIMEOUT,
-            detail=str(e),
-            code="llm_timeout",
-        ) from None
-    except LLMInvalidResponse as e:
-        logger.warning("LLM returned invalid response: %s", e)
-        raise TangramHTTPError(
-            status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=str(e),
-            code="llm_invalid_response",
-        ) from None
-    except LLMConfigError as e:
-        logger.error("LLM misconfigured: %s", e)
-        raise TangramHTTPError(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=str(e),
-            code="llm_config_error",
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Unknown mode: {request.mode_id!r}",
+            code="unknown_mode",
         ) from None
     except LLMError as e:
-        logger.exception("Unexpected LLM error")
-        raise TangramHTTPError(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=str(e) or "Unexpected LLM error",
-            code="llm_error",
-        ) from None
+        _raise_for_llm_error(e)
