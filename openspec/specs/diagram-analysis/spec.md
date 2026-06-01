@@ -14,9 +14,9 @@ The backend SHALL expose `POST /analyze` accepting a JSON body `{ "diagram": Dia
 - **AND** every item in `findings` validates against the `Finding` Pydantic model
 - **AND** `feedback` is a non-empty string
 
-#### Scenario: mode_id defaults to tutor
+#### Scenario: modeId defaults to tutor
 
-- **WHEN** a client POSTs a diagram without a `mode_id`
+- **WHEN** a client POSTs a diagram without a `modeId`
 - **THEN** the request is processed using the `tutor` mode
 - **AND** the response is 200
 
