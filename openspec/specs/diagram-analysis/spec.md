@@ -69,11 +69,11 @@ The endpoint SHALL reject a request whose serialized diagram exceeds `MAX_INPUT_
 
 ### Requirement: Unknown mode is a client error
 
-When `mode_id` does not correspond to a shipped mode, the endpoint SHALL return 422 with a stable `code`, distinct from the LLM error family.
+When `modeId` does not correspond to a shipped mode, the endpoint SHALL return 422 with a stable `code`, distinct from the LLM error family.
 
-#### Scenario: Unknown mode_id → 422
+#### Scenario: Unknown modeId → 422
 
-- **WHEN** a client POSTs a diagram with `mode_id` set to an unknown value
+- **WHEN** a client POSTs a diagram with `modeId` set to an unknown value
 - **THEN** the response status is 422 with `code` set to `unknown_mode`
 - **AND** no LLM call is made
 
