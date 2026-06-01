@@ -5,7 +5,7 @@ TBD - created by archiving change add-diagram-analysis-endpoint. Update Purpose 
 ## Requirements
 ### Requirement: POST /analyze returns findings and feedback
 
-The backend SHALL expose `POST /analyze` accepting a JSON body `{ "diagram": Diagram, "mode_id"?: str }` and returning, on success, `{ "findings": Finding[], "feedback": str }`. `findings` conforms to `app/schemas/finding.py`; `feedback` is a non-empty human-readable string.
+The backend SHALL expose `POST /analyze` accepting a JSON body `{ "diagram": Diagram, "modeId"?: str }` and returning, on success, `{ "findings": Finding[], "feedback": str }`. `findings` conforms to `app/schemas/finding.py`; `feedback` is a non-empty human-readable string.
 
 #### Scenario: Happy path returns findings and feedback
 
