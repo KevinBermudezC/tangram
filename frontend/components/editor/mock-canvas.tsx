@@ -108,7 +108,7 @@ function EmptyCanvasHint() {
         >
           <MousePointer2 size={16} />
         </span>
-        <p className="text-[14px] font-medium text-ink-strong">
+        <p className="font-serif text-[18px] font-medium tracking-wide text-ink-strong">
           Empty canvas
         </p>
         <p className="text-[12.5px] leading-relaxed text-ink-muted">

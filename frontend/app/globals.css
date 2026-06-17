@@ -11,7 +11,7 @@
  * If you swap (2) and (3), tiny things like `bg-canvas` on a node body
  * stop overriding `@xyflow/react`'s default fill.
  */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Shippori+Mincho:wght@400;500;600;700;800&display=swap");
 @import "@xyflow/react/dist/style.css";
 @import "tailwindcss";
 
@@ -23,13 +23,14 @@
    ----------------------------------------------------------------------------- */
 
 @theme inline {
-  /* Surfaces */
-  --color-page: #faf8f3;
+  /* Surfaces — sunadō (砂土), a warm sand/kraft washi ground. Deeper than a
+     near-white so the white cards float and the aka accent sings. */
+  --color-page: #e9dcc2;
   --color-card: #ffffff;
-  --color-canvas: #fdfbf5;
-  --color-sidebar: #f5f1e8;
-  --color-code-bg: #f1ede4;
-  --color-chat: #f8f5ed;
+  --color-canvas: #ede2cb;
+  --color-sidebar: #dfceac;
+  --color-code-bg: #e0d2b4;
+  --color-chat: #e7dabf;
 
   /* Ink */
   --color-ink-strong: #1a1a1a;
@@ -38,14 +39,20 @@
   --color-ink-faint: #b3aa9c;
   --color-ink-on-accent: #fffaf3;
 
-  /* Lines */
-  --color-line: #e7e1d5;
-  --color-line-strong: #d4cdbd;
+  /* Lines — deepened to stay visible against the warmer sand ground. */
+  --color-line: #d8c8a9;
+  --color-line-strong: #c6b48e;
 
-  /* Accent */
-  --color-accent: #c9633a;
-  --color-accent-strong: #a94f29;
-  --color-accent-tint: #fbeee6;
+  /* Accent — aka (赤), a clean true red. Crisp and a touch cool, distinctly
+     not a clay/terracotta orange. */
+  --color-accent: #c5283d;
+  --color-accent-strong: #a81f30;
+  --color-accent-tint: #f9e8ea;
+
+  /* Seal — hanko (判子) red, deeper than the accent. Reserved for the brand
+     mark and stamp-like flourishes so it stays special. */
+  --color-seal: #a01f33;
+  --color-seal-strong: #7e1626;
 
   /* Component category colors (mirror backend node types) */
   --color-cat-frontend: #d8e8f5;
@@ -70,6 +77,9 @@
     "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas,
     monospace;
+  /* Display serif — Shippori Mincho, a Mincho (明朝) face with refined Latin.
+     Used for headlines and the wordmark to give a calm, woodblock-print feel. */
+  --font-serif: "Shippori Mincho", "Noto Serif JP", ui-serif, Georgia, serif;
 
   /* Radii */
   --radius-sm: 6px;
@@ -83,6 +93,42 @@ body {
   color: var(--color-ink-body);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Washi paper grain — an almost-invisible warm texture layered over the page
+   background. Two offset radial dots give the flat off-white a faint tooth,
+   the way handmade paper catches light. Kept extremely subtle on purpose. */
+body {
+  background-image:
+    radial-gradient(rgba(120, 90, 50, 0.022) 1px, transparent 1px),
+    radial-gradient(rgba(120, 90, 50, 0.018) 1px, transparent 1px);
+  background-position:
+    0 0,
+    11px 11px;
+  background-size: 22px 22px;
+}
+
+/* Ensō rotation — own keyframe so it never depends on Tailwind emitting the
+   `spin` utility's keyframes. */
+@keyframes enso-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hanko seal — a small stamp-like mark. Reused by the brand and section
+   flourishes. The inset ring mimics the carved frame of a real seal. */
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-seal);
+  color: #fff;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.32);
 }
 
 /* Inline code style — used in plenty of help text. */

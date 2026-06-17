@@ -15,9 +15,14 @@ export default function TemplatesPage() {
   return (
     <main className="flex flex-col gap-6 p-8">
       <header className="flex flex-col gap-1">
-        <h1 className="text-[22px] font-semibold tracking-tight text-ink-strong">
-          Templates
-        </h1>
+        <div className="flex items-baseline gap-2.5">
+          <h1 className="font-serif text-[24px] font-medium tracking-tight text-ink-strong">
+            Templates
+          </h1>
+          <span aria-hidden className="font-serif text-[17px] text-ink-faint">
+            型
+          </span>
+        </div>
         <p className="text-[13px] text-ink-muted">
           Curated starting points for the eight component types. Fork one
           into your library and edit freely.
@@ -28,8 +33,8 @@ export default function TemplatesPage() {
 
       <Card className="border-dashed bg-transparent p-6">
         <div className="flex flex-col gap-1 text-center">
-          <p className="text-[14px] font-medium text-ink-strong">
-            More templates coming.
+          <p className="font-serif text-[17px] font-medium tracking-wide text-ink-strong">
+            More templates coming
           </p>
           <p className="text-[12.5px] text-ink-muted">
             We're curating them in{" "}

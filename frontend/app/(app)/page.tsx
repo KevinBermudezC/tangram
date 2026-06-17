@@ -35,11 +35,27 @@ export default function HomePage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-8">
-      <div className="-mt-[8vh] flex w-full max-w-[720px] flex-col items-center gap-4">
-        <h1 className="text-center text-[32px] font-semibold tracking-tight text-ink-strong">
-          What do you want to design?
-        </h1>
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-8">
+      {/* Ma — a faint oversized kanji watermark holds the negative space. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -right-[4vw] top-1/2 -translate-y-1/2 select-none font-serif text-[40vh] font-bold leading-none text-ink-strong/[0.025]"
+      >
+        巧
+      </span>
+
+      <div className="relative -mt-[8vh] flex w-full max-w-[680px] flex-col items-center gap-7">
+        <header className="flex flex-col items-center gap-5">
+          <span className="inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.32em] text-ink-faint">
+            <span aria-hidden className="seal h-[18px] w-[18px] text-[10px]">
+              巧
+            </span>
+            System design, taught
+          </span>
+          <h1 className="text-balance text-center font-serif text-[40px] font-medium leading-[1.15] tracking-[-0.01em] text-ink-strong">
+            What do you want to design?
+          </h1>
+        </header>
 
         <Card className="w-full p-3.5">
           <form
@@ -55,13 +71,20 @@ export default function HomePage() {
               className="min-h-20 border-0 bg-transparent px-1.5 py-1 text-[15px] shadow-none focus-visible:border-0 focus-visible:ring-0"
             />
             <div className="flex flex-wrap items-center justify-between gap-2.5">
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span
+                  aria-hidden
+                  className="mr-0.5 font-serif text-[13px] text-accent"
+                  title="examples"
+                >
+                  例
+                </span>
                 {EXAMPLES.slice(0, 3).map((example) => (
                   <button
                     key={example}
                     type="button"
                     onClick={() => setPrompt(example)}
-                    className="rounded-full border border-line bg-sidebar px-2.5 py-1 text-[12.5px] text-ink-body transition-colors hover:border-accent hover:bg-accent-tint hover:text-accent-strong"
+                    className="rounded-[var(--radius-sm)] border border-line bg-card px-2.5 py-1 text-[12.5px] text-ink-body transition-colors hover:border-accent hover:bg-accent-tint hover:text-accent-strong"
                   >
                     {example.split(" ").slice(0, 2).join(" ")}
                   </button>

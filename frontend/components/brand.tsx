@@ -19,15 +19,12 @@ export function Brand({ href = "/", className, iconOnly = false }: BrandProps) {
         className,
       )}
     >
-      <span
-        aria-hidden
-        className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-ink-strong text-[12px] font-bold text-ink-on-accent"
-      >
-        T
+      <span aria-hidden className="seal h-6 w-6 text-[13px]">
+        巧
       </span>
       {!iconOnly && (
-        <span className="text-[15px] font-semibold tracking-tight">
-          Tangram
+        <span className="font-serif text-[16px] font-semibold tracking-[0.14em] text-ink-strong">
+          TANGRAM
         </span>
       )}
     </Link>

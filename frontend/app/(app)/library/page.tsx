@@ -48,9 +48,14 @@ export default function LibraryPage() {
     <main className="flex flex-col gap-6 p-8">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-[22px] font-semibold tracking-tight text-ink-strong">
-            Library
-          </h1>
+          <div className="flex items-baseline gap-2.5">
+            <h1 className="font-serif text-[24px] font-medium tracking-tight text-ink-strong">
+              Library
+            </h1>
+            <span aria-hidden className="font-serif text-[17px] text-ink-faint">
+              蔵
+            </span>
+          </div>
           <p className="text-[13px] text-ink-muted">
             {nonDraftCount} diagrams · {draftCount} draft · stored as JSON in{" "}
             <code>data/diagrams/</code>
