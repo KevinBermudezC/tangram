@@ -62,7 +62,7 @@ export function AppRail() {
     <aside className="flex min-h-0 flex-col gap-3.5 border-r border-line bg-sidebar px-3 py-4">
       <Brand className="px-1.5 pb-0.5" />
 
-      <Button asChild variant="ink" size="md" className="h-9 w-full">
+      <Button asChild variant="secondary" size="md" className="h-9 w-full">
         <Link href="/editor">
           <Plus size={14} />
           New diagram
@@ -91,7 +91,7 @@ export function AppRail() {
                 className={cn(
                   "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-ink-body transition-colors",
                   active
-                    ? "bg-accent-tint/70 font-medium text-ink-strong shadow-[inset_2px_0_0_var(--color-accent)]"
+                    ? "bg-black/[0.05] font-medium text-ink-strong shadow-[inset_2px_0_0_var(--color-accent)]"
                     : "hover:bg-black/[0.04] hover:text-ink-strong",
                 )}
               >

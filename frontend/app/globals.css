@@ -35,8 +35,8 @@
   /* Ink — sumi (墨), a crisp near-black on white. Neutral, not warm. */
   --color-ink-strong: #141414;
   --color-ink-body: #2c2c2c;
-  --color-ink-muted: #6a6a68;
-  --color-ink-faint: #a6a6a2;
+  --color-ink-muted: #64645f;
+  --color-ink-faint: #8a8a85;
   --color-ink-on-accent: #ffffff;
 
   /* Lines — neutral light grey hairlines. */
@@ -112,6 +112,38 @@ body {
 @keyframes enso-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Calm entrance — a gentle fade + rise, like ink settling on paper. Used for
+   first-paint reveals; stagger with inline animation-delay. */
+@keyframes tg-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.tg-enter {
+  opacity: 0;
+  animation: tg-fade-up 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* Respect users who prefer less motion: no entrances, no spin, instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .tg-enter {
+    opacity: 1;
   }
 }
 
