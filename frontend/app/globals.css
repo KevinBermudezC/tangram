@@ -42,16 +42,16 @@
   --color-line: #e7e1d5;
   --color-line-strong: #d4cdbd;
 
-  /* Accent — shu (朱), a clean lacquer vermilion. Redder and a touch cooler
-     than a clay terracotta, like torii / lacquerware. */
-  --color-accent: #c0453a;
-  --color-accent-strong: #a1352b;
-  --color-accent-tint: #f9ebe8;
+  /* Accent — aka (赤), a clean true red. Crisp and a touch cool, distinctly
+     not a clay/terracotta orange. */
+  --color-accent: #c5283d;
+  --color-accent-strong: #a81f30;
+  --color-accent-tint: #f9e8ea;
 
   /* Seal — hanko (判子) red, deeper than the accent. Reserved for the brand
      mark and stamp-like flourishes so it stays special. */
-  --color-seal: #b23a2e;
-  --color-seal-strong: #8f261d;
+  --color-seal: #a01f33;
+  --color-seal-strong: #7e1626;
 
   /* Component category colors (mirror backend node types) */
   --color-cat-frontend: #d8e8f5;
