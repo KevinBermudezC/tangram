@@ -11,7 +11,7 @@
  * If you swap (2) and (3), tiny things like `bg-canvas` on a node body
  * stop overriding `@xyflow/react`'s default fill.
  */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Shippori+Mincho:wght@400;500;600;700;800&display=swap");
 @import "@xyflow/react/dist/style.css";
 @import "tailwindcss";
 
@@ -42,10 +42,15 @@
   --color-line: #e7e1d5;
   --color-line-strong: #d4cdbd;
 
-  /* Accent */
+  /* Accent — shu (朱), a warm vermilion/persimmon */
   --color-accent: #c9633a;
   --color-accent-strong: #a94f29;
   --color-accent-tint: #fbeee6;
+
+  /* Seal — hanko (判子) red, deeper than the accent. Reserved for the brand
+     mark and stamp-like flourishes so it stays special. */
+  --color-seal: #c0392b;
+  --color-seal-strong: #9c2b20;
 
   /* Component category colors (mirror backend node types) */
   --color-cat-frontend: #d8e8f5;
@@ -70,6 +75,9 @@
     "Segoe UI", Helvetica, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas,
     monospace;
+  /* Display serif — Shippori Mincho, a Mincho (明朝) face with refined Latin.
+     Used for headlines and the wordmark to give a calm, woodblock-print feel. */
+  --font-serif: "Shippori Mincho", "Noto Serif JP", ui-serif, Georgia, serif;
 
   /* Radii */
   --radius-sm: 6px;
@@ -83,6 +91,34 @@ body {
   color: var(--color-ink-body);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Washi paper grain — an almost-invisible warm texture layered over the page
+   background. Two offset radial dots give the flat off-white a faint tooth,
+   the way handmade paper catches light. Kept extremely subtle on purpose. */
+body {
+  background-image:
+    radial-gradient(rgba(120, 90, 50, 0.022) 1px, transparent 1px),
+    radial-gradient(rgba(120, 90, 50, 0.018) 1px, transparent 1px);
+  background-position:
+    0 0,
+    11px 11px;
+  background-size: 22px 22px;
+}
+
+/* Hanko seal — a small stamp-like mark. Reused by the brand and section
+   flourishes. The inset ring mimics the carved frame of a real seal. */
+.seal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-seal);
+  color: #fff;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  line-height: 1;
+  border-radius: 5px;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.32);
 }
 
 /* Inline code style — used in plenty of help text. */
