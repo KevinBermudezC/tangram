@@ -13,9 +13,14 @@ export function TemplatesStrip() {
   return (
     <section className="flex flex-col gap-3">
       <header className="flex flex-col gap-0.5">
-        <h2 className="text-[16px] font-semibold tracking-tight text-ink-strong">
-          Templates
-        </h2>
+        <div className="flex items-baseline gap-2">
+          <h2 className="font-serif text-[18px] font-medium tracking-tight text-ink-strong">
+            Templates
+          </h2>
+          <span aria-hidden className="font-serif text-[13px] text-ink-faint">
+            型
+          </span>
+        </div>
         <p className="text-[12.5px] text-ink-muted">
           Curated starting points. Fork into your library and edit.
         </p>
