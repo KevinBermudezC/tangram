@@ -23,13 +23,14 @@
    ----------------------------------------------------------------------------- */
 
 @theme inline {
-  /* Surfaces */
-  --color-page: #faf8f3;
+  /* Surfaces — sunadō (砂土), a warm sand/kraft washi ground. Deeper than a
+     near-white so the white cards float and the aka accent sings. */
+  --color-page: #e9dcc2;
   --color-card: #ffffff;
-  --color-canvas: #fdfbf5;
-  --color-sidebar: #f5f1e8;
-  --color-code-bg: #f1ede4;
-  --color-chat: #f8f5ed;
+  --color-canvas: #ede2cb;
+  --color-sidebar: #dfceac;
+  --color-code-bg: #e0d2b4;
+  --color-chat: #e7dabf;
 
   /* Ink */
   --color-ink-strong: #1a1a1a;
@@ -38,9 +39,9 @@
   --color-ink-faint: #b3aa9c;
   --color-ink-on-accent: #fffaf3;
 
-  /* Lines */
-  --color-line: #e7e1d5;
-  --color-line-strong: #d4cdbd;
+  /* Lines — deepened to stay visible against the warmer sand ground. */
+  --color-line: #d8c8a9;
+  --color-line-strong: #c6b48e;
 
   /* Accent — aka (赤), a clean true red. Crisp and a touch cool, distinctly
      not a clay/terracotta orange. */
