@@ -6,14 +6,14 @@
 // -----------------------------------------------------------------------------
 
 export type NodeType =
-  | "frontend"
-  | "backend"
-  | "database"
-  | "auth"
-  | "storage"
-  | "external_service"
-  | "queue"
-  | "cache";
+   | "frontend"
+   | "backend"
+   | "database"
+   | "auth"
+   | "storage"
+   | "external_service"
+   | "queue"
+   | "cache";
 
 export type DataFlow = "unidirectional" | "bidirectional";
 
@@ -57,6 +57,13 @@ export interface DiagramEdge {
   ai?: EdgeAI | null;
 }
 
+export interface ChatMessage {
+  role: MessageRole;
+  content: string;
+  timestamp: string; // ISO 8601
+  diagramId?: string | null;
+}
+
 export interface ConversationMessage {
   role: MessageRole;
   content: string;
@@ -77,6 +84,14 @@ export interface Diagram {
   nodes: DiagramNode[];
   edges: DiagramEdge[];
   conversation: ConversationMessage[];
+}
+
+// --- Chat response types (backend /api/chat/messages) -----------------------
+
+export interface ChatResponse {
+  assistant_reply?: string | null;
+  new_message: ChatMessage;
+  full_conversation: ChatMessage[];
 }
 
 // --- Diagram summary (GET /diagrams) -----------------------------------------

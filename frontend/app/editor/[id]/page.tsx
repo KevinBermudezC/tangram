@@ -30,45 +30,27 @@ export default function EditorByIdPage({
 
   const runAnalyze = useCallback(() => {
     if (!diagram) return;
-    analysis.mutate(
-      { diagram },
-      {
-        onError: (err) => {
-          const detail =
-            err instanceof TangramApiError ? err.detail : "Could not analyze";
-          toast.error("Analysis failed", { description: detail });
-        },
-      },
-    );
-  }, [diagram, analysis]);
+    analysis.mutate({ diagram, modeId: "tutor" });
+   }, [diagram, analysis]);
 
   const analyzeError = analysis.isError
-    ? analysis.error instanceof TangramApiError
-      ? analysis.error.detail
-      : "Could not analyze this diagram."
-    : null;
+    ? (analysis.error instanceof TangramApiError ? analysis.error.detail : "Could not analyze this diagram.")
+     : null;
 
-  const notFound =
-    query.isError &&
-    query.error instanceof TangramApiError &&
-    query.error.status === 404;
+  const notFound = query.isError && query.error instanceof TangramApiError && query.error.status === 404;
 
   const content = (
-    <div className="relative flex-1">
-      {diagram && <DiagramCanvas diagram={diagram} />}
-      {query.isLoading && <LoadingOverlay />}
-      {query.isError && (
-        <ErrorOverlay
-          notFound={notFound}
-          detail={
-            query.error instanceof TangramApiError
-              ? query.error.detail
-              : "Could not load this diagram."
-          }
-        />
-      )}
-    </div>
-  );
+     <div className="relative flex-1">
+        {diagram && <DiagramCanvas diagram={diagram} />}
+        {query.isLoading && <LoadingOverlay />}
+        {query.isError && (
+          <ErrorOverlay
+           notFound={notFound}
+           detail={query.error instanceof TangramApiError ? query.error.detail : "Couldn't load diagram"}
+         />
+       )}
+      </div>
+    );
 
   return (
     <EditorShell
@@ -82,21 +64,20 @@ export default function EditorByIdPage({
       analyzing={analysis.isPending}
       analyzeError={analyzeError}
       onAnalyze={runAnalyze}
+      diagramId={id}   // Pass diagram context for chat persistence
     />
-  );
+   );
 }
 
 function LoadingOverlay() {
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center bg-canvas/85 backdrop-blur-[2px]">
-      <div className="flex flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-line bg-card px-7 py-5 shadow-md">
-        <Loader2 className="animate-spin text-accent" size={28} />
-        <p className="text-[15px] font-semibold text-ink-strong">
-          Loading diagram…
-        </p>
-      </div>
-    </div>
-  );
+       <div className="flex flex-col items-center gap-2 rounded-xl border border-line bg-card px-7 py-5 shadow-md">
+         <Loader2 className="animate-spin text-accent" size={28} />
+         <p className="text-lg font-semibold text-ink-strong">Loading diagram…</p>
+       </div>
+     </div>
+   );
 }
 
 function ErrorOverlay({
@@ -108,20 +89,20 @@ function ErrorOverlay({
 }) {
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center bg-canvas/85 backdrop-blur-[2px]">
-      <div className="flex max-w-md flex-col items-center gap-2.5 rounded-[var(--radius-lg)] border border-line bg-card px-7 py-5 shadow-md">
-        <OctagonAlert size={28} className="text-accent" />
-        <p className="text-[16px] font-semibold text-ink-strong">
-          {notFound ? "Diagram not found" : "Couldn't load diagram"}
-        </p>
-        <p className="text-center text-[13px] leading-relaxed text-ink-muted">
-          {notFound
-            ? "It may have been deleted, or the link is wrong."
-            : detail}
-        </p>
-        <Button asChild variant="primary" size="md" className="mt-1">
-          <Link href="/library">Back to library</Link>
-        </Button>
-      </div>
-    </div>
-  );
+       <div className="flex max-w-md flex-col items-center gap-2.5 rounded-xl border border-line bg-card px-7 py-5 shadow-md">
+         <OctagonAlert size={28} className="text-accent" />
+         <p className="text-lg font-semibold text-ink-strong">
+           {notFound ? "Diagram not found" : "Couldn't load diagram"}
+         </p>
+         <p className="text-center text-sm text-ink-muted">
+           {notFound
+             ? "It may have been deleted, or the link is wrong."
+             : detail}
+         </p>
+         <Button asChild variant="primary" size="md" className="mt-1">
+           <Link href="/library">Back to library</Link>
+         </Button>
+       </div>
+     </div>
+   );
 }

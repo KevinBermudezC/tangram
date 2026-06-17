@@ -6,7 +6,7 @@ import { ChatPanel } from "@/components/editor/chat-panel";
 import { EditorPalette } from "@/components/editor/palette";
 import { EditorTopbar } from "@/components/editor/topbar";
 import { cn } from "@/lib/utils";
-import type { AnalyzeResponse } from "@/types/tangram";
+import type { AnalyzeResponse, Diagram, Finding, Severity } from "@/types/tangram";
 
 export interface EditorShellProps {
   content: ReactNode;
@@ -22,6 +22,7 @@ export interface EditorShellProps {
   analyzing?: boolean;
   analyzeError?: string | null;
   onAnalyze?: () => void;
+  diagramId?: string;  // Pass diagram ID for chat persistence context
 }
 
 /**
@@ -41,7 +42,7 @@ export function EditorShell({
   analysis = null,
   analyzing = false,
   analyzeError = null,
-  onAnalyze,
+  diagramId,
 }: EditorShellProps) {
   return (
     <div
@@ -49,28 +50,29 @@ export function EditorShell({
         "grid h-screen",
         chatHidden ? "grid-cols-[260px_1fr]" : "grid-cols-[260px_1fr_360px]",
       )}
-    >
-      <EditorPalette />
-      <main className="flex min-w-0 flex-col">
-        <EditorTopbar
-          name={diagramName}
-          componentCount={componentCount}
-          connectionCount={connectionCount}
-          savedLabel={savedLabel}
-          onToggleChat={onToggleChat}
-          chatHidden={chatHidden}
-        />
-        {content}
-      </main>
-      {!chatHidden && (
-        <ChatPanel
-          hasDiagram={hasDiagram}
-          analysis={analysis}
-          analyzing={analyzing}
-          analyzeError={analyzeError}
-          onAnalyze={onAnalyze}
-        />
-      )}
-    </div>
-  );
+     >
+       <EditorPalette />
+       <main className="flex min-w-0 flex-col">
+         <EditorTopbar
+           name={diagramName}
+           componentCount={componentCount}
+           connectionCount={connectionCount}
+           savedLabel={savedLabel}
+           onToggleChat={onToggleChat}
+           chatHidden={chatHidden}
+         />
+         {content}
+       </main>
+       {!chatHidden && (
+         <ChatPanel
+           hasDiagram={hasDiagram}
+           analysis={analysis}
+           analyzing={analyzing}
+           analyzeError={analyzeError}
+           onAnalyze={onAnalyze}
+           diagramId={diagramId}  // Wire diagram context for chat persistence
+         />
+       )}
+     </div>
+   );
 }

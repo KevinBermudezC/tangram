@@ -1,6 +1,8 @@
 import type {
   AnalyzeResponse,
   ApiErrorBody,
+  ChatMessage,
+  ChatResponse,
   Diagram,
   DiagramSummary,
 } from "@/types/tangram";
@@ -94,6 +96,52 @@ export async function analyze(
   });
   if (!response.ok) await throwApiError(response);
   return (await response.json()) as AnalyzeResponse;
+}
+
+// --- Chat API (/api/chat) ----------------------------------------------------
+
+/** Interactive chat with streaming responses. */
+export async function sendMessage(
+  messages: ChatMessage[],
+  userInput: string,
+): Promise<ChatResponse> {
+  const body = JSON.stringify({
+    messages,
+    user_input: userInput,
+  });
+
+  const response = await fetch(`${API_BASE_URL}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+  });
+
+  if (!response.ok) await throwApiError(response);
+  return (await response.json()) as ChatResponse;
+}
+
+/** Batch chat for a specific diagram with full context. */
+export async function sendDiagramChat(
+  messages: ChatMessage[],
+  userInput: string,
+  diagramId: string,
+): Promise<ChatResponse> {
+  const body = JSON.stringify({
+    messages,
+    user_input: userInput,
+  });
+
+  const response = await fetch(
+    `${API_BASE_URL}/diagrams/${diagramId}/chat/messages`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+    }
+  );
+
+  if (!response.ok) await throwApiError(response);
+  return (await response.json()) as ChatResponse;
 }
 
 // --- Diagram persistence (/diagrams) ----------------------------------------
