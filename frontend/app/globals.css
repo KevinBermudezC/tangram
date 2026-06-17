@@ -23,25 +23,25 @@
    ----------------------------------------------------------------------------- */
 
 @theme inline {
-  /* Surfaces — sunadō (砂土), a warm sand/kraft washi ground. Deeper than a
-     near-white so the white cards float and the aka accent sings. */
-  --color-page: #e9dcc2;
+  /* Surfaces — crisp neutral white (kami 紙). Clean paper-white instead of a
+     warm tint, for a high-contrast sumi-on-white look. */
+  --color-page: #fafafa;
   --color-card: #ffffff;
-  --color-canvas: #ede2cb;
-  --color-sidebar: #dfceac;
-  --color-code-bg: #e0d2b4;
-  --color-chat: #e7dabf;
+  --color-canvas: #fcfcfc;
+  --color-sidebar: #f2f2f1;
+  --color-code-bg: #eeeeec;
+  --color-chat: #f7f7f6;
 
-  /* Ink */
-  --color-ink-strong: #1a1a1a;
-  --color-ink-body: #38332c;
-  --color-ink-muted: #6b6157;
-  --color-ink-faint: #b3aa9c;
-  --color-ink-on-accent: #fffaf3;
+  /* Ink — sumi (墨), a crisp near-black on white. Neutral, not warm. */
+  --color-ink-strong: #141414;
+  --color-ink-body: #2c2c2c;
+  --color-ink-muted: #64645f;
+  --color-ink-faint: #8a8a85;
+  --color-ink-on-accent: #ffffff;
 
-  /* Lines — deepened to stay visible against the warmer sand ground. */
-  --color-line: #d8c8a9;
-  --color-line-strong: #c6b48e;
+  /* Lines — neutral light grey hairlines. */
+  --color-line: #e7e7e3;
+  --color-line-strong: #d6d6d1;
 
   /* Accent — aka (赤), a clean true red. Crisp and a touch cool, distinctly
      not a clay/terracotta orange. */
@@ -95,13 +95,12 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Washi paper grain — an almost-invisible warm texture layered over the page
-   background. Two offset radial dots give the flat off-white a faint tooth,
-   the way handmade paper catches light. Kept extremely subtle on purpose. */
+/* Paper grain — an almost-invisible neutral tooth over the page background,
+   the way good paper catches light. Kept extremely subtle on purpose. */
 body {
   background-image:
-    radial-gradient(rgba(120, 90, 50, 0.022) 1px, transparent 1px),
-    radial-gradient(rgba(120, 90, 50, 0.018) 1px, transparent 1px);
+    radial-gradient(rgba(0, 0, 0, 0.012) 1px, transparent 1px),
+    radial-gradient(rgba(0, 0, 0, 0.009) 1px, transparent 1px);
   background-position:
     0 0,
     11px 11px;
@@ -113,6 +112,38 @@ body {
 @keyframes enso-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Calm entrance — a gentle fade + rise, like ink settling on paper. Used for
+   first-paint reveals; stagger with inline animation-delay. */
+@keyframes tg-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.tg-enter {
+  opacity: 0;
+  animation: tg-fade-up 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+/* Respect users who prefer less motion: no entrances, no spin, instant. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .tg-enter {
+    opacity: 1;
   }
 }
 

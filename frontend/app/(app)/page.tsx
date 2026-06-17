@@ -45,7 +45,10 @@ export default function HomePage() {
       </span>
 
       <div className="relative -mt-[8vh] flex w-full max-w-[680px] flex-col items-center gap-7">
-        <header className="flex flex-col items-center gap-5">
+        <header
+          className="tg-enter flex flex-col items-center gap-5"
+          style={{ animationDelay: "60ms" }}
+        >
           <span className="inline-flex items-center gap-2.5 text-[11px] font-medium uppercase tracking-[0.32em] text-ink-faint">
             <span aria-hidden className="seal h-[18px] w-[18px] text-[10px]">
               巧
@@ -57,7 +60,10 @@ export default function HomePage() {
           </h1>
         </header>
 
-        <Card className="w-full p-3.5">
+        <Card
+          className="tg-enter w-full p-3.5"
+          style={{ animationDelay: "160ms" }}
+        >
           <form
             className="flex flex-col gap-2.5"
             onSubmit={handleSubmit}
@@ -103,7 +109,10 @@ export default function HomePage() {
           </form>
         </Card>
 
-        <p className="max-w-[540px] text-center text-[12.5px] leading-relaxed text-ink-faint">
+        <p
+          className="tg-enter max-w-[540px] text-center text-[12.5px] leading-relaxed text-ink-faint"
+          style={{ animationDelay: "260ms" }}
+        >
           Diagrams live as JSON in <code>data/diagrams/</code>. The AI teaches
           as you build — click any node in the editor to ask why it's there.
         </p>
