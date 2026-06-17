@@ -2,11 +2,12 @@
 
 import { use, useCallback } from "react";
 import Link from "next/link";
-import { Loader2, OctagonAlert } from "lucide-react";
+import { OctagonAlert } from "lucide-react";
 import { toast } from "sonner";
 
 import { DiagramCanvas } from "@/components/DiagramCanvas";
 import { EditorShell } from "@/components/editor/editor-shell";
+import { Enso } from "@/components/enso";
 import { Button } from "@/components/ui/button";
 import { TangramApiError } from "@/lib/api";
 import { useAnalyze, useDiagram } from "@/lib/hooks";
@@ -89,9 +90,9 @@ export default function EditorByIdPage({
 function LoadingOverlay() {
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center bg-canvas/85 backdrop-blur-[2px]">
-      <div className="flex flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-line bg-card px-7 py-5 shadow-md">
-        <Loader2 className="animate-spin text-accent" size={28} />
-        <p className="text-[15px] font-semibold text-ink-strong">
+      <div className="flex flex-col items-center gap-2.5 rounded-[var(--radius-lg)] border border-line bg-card px-7 py-5 shadow-md">
+        <Enso size={32} />
+        <p className="font-serif text-[17px] font-medium text-ink-strong">
           Loading diagram…
         </p>
       </div>

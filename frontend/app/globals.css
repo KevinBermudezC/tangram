@@ -42,15 +42,16 @@
   --color-line: #e7e1d5;
   --color-line-strong: #d4cdbd;
 
-  /* Accent — shu (朱), a warm vermilion/persimmon */
-  --color-accent: #c9633a;
-  --color-accent-strong: #a94f29;
-  --color-accent-tint: #fbeee6;
+  /* Accent — shu (朱), a clean lacquer vermilion. Redder and a touch cooler
+     than a clay terracotta, like torii / lacquerware. */
+  --color-accent: #c0453a;
+  --color-accent-strong: #a1352b;
+  --color-accent-tint: #f9ebe8;
 
   /* Seal — hanko (判子) red, deeper than the accent. Reserved for the brand
      mark and stamp-like flourishes so it stays special. */
-  --color-seal: #c0392b;
-  --color-seal-strong: #9c2b20;
+  --color-seal: #b23a2e;
+  --color-seal-strong: #8f261d;
 
   /* Component category colors (mirror backend node types) */
   --color-cat-frontend: #d8e8f5;
@@ -104,6 +105,14 @@ body {
     0 0,
     11px 11px;
   background-size: 22px 22px;
+}
+
+/* Ensō rotation — own keyframe so it never depends on Tailwind emitting the
+   `spin` utility's keyframes. */
+@keyframes enso-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Hanko seal — a small stamp-like mark. Reused by the brand and section

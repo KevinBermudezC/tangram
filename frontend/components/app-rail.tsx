@@ -91,11 +91,11 @@ export function AppRail() {
                 className={cn(
                   "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-ink-body transition-colors",
                   active
-                    ? "bg-black/[0.06] font-medium text-ink-strong"
+                    ? "bg-accent-tint/70 font-medium text-ink-strong shadow-[inset_2px_0_0_var(--color-accent)]"
                     : "hover:bg-black/[0.04] hover:text-ink-strong",
                 )}
               >
-                <span className={cn(active ? "text-ink-strong" : "text-ink-muted")}>
+                <span className={cn(active ? "text-accent-strong" : "text-ink-muted")}>
                   {item.icon}
                 </span>
                 {item.label}

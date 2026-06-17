@@ -2,12 +2,13 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Loader2, OctagonAlert } from "lucide-react";
+import { OctagonAlert } from "lucide-react";
 import { toast } from "sonner";
 
 import { DiagramCanvas } from "@/components/DiagramCanvas";
 import { EditorShell } from "@/components/editor/editor-shell";
 import { MockCanvas } from "@/components/editor/mock-canvas";
+import { Enso } from "@/components/enso";
 import { Button } from "@/components/ui/button";
 import { useAnalyze, useGenerate, useSaveDiagram } from "@/lib/hooks";
 import { TangramApiError } from "@/lib/api";
@@ -189,9 +190,9 @@ function errorToOverlay(err: unknown): { detail: string; code: string } {
 function GeneratingOverlay({ prompt }: { prompt: string }) {
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center bg-canvas/85 backdrop-blur-[2px]">
-      <div className="flex max-w-md flex-col items-center gap-2 rounded-[var(--radius-lg)] border border-line bg-card px-7 py-5 shadow-md">
-        <Loader2 className="animate-spin text-accent" size={28} />
-        <p className="text-[16px] font-semibold text-ink-strong">
+      <div className="flex max-w-md flex-col items-center gap-2.5 rounded-[var(--radius-lg)] border border-line bg-card px-7 py-5 shadow-md">
+        <Enso size={34} />
+        <p className="font-serif text-[18px] font-medium text-ink-strong">
           Sketching your architecture…
         </p>
         <p className="text-center text-[13px] leading-relaxed text-ink-muted">
