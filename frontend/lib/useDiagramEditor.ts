@@ -13,6 +13,29 @@ export type SaveStatus = "idle" | "editing" | "saving" | "saved" | "error";
 const AUTOSAVE_MS = 800;
 
 /**
+ * A semantic signature of the graph — ids, types, labels, rounded positions,
+ * and edges. Deliberately excludes React Flow's internal bookkeeping
+ * (measured dimensions, selection) so that mounting/fit-view/measurement does
+ * NOT look like a user edit.
+ */
+function graphSignature(nodes: Node[], edges: Edge[]): string {
+  const n = nodes
+    .map((node) => {
+      const d = (node.data ?? {}) as Record<string, unknown>;
+      return `${node.id}:${d.tangramType ?? ""}:${d.label ?? ""}:${Math.round(
+        node.position.x,
+      )},${Math.round(node.position.y)}`;
+    })
+    .sort()
+    .join("|");
+  const e = edges
+    .map((edge) => `${edge.id}:${edge.source}>${edge.target}:${edge.label ?? ""}`)
+    .sort()
+    .join("|");
+  return `${n}#${e}`;
+}
+
+/**
  * Save orchestration for the editable canvas.
  *
  * `onChange` receives the live React Flow graph on every mutation; an idle
@@ -26,6 +49,7 @@ export function useDiagramEditor(base: Diagram | null) {
   const baseRef = useRef<Diagram | null>(base);
   const latest = useRef<{ nodes: Node[]; edges: Edge[] } | null>(null);
   const primedFor = useRef<string | null>(null);
+  const savedSig = useRef<string>("");
   const dirtyRef = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -51,6 +75,7 @@ export function useDiagramEditor(base: Diagram | null) {
     if (latest.current.nodes.length === 0) return;
     const diagram = flowToDiagram(latest.current.nodes, latest.current.edges, b);
     setStatus("saving");
+    savedSig.current = graphSignature(latest.current.nodes, latest.current.edges);
     save.mutate(diagram, {
       onSuccess: () => {
         dirtyRef.current = false;
@@ -70,11 +95,26 @@ export function useDiagramEditor(base: Diagram | null) {
     (nodes: Node[], edges: Edge[]) => {
       latest.current = { nodes, edges };
       const id = baseRef.current?.id ?? null;
-      // The first report after (re)seeding a diagram is the seed, not an edit.
+      const sig = graphSignature(nodes, edges);
+
+      // First report after (re)seeding a diagram establishes the clean baseline.
       if (primedFor.current !== id) {
         primedFor.current = id;
+        savedSig.current = sig;
+        dirtyRef.current = false;
+        setDirty(false);
         return;
       }
+
+      // No semantic change (e.g. React Flow measuring/selecting) → still clean.
+      if (sig === savedSig.current) {
+        if (dirtyRef.current) {
+          dirtyRef.current = false;
+          setDirty(false);
+        }
+        return;
+      }
+
       dirtyRef.current = true;
       setDirty(true);
       setStatus("editing");
