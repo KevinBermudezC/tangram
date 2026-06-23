@@ -15,19 +15,21 @@ from app.schemas.diagram import Node, NodeType, Position
 from app.schemas.generate import GeneratedNode
 
 # Layout constants — tuned for ~6–10 node diagrams, readable in React Flow.
+# Columns are spaced wider than the node's max width (~220px) so edges and
+# their labels have a clear channel between columns.
 _COLUMN_X: dict[NodeType, float] = {
     NodeType.FRONTEND: 80,
-    NodeType.AUTH: 320,
-    NodeType.BACKEND: 560,
-    NodeType.CACHE: 560,
-    NodeType.QUEUE: 560,
-    NodeType.DATABASE: 800,
-    NodeType.STORAGE: 800,
-    NodeType.EXTERNAL_SERVICE: 320,  # top row, see y offset below
+    NodeType.AUTH: 400,
+    NodeType.BACKEND: 720,
+    NodeType.CACHE: 720,
+    NodeType.QUEUE: 720,
+    NodeType.DATABASE: 1040,
+    NodeType.STORAGE: 1040,
+    NodeType.EXTERNAL_SERVICE: 400,  # top row, see y offset below
 }
 
-_DEFAULT_Y = 240
-_ROW_GAP = 160
+_DEFAULT_Y = 260
+_ROW_GAP = 180
 
 # Types that get a different "row" treatment (e.g. external services go up top,
 # cache/queue go below backend).

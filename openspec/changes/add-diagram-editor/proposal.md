@@ -15,13 +15,15 @@ This change turns the canvas into a real editor: drag components from the palett
 - **Rename**: double-click a node to edit its label inline.
 - **Persistence of edits**: a debounced autosave serializes the graph (`flowToDiagram`) and upserts it via the existing `POST /diagrams`; the topbar's `savedLabel` reflects idle / saving / saved / error. An explicit **Save** button in the topbar flushes the pending save immediately (shares the same save path as autosave). Blank-canvas diagrams mint a client ULID + default metadata on first edit.
 - Wire `/editor` (post-generate) and `/editor/[id]` (saved) to the editable canvas; the blank-canvas entry (`/editor` with no prompt) starts an empty editable draft.
+- **Auto-arrange**: an in-canvas button re-lays the graph with a clean left-to-right layered layout (Dagre), client-side and on-demand; the tidied positions persist like any edit. Also widen the backend `auto_layout` column/row spacing so freshly generated diagrams aren't cramped for the larger editor node.
+- **Cleaner edges**: smoothstep (right-angled) routing with arrowheads and readable label backings, so connections route around boxes instead of slicing through them.
 - Update the palette helper copy (drop the "coming in add-diagram-editor" note) and enable the previously-disabled affordances.
 - Add tests: `flowToDiagram` round-trip, drop-to-create, connect-to-edge, delete-prunes-edges, and the autosave serialization path (mocked).
 
 This change does **not**:
 - Add undo/redo. Tempting, but a v0 editor ships without it; it's a fast follow.
 - Add an edge-properties editor (protocol / data-flow direction UI). Edges get sensible defaults; richer edge editing is a separate change.
-- Re-run server-side auto-layout after edits. The user owns positions once they start moving things.
+- Auto re-layout after *every* edit. Layout only runs on demand (the Auto-arrange button); the user owns positions otherwise.
 - Add copy/paste, multi-node grouping, or alignment guides.
 - Change any backend route. Persistence (`POST/GET/DELETE /diagrams`) already exists and upserts by id.
 

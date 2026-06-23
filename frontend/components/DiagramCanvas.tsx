@@ -6,6 +6,7 @@ import {
   Controls,
   MarkerType,
   MiniMap,
+  Panel,
   ReactFlow,
   ReactFlowProvider,
   useEdgesState,
@@ -19,9 +20,11 @@ import {
 } from "@xyflow/react";
 // React Flow's stylesheet is imported once globally in `app/globals.css`.
 
+import { Wand2 } from "lucide-react";
 import { useCallback, useEffect, useRef } from "react";
 
 import { DiagramNode } from "@/components/editor/diagram-node";
+import { autoLayout } from "@/lib/autoLayout";
 import { diagramToFlow } from "@/lib/diagramToFlow";
 import { connectEdge, createNode } from "@/lib/editor-graph";
 import type { Diagram, NodeType } from "@/types/tangram";
@@ -69,7 +72,7 @@ function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanv
   const initial = diagramToFlow(diagram);
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, fitView } = useReactFlow();
 
   // Re-seed only when a *different* diagram is opened, so a background refetch
   // of the same diagram never clobbers in-progress edits.
@@ -111,6 +114,12 @@ function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanv
     [screenToFlowPosition, setNodes],
   );
 
+  const onTidy = useCallback(() => {
+    setNodes((nds) => autoLayout(nds, edges));
+    // Re-fit after the new positions commit.
+    requestAnimationFrame(() => fitView({ padding: 0.2, duration: 300 }));
+  }, [setNodes, edges, fitView]);
+
   return (
     <div className="h-full w-full" role="region" aria-label="Diagram canvas">
       <ReactFlow
@@ -132,6 +141,19 @@ function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanv
         deleteKeyCode={readOnly ? null : ["Backspace", "Delete"]}
         proOptions={{ hideAttribution: true }}
       >
+        {!readOnly && (
+          <Panel position="top-right">
+            <button
+              type="button"
+              onClick={onTidy}
+              className="inline-flex items-center gap-1.5 rounded-[var(--radius)] border border-line bg-card px-2.5 py-1.5 text-[12.5px] font-medium text-ink-body shadow-sm transition-colors hover:border-ink-muted hover:text-ink-strong"
+              title="Auto-arrange the diagram"
+            >
+              <Wand2 size={13} />
+              Auto-arrange
+            </button>
+          </Panel>
+        )}
         <Background gap={20} size={1} />
         <Controls showInteractive={false} />
         <MiniMap pannable zoomable />

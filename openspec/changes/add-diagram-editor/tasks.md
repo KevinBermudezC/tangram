@@ -39,7 +39,14 @@
 - [x] 6.1 Pure graph helpers extracted to `lib/editor-graph.ts`; `tests/editor-graph.test.ts` — drop creates a typed node, connect creates an edge, self-loop + duplicate rejected. Delete→prune is covered by the orphan-edge case in `tests/flowToDiagram.test.ts` (React Flow interactions aren't jsdom-friendly, so the logic is unit-tested pure).
 - [x] 6.2 `tests/useDiagramEditor.test.tsx` — the seed report doesn't persist; an edit + `saveNow` upserts the serialized graph (mocked `saveDiagram`)
 
-## 7. Docs + verification
+## 7. Layout polish
+
+- [x] 7a.1 Widen backend `auto_layout` column/row spacing so generated diagrams aren't cramped for the larger editor node (`backend/app/services/generation/layout.py`)
+- [x] 7a.2 Cleaner edges: smoothstep + arrowheads + readable label backing (`DiagramCanvas` `defaultEdgeOptions`)
+- [x] 7a.3 Auto-arrange: `lib/autoLayout.ts` (Dagre, LR layered) + an in-canvas Panel button; tidied positions persist via autosave
+- [x] 7a.4 Tests `tests/autoLayout.test.ts` (positions assigned, left-to-right chain, identity preserved); backend `test_layout.py` made spacing-relative
+
+## 8. Docs + verification
 
 - [x] 7.1 Short "Editor" note in `frontend/README.md`
 - [x] 7.2 `pnpm typecheck` clean
