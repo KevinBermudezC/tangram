@@ -2,7 +2,9 @@
 
 import {
   Background,
+  ConnectionLineType,
   Controls,
+  MarkerType,
   MiniMap,
   ReactFlow,
   ReactFlowProvider,
@@ -10,6 +12,7 @@ import {
   useNodesState,
   useReactFlow,
   type Connection,
+  type DefaultEdgeOptions,
   type Edge,
   type Node,
   type NodeTypes,
@@ -25,6 +28,18 @@ import type { Diagram, NodeType } from "@/types/tangram";
 
 const NODE_TYPES: NodeTypes = { tangram: DiagramNode };
 const DND_MIME = "application/tangram-node";
+
+// Smooth right-angled edges with an arrowhead route around boxes far more
+// cleanly than straight diagonals, and the label gets a readable backing.
+const EDGE_OPTIONS: DefaultEdgeOptions = {
+  type: "smoothstep",
+  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#9a958c" },
+  style: { stroke: "#b9b2a6", strokeWidth: 1.5 },
+  labelStyle: { fill: "var(--color-ink-muted)", fontSize: 11, fontWeight: 500 },
+  labelBgStyle: { fill: "var(--color-page)", fillOpacity: 0.92 },
+  labelBgPadding: [4, 2],
+  labelBgBorderRadius: 4,
+};
 
 export interface DiagramCanvasProps {
   diagram: Diagram;
@@ -107,7 +122,10 @@ function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanv
         onDrop={onDrop}
         onDragOver={onDragOver}
         nodeTypes={NODE_TYPES}
+        defaultEdgeOptions={EDGE_OPTIONS}
+        connectionLineType={ConnectionLineType.SmoothStep}
         fitView
+        fitViewOptions={{ padding: 0.2 }}
         nodesDraggable={!readOnly}
         nodesConnectable={!readOnly}
         elementsSelectable
