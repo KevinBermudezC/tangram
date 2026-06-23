@@ -28,7 +28,7 @@ function toFlowNode(node: DiagramNode): RFNode {
       tangramType: node.type,
       tangram: node,
     },
-    type: "default",
+    type: "tangram",
   };
 }
 

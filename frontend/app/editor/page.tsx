@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { OctagonAlert } from "lucide-react";
 import { toast } from "sonner";
@@ -11,7 +11,23 @@ import { MockCanvas } from "@/components/editor/mock-canvas";
 import { Enso } from "@/components/enso";
 import { Button } from "@/components/ui/button";
 import { useAnalyze, useGenerate, useSaveDiagram } from "@/lib/hooks";
+import { useDiagramEditor } from "@/lib/useDiagramEditor";
+import { newDiagramId } from "@/lib/ids";
 import { TangramApiError } from "@/lib/api";
+import type { Diagram } from "@/types/tangram";
+
+/** A fresh empty diagram for the blank-canvas entry. */
+function makeBlankDiagram(): Diagram {
+  const now = new Date().toISOString();
+  return {
+    version: "0.1.0",
+    id: newDiagramId(),
+    metadata: { name: "Untitled", description: null, createdAt: now, updatedAt: now },
+    nodes: [],
+    edges: [],
+    conversation: [],
+  };
+}
 
 /**
  * Editor page.
@@ -95,8 +111,26 @@ function EditorInner() {
     // wired, so there's no warning to silence.
   }, [initialPrompt]);
 
-  const diagram = generation.data ?? null;
   const generating = generation.isPending;
+  // Blank-canvas mode (no ?prompt=) starts an editable empty draft. With a
+  // prompt, we edit the generated diagram once it arrives.
+  const blankMode = !initialPrompt;
+  const blankDraft = useMemo(() => (blankMode ? makeBlankDiagram() : null), [blankMode]);
+  const diagram = generation.data ?? blankDraft;
+
+  const editor = useDiagramEditor(diagram);
+  const [counts, setCounts] = useState({ nodes: 0, edges: 0 });
+  const handleChange = useCallback(
+    (nodes: unknown[], edges: unknown[]) => {
+      editor.onChange(nodes as never, edges as never);
+      setCounts((c) =>
+        c.nodes === nodes.length && c.edges === edges.length
+          ? c
+          : { nodes: nodes.length, edges: edges.length },
+      );
+    },
+    [editor],
+  );
 
   const runAnalyze = useCallback(() => {
     if (!diagram) return;
@@ -123,8 +157,8 @@ function EditorInner() {
 
   const content = (
     <div className="relative flex-1">
-      {diagram ? (
-        <DiagramCanvas diagram={diagram} />
+      {diagram && !generating ? (
+        <DiagramCanvas diagram={diagram} onChange={handleChange} />
       ) : (
         <MockCanvas demo={generating} />
       )}
@@ -145,19 +179,15 @@ function EditorInner() {
     </div>
   );
 
-  const blank = !diagram && !generating && !initialPrompt;
-  const diagramName = diagram?.metadata.name ?? (blank ? "Untitled" : "New diagram");
-  const componentCount = diagram?.nodes.length ?? 0;
-  const connectionCount = diagram?.edges.length ?? 0;
+  const diagramName = diagram?.metadata.name ?? (generating ? "New diagram" : "Untitled");
+  // Live counts come from the canvas once editing; fall back to the base.
+  const componentCount = diagram ? counts.nodes || diagram.nodes.length : 0;
+  const connectionCount = diagram ? counts.edges || diagram.edges.length : 0;
   const savedLabel = generating
     ? "generating…"
-    : save.isPending
-      ? "saving…"
-      : save.isSuccess
-        ? "saved just now"
-        : diagram
-          ? "unsaved"
-          : "not saved";
+    : diagram
+      ? editor.label
+      : "not saved";
 
   return (
     <EditorShell
@@ -173,6 +203,8 @@ function EditorInner() {
       analyzing={analysis.isPending}
       analyzeError={analyzeError}
       onAnalyze={runAnalyze}
+      onSave={editor.saveNow}
+      canSave={editor.canSave}
     />
   );
 }

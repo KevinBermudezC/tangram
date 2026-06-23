@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Moon, Plus, Trash2 } from "lucide-react";
+import { Check, Download, Moon, Plus, Save, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GithubMark } from "@/components/icons";
@@ -13,6 +13,10 @@ interface EditorTopbarProps {
   savedLabel: string;
   onToggleChat: () => void;
   chatHidden: boolean;
+  /** Manual save — flushes the pending autosave. Omit to hide the button. */
+  onSave?: () => void;
+  /** Whether there are unsaved changes to flush. */
+  canSave?: boolean;
 }
 
 export function EditorTopbar({
@@ -22,6 +26,8 @@ export function EditorTopbar({
   savedLabel,
   onToggleChat,
   chatHidden,
+  onSave,
+  canSave = false,
 }: EditorTopbarProps) {
   return (
     <header className="flex h-14 flex-shrink-0 items-center justify-between gap-4 border-b border-line bg-page px-4">
@@ -39,6 +45,18 @@ export function EditorTopbar({
       </div>
 
       <div className="flex items-center gap-1.5">
+        {onSave && (
+          <Button
+            variant={canSave ? "primary" : "secondary"}
+            size="sm"
+            onClick={onSave}
+            disabled={!canSave}
+            aria-label="Save diagram"
+          >
+            {canSave ? <Save size={13} /> : <Check size={13} />}
+            {canSave ? "Save" : "Saved"}
+          </Button>
+        )}
         <Button variant="secondary" size="sm">
           <Plus size={13} />
           New
