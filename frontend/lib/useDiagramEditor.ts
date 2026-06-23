@@ -2,6 +2,7 @@
 
 import type { Edge, Node } from "@xyflow/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { flowToDiagram } from "@/lib/flowToDiagram";
 import { useSaveDiagram } from "@/lib/hooks";
@@ -60,6 +61,7 @@ export function useDiagramEditor(base: Diagram | null) {
       onError: () => {
         if (!mounted.current) return;
         setStatus("error");
+        toast.error("Save failed", { description: "Your changes aren't saved." });
       },
     });
   }, [save]);
