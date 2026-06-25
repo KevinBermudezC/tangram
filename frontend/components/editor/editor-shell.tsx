@@ -22,6 +22,9 @@ export interface EditorShellProps {
   analyzing?: boolean;
   analyzeError?: string | null;
   onAnalyze?: () => void;
+  /** Manual save wiring, forwarded to the topbar. */
+  onSave?: () => void;
+  canSave?: boolean;
 }
 
 /**
@@ -42,6 +45,8 @@ export function EditorShell({
   analyzing = false,
   analyzeError = null,
   onAnalyze,
+  onSave,
+  canSave = false,
 }: EditorShellProps) {
   return (
     <div
@@ -59,6 +64,8 @@ export function EditorShell({
           savedLabel={savedLabel}
           onToggleChat={onToggleChat}
           chatHidden={chatHidden}
+          onSave={onSave}
+          canSave={canSave}
         />
         {content}
       </main>

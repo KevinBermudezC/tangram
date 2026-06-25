@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback } from "react";
+import { use, useCallback, useState } from "react";
 import Link from "next/link";
 import { OctagonAlert } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { Enso } from "@/components/enso";
 import { Button } from "@/components/ui/button";
 import { TangramApiError } from "@/lib/api";
 import { useAnalyze, useDiagram } from "@/lib/hooks";
+import { useDiagramEditor } from "@/lib/useDiagramEditor";
 
 /**
  * Open a saved diagram by id.
@@ -28,6 +29,20 @@ export default function EditorByIdPage({
   const query = useDiagram(id);
   const diagram = query.data ?? null;
   const analysis = useAnalyze();
+
+  const editor = useDiagramEditor(diagram);
+  const [counts, setCounts] = useState({ nodes: 0, edges: 0 });
+  const handleChange = useCallback(
+    (nodes: unknown[], edges: unknown[]) => {
+      editor.onChange(nodes as never, edges as never);
+      setCounts((c) =>
+        c.nodes === nodes.length && c.edges === edges.length
+          ? c
+          : { nodes: nodes.length, edges: edges.length },
+      );
+    },
+    [editor],
+  );
 
   const runAnalyze = useCallback(() => {
     if (!diagram) return;
@@ -56,7 +71,7 @@ export default function EditorByIdPage({
 
   const content = (
     <div className="relative flex-1">
-      {diagram && <DiagramCanvas diagram={diagram} />}
+      {diagram && <DiagramCanvas diagram={diagram} onChange={handleChange} />}
       {query.isLoading && <LoadingOverlay />}
       {query.isError && (
         <ErrorOverlay
@@ -75,14 +90,18 @@ export default function EditorByIdPage({
     <EditorShell
       content={content}
       diagramName={diagram?.metadata.name ?? "Diagram"}
-      componentCount={diagram?.nodes.length ?? 0}
-      connectionCount={diagram?.edges.length ?? 0}
-      savedLabel={diagram ? "saved" : query.isLoading ? "loading…" : "—"}
+      componentCount={diagram ? counts.nodes || diagram.nodes.length : 0}
+      connectionCount={diagram ? counts.edges || diagram.edges.length : 0}
+      savedLabel={
+        diagram ? editor.label : query.isLoading ? "loading…" : "—"
+      }
       hasDiagram={Boolean(diagram)}
       analysis={analysis.data ?? null}
       analyzing={analysis.isPending}
       analyzeError={analyzeError}
       onAnalyze={runAnalyze}
+      onSave={editor.saveNow}
+      canSave={editor.canSave}
     />
   );
 }

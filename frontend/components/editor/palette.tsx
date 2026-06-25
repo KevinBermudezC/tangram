@@ -8,10 +8,11 @@ import { nodeColors } from "@/lib/node-style";
 /**
  * Left rail in the editor — draggable component palette.
  *
- * Drag-to-canvas isn't wired up yet (lives in `add-diagram-editor`); these
- * cards are visually draggable (`draggable=true`) so the affordance reads
- * correctly even though the drop target is a no-op.
+ * Each card carries its node type on `dataTransfer`; the canvas reads it on
+ * drop and creates a node at the drop position (see `DiagramCanvas`).
  */
+const DND_MIME = "application/tangram-node";
+
 export function EditorPalette() {
   return (
     <aside className="flex min-h-0 flex-col gap-4 border-r border-line bg-sidebar px-3.5 py-4">
@@ -30,6 +31,10 @@ export function EditorPalette() {
                 <button
                   type="button"
                   draggable
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData(DND_MIME, c.type);
+                    e.dataTransfer.effectAllowed = "move";
+                  }}
                   className="flex w-full cursor-grab items-center gap-2.5 rounded-[var(--radius)] border border-line bg-card px-2.5 py-2 text-left transition-all hover:border-ink-muted hover:shadow-sm active:cursor-grabbing active:scale-[0.99]"
                 >
                   <span
@@ -58,11 +63,8 @@ export function EditorPalette() {
       </div>
 
       <p className="mt-auto px-1 text-[11.5px] leading-snug text-ink-faint">
-        Drag components onto the canvas. Connect them by dragging from handle
-        to handle.{" "}
-        <span className="text-[10.5px] uppercase tracking-wider text-ink-faint">
-          (Drag-to-canvas coming in `add-diagram-editor`.)
-        </span>
+        Drag a component onto the canvas. Connect nodes by dragging handle to
+        handle, double-click to rename, and press Delete to remove.
       </p>
     </aside>
   );

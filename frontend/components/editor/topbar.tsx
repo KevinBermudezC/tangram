@@ -1,6 +1,6 @@
 "use client";
 
-import { Download, Moon, Plus, Trash2 } from "lucide-react";
+import { Check, Download, Moon, Save, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GithubMark } from "@/components/icons";
@@ -13,6 +13,10 @@ interface EditorTopbarProps {
   savedLabel: string;
   onToggleChat: () => void;
   chatHidden: boolean;
+  /** Manual save — flushes the pending autosave. Omit to hide the button. */
+  onSave?: () => void;
+  /** Whether there are unsaved changes to flush. */
+  canSave?: boolean;
 }
 
 export function EditorTopbar({
@@ -22,27 +26,37 @@ export function EditorTopbar({
   savedLabel,
   onToggleChat,
   chatHidden,
+  onSave,
+  canSave = false,
 }: EditorTopbarProps) {
   return (
-    <header className="flex h-14 flex-shrink-0 items-center justify-between gap-4 border-b border-line bg-page px-4">
-      <div className="flex min-w-0 items-center gap-2.5">
+    <header className="flex h-14 flex-shrink-0 items-center justify-between gap-3 border-b border-line bg-page px-4">
+      <div className="flex min-w-0 items-center gap-2">
         <span className="truncate text-[14px] font-semibold text-ink-strong">
           {name}
         </span>
-        <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-[12.5px] text-ink-muted">
+        <span className="hidden shrink-0 items-center gap-1.5 whitespace-nowrap text-[12.5px] text-ink-muted sm:inline-flex">
+          <span className="text-ink-faint">·</span>
           <span>{componentCount} components</span>
           <span className="text-ink-faint">·</span>
           <span>{connectionCount} connections</span>
-          <span className="text-ink-faint">·</span>
-          <span>{savedLabel}</span>
         </span>
       </div>
 
-      <div className="flex items-center gap-1.5">
-        <Button variant="secondary" size="sm">
-          <Plus size={13} />
-          New
-        </Button>
+      <div className="flex shrink-0 items-center gap-1.5">
+        {onSave && (
+          <Button
+            variant={canSave ? "primary" : "secondary"}
+            size="sm"
+            onClick={onSave}
+            disabled={!canSave}
+            aria-label="Save diagram"
+            title={savedLabel}
+          >
+            {canSave ? <Save size={13} /> : <Check size={13} />}
+            {canSave ? "Save" : "Saved"}
+          </Button>
+        )}
         <Button
           variant="secondary"
           size="sm"
@@ -51,13 +65,11 @@ export function EditorTopbar({
         >
           {chatHidden ? "Show AI" : "Hide AI"}
         </Button>
-        <Button variant="secondary" size="sm">
-          <Download size={13} />
-          Export
+        <Button variant="ghost" size="icon" aria-label="Export" title="Export">
+          <Download size={14} />
         </Button>
-        <Button variant="danger" size="sm">
-          <Trash2 size={13} />
-          Clear
+        <Button variant="ghost" size="icon" aria-label="Clear canvas" title="Clear canvas">
+          <Trash2 size={14} />
         </Button>
         <span className={cn("mx-1 h-5 w-px bg-line")} aria-hidden />
         <Button

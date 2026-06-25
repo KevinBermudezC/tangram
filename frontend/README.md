@@ -112,7 +112,7 @@ frontend/
 ## What works today
 
 - Home → editor handoff: prompt typed on `/` is sent through to `/editor?prompt=…` and `POST /generate` fires.
-- Real React Flow canvas renders the generated diagram (read-only).
+- **Editable React Flow canvas**: drag a component from the palette to create a node, move it, connect nodes handle-to-handle, double-click to rename, Delete to remove. Edits serialize back to the `Diagram` schema and autosave (debounced) via `POST /diagrams`; an explicit **Save** button flushes immediately.
 - Loading / error / blank states on the editor.
 - Library + Recent (mock data, real hooks).
 - AI chat panel with streamed Markdown (mock backend).
@@ -122,8 +122,8 @@ frontend/
 
 | Feature                          | Tracked in                                                |
 | -------------------------------- | --------------------------------------------------------- |
-| Editing the diagram              | `add-diagram-editor`                                      |
-| Saving / loading diagrams        | `add-diagram-persistence-routes`                          |
+| Undo / redo on the canvas        | `add-diagram-editor` follow-up                            |
+| Real chat-about-diagram endpoint | `add-chat-about-diagram` (planned)                        |
 | Real chat-about-diagram endpoint | `add-chat-about-diagram` (planned)                        |
 | Export to Mermaid                | `add-mermaid-export`                                      |
 | Per-node AI explanation panel    | `add-ai-explanation-panel`                                |

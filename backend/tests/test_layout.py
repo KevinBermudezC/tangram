@@ -18,7 +18,10 @@ def test_frontend_leftmost() -> None:
 
 def test_database_rightmost() -> None:
     [db] = auto_layout([_gen("d", NodeType.DATABASE)])
-    assert db.position.x == 800
+    [front] = auto_layout([_gen("a", NodeType.FRONTEND)])
+    [api] = auto_layout([_gen("b", NodeType.BACKEND)])
+    # Database sits to the right of both frontend and backend.
+    assert db.position.x > api.position.x > front.position.x
 
 
 def test_backend_in_middle() -> None:
