@@ -87,6 +87,34 @@
   --radius-lg: 14px;
 }
 
+/* Dark theme — same semantic tokens, sumi-on-night surfaces. Category node
+   colors stay as-is (out of scope for the first toggle). next-themes sets
+   `class="dark"` on <html>. */
+.dark {
+  --color-page: #121212;
+  --color-card: #1a1a1a;
+  --color-canvas: #141414;
+  --color-sidebar: #0e0e0e;
+  --color-code-bg: #242422;
+  --color-chat: #161616;
+
+  --color-ink-strong: #f2f2f0;
+  --color-ink-body: #c8c8c2;
+  --color-ink-muted: #8e8e88;
+  --color-ink-faint: #6e6e68;
+  --color-ink-on-accent: #ffffff;
+
+  --color-line: #2a2a28;
+  --color-line-strong: #3c3c38;
+
+  --color-accent: #e04558;
+  --color-accent-strong: #f05a6b;
+  --color-accent-tint: #3a181c;
+
+  --color-seal: #c5283d;
+  --color-seal-strong: #e04558;
+}
+
 html,
 body {
   background: var(--color-page);
@@ -105,6 +133,13 @@ body {
     0 0,
     11px 11px;
   background-size: 22px 22px;
+}
+
+.dark body,
+html.dark body {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.012) 1px, transparent 1px);
 }
 
 /* Ensō rotation — own keyframe so it never depends on Tailwind emitting the

@@ -1,9 +1,10 @@
 "use client";
 
-import { Check, Download, Moon, Save, Trash2 } from "lucide-react";
+import { Check, Download, Save, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GithubMark } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { cn } from "@/lib/utils";
 
 interface EditorTopbarProps {
@@ -72,14 +73,7 @@ export function EditorTopbar({
           <Trash2 size={14} />
         </Button>
         <span className={cn("mx-1 h-5 w-px bg-line")} aria-hidden />
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Dark mode (coming soon)"
-          disabled
-        >
-          <Moon size={14} />
-        </Button>
+        <ThemeToggle />
         <Button
           variant="ghost"
           size="icon"
