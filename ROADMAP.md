@@ -24,7 +24,7 @@ Goal: someone clones the repo, runs `pip install` + `uvicorn` + `pnpm dev`, type
 | 12 | `POST /analyze` (diagram → feedback + rule findings) | `add-diagram-analysis-endpoint`     | ✅ Done    |
 | 13 | Diagram persistence routes (filesystem)     | `add-diagram-persistence-routes`             | 🟡 Active  |
 | 14 | OpenAPI → TypeScript codegen                | `add-openapi-typescript-codegen`             | ⬜ Planned  |
-| 15 | Editor: drag/drop/connect/edit              | `add-diagram-editor`                         | ⬜ Planned  |
+| 15 | Editor: drag/drop/connect/edit              | `add-diagram-editor`                         | ✅ Done    |
 | 16 | Per-node AI explanation panel               | `add-ai-explanation-panel`                   | ⬜ Planned  |
 | 17 | Chat-about-diagram endpoint                 | `add-chat-about-diagram` (planned)           | ⬜ Planned  |
 | 18 | Export to Mermaid                           | `add-mermaid-export`                         | ⬜ Planned  |

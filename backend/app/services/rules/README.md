@@ -14,8 +14,8 @@ from app.schemas.finding import Finding, Severity
 
 
 class MyRule:
-    id = "my-rule"                     # kebab-case, unique
-    severity = Severity.WARNING        # ERROR | WARNING | INFO
+    id = "my-rule"  # kebab-case, unique
+    severity = Severity.WARNING  # ERROR | WARNING | INFO
     title = "Short user-facing title"
     description = "Why this matters. Pedagogical. The LLM will use this verbatim."
 
