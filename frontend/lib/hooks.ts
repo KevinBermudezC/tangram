@@ -10,13 +10,8 @@ import {
   listDiagrams,
   saveDiagram,
 } from "@/lib/api";
-import { relativeTime } from "@/lib/format";
-import type { MockDiagram } from "@/lib/mock-data";
-import type {
-  AnalyzeResponse,
-  Diagram,
-  DiagramSummary,
-} from "@/types/tangram";
+import { toDiagramListItem, type DiagramListItem } from "@/lib/diagram-list";
+import type { AnalyzeResponse, Diagram } from "@/types/tangram";
 
 /**
  * Tangram backend hooks.
@@ -29,7 +24,7 @@ import type {
  *   - useHealth        → polls /health
  *   - useGenerate      → wraps POST /generate as a mutation
  *   - useAnalyze       → wraps POST /analyze as a mutation (on-demand)
- *   - useDiagrams      → GET /diagrams (live), mapped to the card view model
+ *   - useDiagrams      → GET /diagrams (live), mapped to DiagramListItem
  *   - useDiagram(id)   → GET /diagrams/{id} (live)
  *   - useSaveDiagram   → POST /diagrams (live), invalidates the list
  *   - useChat          → uses /api/chat (the local mock route) — switches
@@ -76,31 +71,14 @@ export function useAnalyze() {
 
 // --- Library (GET /diagrams) ------------------------------------------------
 
-/**
- * Map a backend summary to the card/rail view model.
- *
- * `source` isn't tracked server-side yet; every persisted diagram today comes
- * from generation, so we label it "ai". The thumb geometry comes straight
- * from the backend projection.
- */
-function summaryToCard(summary: DiagramSummary): MockDiagram {
-  return {
-    id: summary.id,
-    name: summary.name,
-    source: "ai",
-    components: summary.nodeCount,
-    connections: summary.edgeCount,
-    updatedLabel: relativeTime(summary.updatedAt),
-    thumb: summary.thumb,
-  };
-}
-
 /** Live list of saved diagrams, newest first, shaped for the cards. */
 export function useDiagrams() {
-  return useQuery<MockDiagram[]>({
+  return useQuery<DiagramListItem[]>({
     queryKey: DIAGRAMS_KEY,
-    queryFn: async () => (await listDiagrams()).map(summaryToCard),
+    queryFn: async () => (await listDiagrams()).map((summary) => toDiagramListItem(summary)),
     staleTime: 10_000,
+    // A down backend should surface as an error, not a long skeleton.
+    retry: 0,
   });
 }
 

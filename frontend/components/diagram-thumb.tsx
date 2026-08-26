@@ -1,8 +1,8 @@
-import type { MockDiagram } from "@/lib/mock-data";
+import type { DiagramListItem } from "@/lib/diagram-list";
 import { nodeColors } from "@/lib/node-style";
 
 interface DiagramThumbProps {
-  diagram: MockDiagram;
+  diagram: DiagramListItem;
 }
 
 /**

@@ -12,10 +12,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { MockDiagram } from "@/lib/mock-data";
+import type { DiagramListItem } from "@/lib/diagram-list";
 
 interface DiagramCardProps {
-  diagram: MockDiagram;
+  diagram: DiagramListItem;
 }
 
 export function DiagramCard({ diagram }: DiagramCardProps) {

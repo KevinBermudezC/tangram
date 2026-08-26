@@ -17,8 +17,8 @@ import { Brand } from "@/components/brand";
 import { GithubMark } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { DiagramSource } from "@/lib/diagram-list";
 import { useDiagrams } from "@/lib/hooks";
-import type { DiagramSource } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 interface RailNavItem {
@@ -125,7 +125,7 @@ export function AppRail() {
 }
 
 function RecentDiagrams() {
-  const { data, isLoading } = useDiagrams();
+  const { data, isLoading, isError } = useDiagrams();
   const diagrams = data ?? [];
 
   return (
@@ -142,14 +142,15 @@ function RecentDiagrams() {
       </header>
       <ul className="flex flex-col gap-px">
         {isLoading ? (
-          // Skeleton rows while React Query resolves. Mock returns instantly
-          // today so these only flash; once a real endpoint backs this they
-          // matter.
           Array.from({ length: 3 }).map((_, i) => (
             <li key={i} className="px-2.5 py-1.5">
               <span className="block h-3 w-32 animate-pulse rounded-sm bg-black/[0.06]" />
             </li>
           ))
+        ) : isError ? (
+          <li className="px-2.5 py-1 text-[12px] text-ink-faint">
+            Couldn't load recent diagrams.
+          </li>
         ) : diagrams.length === 0 ? (
           <li className="px-2.5 py-1 text-[12px] text-ink-faint">
             No diagrams yet.
