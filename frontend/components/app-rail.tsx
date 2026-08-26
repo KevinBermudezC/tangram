@@ -15,6 +15,7 @@ import type { ReactNode } from "react";
 import { BackendStatus } from "@/components/backend-status";
 import { Brand } from "@/components/brand";
 import { GithubMark } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useDiagrams } from "@/lib/hooks";
@@ -91,8 +92,8 @@ export function AppRail() {
                 className={cn(
                   "flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[13px] text-ink-body transition-colors",
                   active
-                    ? "bg-black/[0.05] font-medium text-ink-strong shadow-[inset_2px_0_0_var(--color-accent)]"
-                    : "hover:bg-black/[0.04] hover:text-ink-strong",
+                    ? "bg-ink-strong/[0.06] font-medium text-ink-strong shadow-[inset_2px_0_0_var(--color-accent)]"
+                    : "hover:bg-ink-strong/[0.05] hover:text-ink-strong",
                 )}
               >
                 <span className={cn(active ? "text-accent-strong" : "text-ink-muted")}>
@@ -108,15 +109,18 @@ export function AppRail() {
       <RecentDiagrams />
 
       <div className="mt-auto flex flex-col gap-1 border-t border-line px-2.5 pt-2">
-        <a
-          href="https://github.com/KevinBermudezC/tangram"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-2 py-1 text-[12.5px] text-ink-muted no-underline hover:text-ink-strong"
-        >
-          <GithubMark size={13} />
-          GitHub
-        </a>
+        <div className="flex items-center justify-between gap-2 py-0.5">
+          <a
+            href="https://github.com/KevinBermudezC/tangram"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 py-1 text-[12.5px] text-ink-muted no-underline hover:text-ink-strong"
+          >
+            <GithubMark size={13} />
+            GitHub
+          </a>
+          <ThemeToggle />
+        </div>
         <BackendStatus />
         <span className="text-[11px] text-ink-faint">MIT · Pre-alpha</span>
       </div>
@@ -147,7 +151,7 @@ function RecentDiagrams() {
           // matter.
           Array.from({ length: 3 }).map((_, i) => (
             <li key={i} className="px-2.5 py-1.5">
-              <span className="block h-3 w-32 animate-pulse rounded-sm bg-black/[0.06]" />
+              <span className="block h-3 w-32 animate-pulse rounded-sm bg-ink-strong/[0.08]" />
             </li>
           ))
         ) : diagrams.length === 0 ? (
@@ -159,7 +163,7 @@ function RecentDiagrams() {
             <li key={d.id}>
               <Link
                 href={`/editor/${d.id}`}
-                className="flex items-center gap-2.5 truncate rounded-md px-2.5 py-1.5 text-[13px] text-ink-body hover:bg-black/[0.04] hover:text-ink-strong"
+                className="flex items-center gap-2.5 truncate rounded-md px-2.5 py-1.5 text-[13px] text-ink-body hover:bg-ink-strong/[0.05] hover:text-ink-strong"
               >
                 <SourceDot source={d.source} />
                 <span className="truncate">{d.name}</span>
