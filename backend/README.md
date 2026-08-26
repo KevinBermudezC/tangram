@@ -153,10 +153,12 @@ from app.services.llm import get_llm
 llm = get_llm()
 
 # Plain prose
-text = await llm.generate([
-    ChatMessage(role="system", content="You are a system-design tutor."),
-    ChatMessage(role="user", content="What is CQRS?"),
-])
+text = await llm.generate(
+    [
+        ChatMessage(role="system", content="You are a system-design tutor."),
+        ChatMessage(role="user", content="What is CQRS?"),
+    ]
+)
 
 # Structured — physically cannot return a malformed Diagram
 diagram = await llm.generate_structured(
@@ -168,9 +170,11 @@ diagram = await llm.generate_structured(
 )
 
 # Streaming
-async for chunk in llm.stream([
-    ChatMessage(role="user", content="Explain microservices."),
-]):
+async for chunk in llm.stream(
+    [
+        ChatMessage(role="user", content="Explain microservices."),
+    ]
+):
     print(chunk, end="")
 ```
 
@@ -196,7 +200,7 @@ from app.schemas.diagram import NodeType
 from app.services.components import get_component, load_components
 
 # All components at once
-catalog = load_components()             # dict[NodeType, ComponentMetadata]
+catalog = load_components()  # dict[NodeType, ComponentMetadata]
 print(catalog[NodeType.DATABASE].label)
 
 # Or one at a time
@@ -214,7 +218,7 @@ Longer-form architectural patterns live at the repo root in `patterns/<id>.md`. 
 from app.services.patterns import get_pattern, load_patterns
 
 # All patterns
-catalog = load_patterns()           # dict[str, Pattern]
+catalog = load_patterns()  # dict[str, Pattern]
 print(catalog["crud-application"].title)
 
 # One at a time
@@ -259,6 +263,7 @@ messages = await compose_prompt("what's wrong here?", diagram=my_diagram)
 
 # Then send to the LLM
 from app.services.llm import get_llm
+
 result = await get_llm().generate(messages)
 ```
 
