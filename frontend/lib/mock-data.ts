@@ -1,43 +1,12 @@
 /**
- * View models + static catalog data for the UI.
+ * Static catalog data for the UI.
  *
- * `MockDiagram` is the shape the library cards and rail consume; it's now
- * populated from the backend via `useDiagrams` (see lib/hooks.ts), not from a
- * hardcoded list. `componentCatalog` and `templates` below are still static
- * (the palette and templates page have no backend yet).
+ * Saved diagrams come from `GET /diagrams` via `useDiagrams` (see
+ * `lib/diagram-list.ts`). This file is only the palette catalog and the
+ * templates strip — those have no backend yet.
  */
 
 import type { NodeType } from "@/types/tangram";
-
-export type DiagramSource = "ai" | "manual" | "draft";
-
-export interface DiagramThumbNode {
-  type: NodeType;
-  x: number;
-  y: number;
-  w: number;
-  h: number;
-}
-
-export interface DiagramThumbEdge {
-  from: { x: number; y: number };
-  to: { x: number; y: number };
-  /** Whether the model drew it (AI = dashed) or the user (manual = solid). */
-  dashed?: boolean;
-}
-
-export interface MockDiagram {
-  id: string;
-  name: string;
-  source: DiagramSource;
-  components: number;
-  connections: number;
-  updatedLabel: string;
-  thumb: {
-    nodes: DiagramThumbNode[];
-    edges: DiagramThumbEdge[];
-  };
-}
 
 // --- The eight component types we expose in the palette --------------------
 

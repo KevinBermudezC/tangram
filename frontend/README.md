@@ -68,10 +68,11 @@ frontend/
 │   ├── DiagramCanvas.tsx  # Read-only React Flow canvas
 │   └── PromptForm.tsx     # Legacy single-page prompt (kept for tests)
 ├── lib/
-│   ├── api.ts             # fetch() against /generate, /health + TangramApiError
-│   ├── hooks.ts           # useGenerate, useHealth, useDiagrams (TanStack Query)
+│   ├── api.ts             # fetch() against /generate, /health, /diagrams, /analyze
+│   ├── hooks.ts           # useGenerate, useHealth, useDiagrams, useDiagram, useSaveDiagram
+│   ├── diagram-list.ts    # Card/rail view model mapped from GET /diagrams summaries
 │   ├── diagramToFlow.ts   # Tangram Diagram → React Flow {nodes,edges}
-│   ├── mock-data.ts       # Mock recent diagrams + templates + component catalog
+│   ├── mock-data.ts       # Static templates + component catalog (not saved diagrams)
 │   ├── node-style.ts      # Per-category fills + strokes + label
 │   └── utils.ts           # cn() class merger (clsx + tailwind-merge)
 ├── types/

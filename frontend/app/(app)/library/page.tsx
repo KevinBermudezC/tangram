@@ -6,8 +6,8 @@ import { useState } from "react";
 import { DiagramCard } from "@/components/diagram-card";
 import { Input } from "@/components/ui/input";
 import { TemplatesStrip } from "@/components/templates-strip";
+import type { DiagramSource } from "@/lib/diagram-list";
 import { useDiagrams } from "@/lib/hooks";
-import type { DiagramSource } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | "drafts" | "ai" | "manual";
@@ -30,7 +30,7 @@ export default function LibraryPage() {
   const [query, setQuery] = useState("");
   const [view, setView] = useState<"grid" | "list">("grid");
 
-  const { data, isLoading } = useDiagrams();
+  const { data, isLoading, isError } = useDiagrams();
   const all = data ?? [];
 
   const filtered = all.filter((d) => {
@@ -57,8 +57,12 @@ export default function LibraryPage() {
             </span>
           </div>
           <p className="text-[13px] text-ink-muted">
-            {nonDraftCount} diagrams · {draftCount} draft · stored as JSON in{" "}
-            <code>data/diagrams/</code>
+            {isError
+              ? "Couldn't reach the backend."
+              : isLoading
+                ? "Loading diagrams…"
+                : `${nonDraftCount} diagrams · ${draftCount} draft · stored as JSON in `}
+            {!isError && !isLoading && <code>data/diagrams/</code>}
           </p>
         </div>
 
@@ -138,6 +142,24 @@ export default function LibraryPage() {
             </li>
           ))}
         </ul>
+      ) : isError ? (
+        <div className="rounded-[var(--radius-lg)] border border-dashed border-line-strong p-12 text-center">
+          <p className="text-[14px] font-medium text-ink-strong">
+            Couldn't load diagrams.
+          </p>
+          <p className="mt-1.5 text-[13px] text-ink-muted">
+            Is the backend running? Start uvicorn and refresh this page.
+          </p>
+        </div>
+      ) : all.length === 0 ? (
+        <div className="rounded-[var(--radius-lg)] border border-dashed border-line-strong p-12 text-center">
+          <p className="text-[14px] font-medium text-ink-strong">
+            No saved diagrams yet.
+          </p>
+          <p className="mt-1.5 text-[13px] text-ink-muted">
+            Generate one from Home, or start a blank canvas.
+          </p>
+        </div>
       ) : filtered.length === 0 ? (
         <div className="rounded-[var(--radius-lg)] border border-dashed border-line-strong p-12 text-center">
           <p className="text-[14px] text-ink-muted">

@@ -26,6 +26,11 @@ export default function EditorByIdPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
+  return <EditorById id={id} />;
+}
+
+/** Inner editor so tests can pass an id without resolving a Next.js params Promise. */
+export function EditorById({ id }: { id: string }) {
   const query = useDiagram(id);
   const diagram = query.data ?? null;
   const analysis = useAnalyze();

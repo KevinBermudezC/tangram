@@ -22,7 +22,7 @@ Goal: someone clones the repo, runs `pip install` + `uvicorn` + `pnpm dev`, type
 | 10 | `POST /generate` (text → diagram)           | `add-diagram-generation-endpoint`            | 🟢 Merged  |
 | 11 | Frontend foundation + UI shell              | `establish-frontend-foundation`              | 🟡 Active  |
 | 12 | `POST /analyze` (diagram → feedback + rule findings) | `add-diagram-analysis-endpoint`     | ✅ Done    |
-| 13 | Diagram persistence routes (filesystem)     | `add-diagram-persistence-routes`             | 🟡 Active  |
+| 13 | Diagram persistence routes (filesystem)     | `add-diagram-persistence-routes`             | ✅ Done    |
 | 14 | OpenAPI → TypeScript codegen                | `add-openapi-typescript-codegen`             | ⬜ Planned  |
 | 15 | Editor: drag/drop/connect/edit              | `add-diagram-editor`                         | ✅ Done    |
 | 16 | Per-node AI explanation panel               | `add-ai-explanation-panel`                   | ⬜ Planned  |
@@ -79,8 +79,8 @@ Most of these are ⬜ Planned and good first issues for contributors (see below)
 | Capability                                  | Depends on                                  | Notes                                                                                                          |
 | ------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | Real chat endpoint                          | `add-chat-about-diagram` (backend)          | The frontend already speaks the AI SDK + Streamdown stream protocol against `/api/chat` (a local mock route). Once the backend ships, the route becomes a thin proxy. |
-| Library / Recent backed by real data         | `add-diagram-persistence-routes` (backend done) | `lib/hooks.ts:useDiagrams` is the single touch point. Today it returns mock from `lib/mock-data.ts`; swap the body for a `GET /diagrams` call. The backend routes (`POST/GET/DELETE /diagrams`) now exist; this is pure frontend wiring. |
-| `/editor/[id]` route                         | persistence                                  | Open a saved diagram by ULID. Pairs with a `useDiagram(id)` query.                                              |
+| Library / Recent backed by real data         | `add-diagram-persistence-routes` + `wire-diagram-persistence-frontend` | Done. `useDiagrams` calls `GET /diagrams`; Library and the rail Recent list render live summaries with empty/error states (no mock records). |
+| `/editor/[id]` route                         | persistence                                  | Done. Opens a saved diagram by ULID via `useDiagram(id)` → `GET /diagrams/{id}`. |
 | Drag-and-drop palette → canvas               | `add-diagram-editor`                        | The palette in `components/editor/palette.tsx` is already `draggable=true`; the drop target on the canvas is a no-op until React Flow editor wires up. |
 | Theme toggle (dark / light)                  | —                                           | The button exists in the editor topbar; wire `next-themes` and add dark color variables in `app/globals.css`. CSS already uses semantic tokens, so the work is one variables file + a toggle. |
 | Command palette (Cmd-K)                      | —                                           | `cmdk` package. Open any diagram, create new, jump to settings, "ask AI…". Replaces the rail search.            |
@@ -95,8 +95,8 @@ These are ready for a contributor to pick up. Each one is small, scoped, and unb
 - [ ] **Archive the merged OpenSpec changes** (#5–#10 above). One PR per change is fine, or one batch PR that runs `openspec archive <name>` for each. ~15 min of work, mostly mechanical.
 - [ ] **Wire the dark mode toggle.** Add `next-themes`, swap the disabled button in `components/editor/topbar.tsx` for a real toggle, and add a dark theme block to `app/globals.css` (the CSS already uses semantic tokens like `bg-page` / `text-ink-strong`, so the work is mostly providing a second token set).
 - [ ] **Client-side Mermaid export.** Implement `lib/diagramToMermaid.ts` (Diagram → Mermaid flowchart string) and wire the "Export" button in the editor topbar to copy the string and toast "Copied as Mermaid". No backend changes.
-- [ ] **`useDiagrams` against real persistence.** When `add-diagram-persistence-routes` lands, swap the body of `useDiagrams` in `frontend/lib/hooks.ts` for a `GET /diagrams` call. The library and rail consume it; the call sites don't change.
-- [ ] **`/editor/[id]` route + `useDiagram(id)`.** Loads a saved diagram by ULID and renders it in `<DiagramCanvas>`. Also requires persistence.
+- [x] **`useDiagrams` against real persistence.** `useDiagrams` calls `GET /diagrams`; Library and Recent consume `DiagramListItem` (not mock records).
+- [x] **`/editor/[id]` route + `useDiagram(id)`.** Loads a saved diagram by ULID and renders it in `<DiagramCanvas>`.
 - [ ] **OpenAPI codegen.** Generate `frontend/types/tangram.ts` from the FastAPI spec at build time. The existing hand-written file's header comment flags the swap.
 - [ ] **Page tests.** Vitest + Testing Library against the new Next.js pages: prompt → editor handoff, library filters, blank canvas hint, chat empty state.
 - [ ] **Pick a font for diagram labels** (the canvas currently inherits the page font; we may want a tighter sans).
