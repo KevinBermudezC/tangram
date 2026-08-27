@@ -22,7 +22,7 @@ import {
 
 import { Wand2 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DiagramNode } from "@/components/editor/diagram-node";
 import { autoLayout } from "@/lib/autoLayout";
@@ -79,7 +79,13 @@ export function DiagramCanvas(props: DiagramCanvasProps) {
 
 function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanvasProps) {
   const { resolvedTheme } = useTheme();
-  const colorMode = flowColorMode(resolvedTheme);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  // First paint matches SSR (`react-flow light`). After mount, follow
+  // next-themes — not a second OS listener, and not the unresolved client value.
+  const colorMode = flowColorMode(resolvedTheme, mounted);
   const initial = diagramToFlow(diagram);
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);

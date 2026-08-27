@@ -75,7 +75,7 @@ describe("semantic color tokens", () => {
   it("wires React Flow colorMode from next-themes resolvedTheme, not the OS", () => {
     const src = readFileSync(path.join(frontendRoot, "components/DiagramCanvas.tsx"), "utf8");
     expect(src).toContain("const { resolvedTheme } = useTheme()");
-    expect(src).toContain("flowColorMode(resolvedTheme)");
+    expect(src).toContain("flowColorMode(resolvedTheme, mounted)");
     expect(src).toContain("colorMode={colorMode}");
     const withoutComments = src
       .replace(/\/\*[\s\S]*?\*\//g, "")
