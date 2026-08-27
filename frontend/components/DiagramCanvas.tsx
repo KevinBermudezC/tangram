@@ -21,12 +21,14 @@ import {
 // React Flow's stylesheet is imported once globally in `app/globals.css`.
 
 import { Wand2 } from "lucide-react";
-import { useCallback, useEffect, useRef } from "react";
+import { useTheme } from "next-themes";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { DiagramNode } from "@/components/editor/diagram-node";
 import { autoLayout } from "@/lib/autoLayout";
 import { diagramToFlow } from "@/lib/diagramToFlow";
 import { connectEdge, createNode } from "@/lib/editor-graph";
+import { flowColorMode } from "@/lib/theme";
 import type { Diagram, NodeType } from "@/types/tangram";
 
 const NODE_TYPES: NodeTypes = { tangram: DiagramNode };
@@ -34,10 +36,17 @@ const DND_MIME = "application/tangram-node";
 
 // Smooth right-angled edges with an arrowhead route around boxes far more
 // cleanly than straight diagonals, and the label gets a readable backing.
+// Stroke/marker colors are CSS variables so they follow `.dark` with the rest
+// of the editor (hardcoded #9a958c / #b9b2a6 stayed warm-grey in dark mode).
 const EDGE_OPTIONS: DefaultEdgeOptions = {
   type: "smoothstep",
-  markerEnd: { type: MarkerType.ArrowClosed, width: 16, height: 16, color: "#9a958c" },
-  style: { stroke: "#b9b2a6", strokeWidth: 1.5 },
+  markerEnd: {
+    type: MarkerType.ArrowClosed,
+    width: 16,
+    height: 16,
+    color: "var(--color-ink-muted)",
+  },
+  style: { stroke: "var(--color-ink-faint)", strokeWidth: 1.5 },
   labelStyle: { fill: "var(--color-ink-muted)", fontSize: 11, fontWeight: 500 },
   labelBgStyle: { fill: "var(--color-page)", fillOpacity: 0.92 },
   labelBgPadding: [4, 2],
@@ -69,6 +78,14 @@ export function DiagramCanvas(props: DiagramCanvasProps) {
 }
 
 function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanvasProps) {
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  // First paint matches SSR (`react-flow light`). After mount, follow
+  // next-themes — not a second OS listener, and not the unresolved client value.
+  const colorMode = flowColorMode(resolvedTheme, mounted);
   const initial = diagramToFlow(diagram);
   const [nodes, setNodes, onNodesChange] = useNodesState(initial.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initial.edges);
@@ -140,6 +157,8 @@ function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanv
         elementsSelectable
         deleteKeyCode={readOnly ? null : ["Backspace", "Delete"]}
         proOptions={{ hideAttribution: true }}
+        colorMode={colorMode}
+        defaultMarkerColor="var(--color-ink-muted)"
       >
         {!readOnly && (
           <Panel position="top-right">
@@ -154,9 +173,21 @@ function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanv
             </button>
           </Panel>
         )}
-        <Background gap={20} size={1} />
+        <Background
+          gap={20}
+          size={1}
+          color="var(--color-line-strong)"
+          bgColor="var(--color-canvas)"
+        />
         <Controls showInteractive={false} />
-        <MiniMap pannable zoomable />
+        <MiniMap
+          pannable
+          zoomable
+          bgColor="var(--color-card)"
+          maskColor="color-mix(in srgb, var(--color-page) 75%, transparent)"
+          nodeColor="var(--color-line-strong)"
+          nodeStrokeColor="var(--color-line)"
+        />
       </ReactFlow>
     </div>
   );

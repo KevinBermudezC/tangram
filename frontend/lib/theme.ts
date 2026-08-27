@@ -1,6 +1,29 @@
 export type TangramTheme = "light" | "dark" | "system";
 
+/** React Flow's `colorMode` — only `light` | `dark` (not `system`). */
+export type FlowColorMode = "light" | "dark";
+
 const ORDER: TangramTheme[] = ["light", "dark", "system"];
+
+/**
+ * Map next-themes `resolvedTheme` onto React Flow's colorMode.
+ *
+ * React Flow v12 defaults to `"light"` and treats `"system"` as a second OS
+ * listener (`prefers-color-scheme`). Tangram's source of truth is the
+ * next-themes class on `<html>`, so we never pass `"system"`.
+ *
+ * `mounted` must be false on the server and the first client paint (same
+ * gate as ThemeToggle). next-themes can already know the theme is dark
+ * during hydration; applying it then makes RF emit `react-flow dark` while
+ * SSR emitted `react-flow light`.
+ */
+export function flowColorMode(
+  resolvedTheme: string | undefined,
+  mounted = true,
+): FlowColorMode {
+  if (!mounted) return "light";
+  return resolvedTheme === "dark" ? "dark" : "light";
+}
 
 /** Next theme in the light → dark → system loop. */
 export function cycleTheme(current: TangramTheme | undefined): TangramTheme {

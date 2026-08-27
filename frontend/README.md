@@ -88,7 +88,7 @@ frontend/
 
 ## Stack notes
 
-**Styling.** Tailwind CSS v4 via PostCSS, with the Tangram design tokens declared in `app/globals.css` under `@theme inline`. That makes them available as Tailwind utilities (`bg-page`, `text-ink-strong`, `bg-cat-frontend`, etc.). Per-node-type colors live in `lib/node-style.ts`.
+**Styling.** Tailwind CSS v4 via PostCSS, with the Tangram design tokens declared in `app/globals.css` under `@theme`. Utilities (`bg-page`, `text-ink-strong`, `bg-cat-frontend`, etc.) reference `var(--color-*)` so `.dark` can override them. Per-node-type colors live in `lib/node-style.ts`.
 
 **UI primitives.** A lean shadcn-style set in `components/ui/` (Button with CVA variants, Input, Textarea, Card, Badge, Separator, DropdownMenu). Built on Radix where state matters. No `shadcn` CLI was used — the surface is small and the build step stays simple.
 

@@ -15,14 +15,21 @@
 @import "@xyflow/react/dist/style.css";
 @import "tailwindcss";
 
+/* next-themes puts `class="dark"` on <html>. Without this, Tailwind v4's
+   `dark:` variant follows `prefers-color-scheme` instead of that class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* -----------------------------------------------------------------------------
    Tangram design tokens.
    Adopted from frontend/prototype/style.css. The prototype is the source of
    truth for the visual direction; this file ports those values to Tailwind v4
-   via @theme inline so utilities (`bg-card`, `text-ink-strong`, etc.) work.
+   via @theme so utilities (`bg-card`, `text-ink-strong`, etc.) reference
+   `var(--color-*)` and `.dark` can override them at runtime.
+   `@theme inline` would bake the light hex into each utility, which is why
+   the shipped toggle restyled html/body (raw var()) but not the editor chrome.
    ----------------------------------------------------------------------------- */
 
-@theme inline {
+@theme {
   /* Surfaces — crisp neutral white (kami 紙). Clean paper-white instead of a
      warm tint, for a high-contrast sumi-on-white look. */
   --color-page: #fafafa;
@@ -216,4 +223,50 @@ code {
   border: 1px solid var(--color-line-strong);
   border-radius: var(--radius);
   font-family: var(--font-sans);
+}
+
+/*
+  Bridge Tangram tokens into React Flow's own CSS variables. Without this, the
+  pane/background/controls/minimap keep xyflow's light defaults (or, when
+  `colorMode="dark"`, xyflow's independent black pane) and the canvas splits
+  from the editor chrome. Setting the non-`-default` variables wins over both
+  `.react-flow` and `.react-flow.dark` fallbacks.
+*/
+.react-flow {
+  --xy-background-color: var(--color-canvas);
+  --xy-background-pattern-color: var(--color-line-strong);
+  --xy-minimap-background-color: var(--color-card);
+  --xy-minimap-mask-background-color: color-mix(
+    in srgb,
+    var(--color-page) 75%,
+    transparent
+  );
+  --xy-minimap-node-background-color: var(--color-line-strong);
+  --xy-minimap-node-stroke-color: var(--color-line);
+  --xy-controls-button-background-color: var(--color-card);
+  --xy-controls-button-background-color-hover: var(--color-sidebar);
+  --xy-controls-button-color: var(--color-ink-body);
+  --xy-controls-button-color-hover: var(--color-ink-strong);
+  --xy-controls-button-border-color: var(--color-line);
+  --xy-edge-stroke: var(--color-ink-faint);
+  --xy-connectionline-stroke: var(--color-ink-faint);
+  --xy-edge-label-background-color: var(--color-page);
+  --xy-edge-label-color: var(--color-ink-muted);
+  --xy-node-color: var(--color-ink-strong);
+  --xy-node-background-color: var(--color-card);
+  --xy-node-border: 1px solid var(--color-line-strong);
+  --xy-handle-background-color: var(--color-ink-muted);
+  --xy-handle-border-color: var(--color-card);
+  background-color: var(--color-canvas);
+}
+
+.react-flow__pane,
+.react-flow__renderer,
+.react-flow__background {
+  background-color: var(--color-canvas);
+}
+
+.react-flow__edge-path,
+.react-flow__connection-path {
+  stroke: var(--color-ink-faint);
 }

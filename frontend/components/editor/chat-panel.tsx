@@ -217,7 +217,7 @@ function ChatBubble({ message }: { message: ReturnType<typeof useChat>["messages
       {!isUser && (
         <span
           aria-hidden
-          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-strong text-[10px] font-bold tracking-wider text-ink-on-accent"
+          className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-strong text-[10px] font-bold tracking-wider text-page"
         >
           AI
         </span>
@@ -226,7 +226,7 @@ function ChatBubble({ message }: { message: ReturnType<typeof useChat>["messages
         className={cn(
           "rounded-xl border px-3 py-2.5 text-[13.5px] leading-relaxed",
           isUser
-            ? "rounded-br-sm border-[#f1c5ad] bg-[var(--bg-msg-user,#fdebdf)] text-ink-strong"
+            ? "rounded-br-sm border-accent bg-accent-tint text-ink-strong"
             : "rounded-bl-sm border-line bg-card text-ink-body",
         )}
       >
@@ -255,7 +255,7 @@ const SEVERITY_META: Record<
 > = {
   error: {
     icon: CircleAlert,
-    chip: "border-[#f1a9a9] bg-[#fdeaea] text-[#a12525]",
+    chip: "border-accent bg-accent-tint text-accent-strong",
     label: "Error",
   },
   warning: {
@@ -300,7 +300,7 @@ function AnalysisBlock({
         )}
 
         {error && !analyzing && (
-          <p className="m-0 text-[13px] text-[#a12525]">{error}</p>
+          <p className="m-0 text-[13px] text-accent-strong">{error}</p>
         )}
 
         {analysis && !analyzing && (
@@ -379,7 +379,7 @@ function EmptyChatState({ onPick }: { onPick: (text: string) => void }) {
     <article className="flex gap-2">
       <span
         aria-hidden
-        className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-strong text-[10px] font-bold tracking-wider text-ink-on-accent"
+        className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink-strong text-[10px] font-bold tracking-wider text-page"
       >
         AI
       </span>
