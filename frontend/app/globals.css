@@ -270,8 +270,3 @@ code {
 .react-flow__connection-path {
   stroke: var(--color-ink-faint);
 }
-
-.react-flow__arrowhead path,
-.react-flow__arrowhead polygon {
-  fill: var(--color-ink-muted);
-}

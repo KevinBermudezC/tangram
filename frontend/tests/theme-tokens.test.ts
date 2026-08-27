@@ -53,10 +53,46 @@ describe("semantic color tokens", () => {
     }
   });
 
-  it("lets .dark override the page token used by those utilities", async () => {
+  it("lets .dark override every editor-chrome token those utilities read", async () => {
     const css = await compileThemeCss();
-    expect(css).toMatch(/\.dark\s*\{[^}]*--color-page:\s*#121212/);
-    expect(css).toMatch(/\.dark\s*\{[^}]*--color-sidebar:\s*#0e0e0e/);
-    expect(css).toMatch(/\.dark\s*\{[^}]*--color-ink-strong:\s*#f2f2f0/);
+    const darkOverrides: Array<[string, string]> = [
+      ["--color-page", "#121212"],
+      ["--color-card", "#1a1a1a"],
+      ["--color-canvas", "#141414"],
+      ["--color-sidebar", "#0e0e0e"],
+      ["--color-chat", "#161616"],
+      ["--color-ink-strong", "#f2f2f0"],
+      ["--color-ink-faint", "#6e6e68"],
+      ["--color-line-strong", "#3c3c38"],
+    ];
+    for (const [variable, value] of darkOverrides) {
+      expect(css, `.dark must override ${variable}`).toMatch(
+        new RegExp(`\\.dark\\s*\\{[^}]*${variable}:\\s*${value}`),
+      );
+    }
+  });
+
+  it("wires React Flow colorMode from next-themes resolvedTheme, not the OS", () => {
+    const src = readFileSync(path.join(frontendRoot, "components/DiagramCanvas.tsx"), "utf8");
+    expect(src).toContain("const { resolvedTheme } = useTheme()");
+    expect(src).toContain("flowColorMode(resolvedTheme)");
+    expect(src).toContain("colorMode={colorMode}");
+    const withoutComments = src
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .replace(/\/\/.*$/gm, "");
+    expect(withoutComments).not.toMatch(/colorMode=["']system["']/);
+    expect(withoutComments).not.toContain("#9a958c");
+    expect(withoutComments).not.toContain("#b9b2a6");
+  });
+
+  it("keeps inverted ink readable on the AI panel (no light-only peach + ink-strong)", () => {
+    const src = readFileSync(
+      path.join(frontendRoot, "components/editor/chat-panel.tsx"),
+      "utf8",
+    );
+    expect(src).not.toMatch(/bg-ink-strong[^"'`]*text-ink-on-accent/);
+    expect(src).not.toContain("#fdebdf");
+    expect(src).not.toContain("--bg-msg-user");
+    expect(src).not.toContain("text-[#a12525]");
   });
 });

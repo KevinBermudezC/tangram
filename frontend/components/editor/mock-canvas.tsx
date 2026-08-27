@@ -36,7 +36,7 @@ export function MockCanvas({ demo = false }: MockCanvasProps) {
       >
         <defs>
           <pattern id="dotgrid" width="22" height="22" patternUnits="userSpaceOnUse">
-            <circle cx="1" cy="1" r="1" fill="#E1DDD3" />
+            <circle cx="1" cy="1" r="1" fill="var(--color-line-strong)" />
           </pattern>
           <marker
             id="edge-arrow"
@@ -47,7 +47,7 @@ export function MockCanvas({ demo = false }: MockCanvasProps) {
             markerHeight="6"
             orient="auto-start-reverse"
           >
-            <path d="M0 0 L10 5 L0 10 z" fill="#9A8F80" />
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--color-ink-faint)" />
           </marker>
         </defs>
         <rect width="900" height="540" fill="url(#dotgrid)" />
@@ -210,7 +210,7 @@ function Edge({ d, dashed, label, labelX, labelY, anchor = "middle" }: EdgeProps
     <>
       <path
         d={d}
-        stroke="#9A8F80"
+        stroke="var(--color-ink-faint)"
         strokeWidth={1.5}
         fill="none"
         strokeDasharray={dashed ? "4 3" : undefined}
