@@ -13,11 +13,11 @@ from __future__ import annotations
 
 import re
 from collections.abc import AsyncIterator
-from typing import Protocol, TypeVar, runtime_checkable
+from typing import Any, Protocol, TypeVar, runtime_checkable
 
 from pydantic import BaseModel, ValidationError
 
-from app.schemas.chat import ChatMessage
+from app.schemas.chat import ChatMessage, ChatStreamPart
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -83,6 +83,21 @@ class LLMProvider(Protocol):
         temperature: float = 0.7,
     ) -> AsyncIterator[str]:
         """Yield prose chunks as they arrive. Not used for structured outputs."""
+
+    def stream_parts(
+        self,
+        messages: list[ChatMessage],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        max_tokens: int | None = None,
+        temperature: float = 0.7,
+    ) -> AsyncIterator[ChatStreamPart]:
+        """Yield text and optional native tool-call parts.
+
+        When `tools` is omitted, parts are text-only and concatenation matches
+        `stream()`. Used by POST /chat; `/generate` and `/analyze` keep using
+        `generate_structured` / `generate`.
+        """
 
 
 @runtime_checkable
@@ -154,6 +169,21 @@ class LLMProviderBase:
         self._max_output_tokens = max_output_tokens
         # Non-empty key fragments that must never appear in errors or logs.
         self._secrets = [s for s in (secrets_to_redact or []) if s]
+
+    async def stream_parts(
+        self,
+        messages: list[ChatMessage],
+        *,
+        tools: list[dict[str, Any]] | None = None,  # noqa: ARG002 — default ignores tools
+        max_tokens: int | None = None,
+        temperature: float = 0.7,
+    ) -> AsyncIterator[ChatStreamPart]:
+        """Wrap `stream()` as text parts. Adapters override to honor `tools`."""
+        async for text in self.stream(  # type: ignore[attr-defined]
+            messages, max_tokens=max_tokens, temperature=temperature
+        ):
+            if text:
+                yield ChatStreamPart(type="text", text=text)
 
     # -- Input / output caps --------------------------------------------------
 

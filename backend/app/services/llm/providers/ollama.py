@@ -8,13 +8,13 @@ from __future__ import annotations
 
 import json
 from collections.abc import AsyncIterator
-from typing import TypeVar
+from typing import Any, TypeVar
 
 import httpx
 from ollama import AsyncClient
 from pydantic import BaseModel, ValidationError
 
-from app.schemas.chat import ChatMessage
+from app.schemas.chat import ChatMessage, ChatStreamPart
 from app.services.llm.base import (
     LLMConfigError,
     LLMInvalidResponse,
@@ -79,7 +79,7 @@ class OllamaProvider(_OllamaBase):
         try:
             response = await self._client.chat(
                 model=self._model,
-                messages=[m.model_dump() for m in messages],
+                messages=[m.model_dump(exclude_none=True) for m in messages],
                 options={"temperature": temperature, "num_predict": capped},
             )
         except httpx.TimeoutException as e:
@@ -104,7 +104,7 @@ class OllamaProvider(_OllamaBase):
         async def _call(strict_messages: list[ChatMessage]) -> str:
             response = await self._client.chat(
                 model=self._model,
-                messages=[m.model_dump() for m in strict_messages],
+                messages=[m.model_dump(exclude_none=True) for m in strict_messages],
                 format=schema.model_json_schema(),
                 options={"temperature": temperature, "num_predict": capped},
             )
@@ -146,7 +146,7 @@ class OllamaProvider(_OllamaBase):
         try:
             async for chunk in await self._client.chat(
                 model=self._model,
-                messages=[m.model_dump() for m in messages],
+                messages=[m.model_dump(exclude_none=True) for m in messages],
                 stream=True,
                 options={"temperature": temperature, "num_predict": capped},
             ):
@@ -155,6 +155,58 @@ class OllamaProvider(_OllamaBase):
                     yield piece
         except httpx.TimeoutException as e:
             raise LLMTimeoutError(self._redact(str(e))) from None
+
+    async def stream_parts(
+        self,
+        messages: list[ChatMessage],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        max_tokens: int | None = None,
+        temperature: float = 0.7,
+    ) -> AsyncIterator[ChatStreamPart]:
+        if not tools:
+            async for text in self.stream(messages, max_tokens=max_tokens, temperature=temperature):
+                if text:
+                    yield ChatStreamPart(type="text", text=text)
+            return
+
+        self._check_input(messages)
+        capped = self._apply_caps(max_tokens)
+        kwargs: dict[str, Any] = {
+            "model": self._model,
+            "messages": _to_ollama_messages(messages),
+            "stream": True,
+            "options": {"temperature": temperature, "num_predict": capped},
+            "tools": tools,
+        }
+        try:
+            async for chunk in await self._client.chat(**kwargs):
+                msg = chunk.get("message") or {}
+                piece = msg.get("content") or ""
+                if piece:
+                    yield ChatStreamPart(type="text", text=piece)
+                for tc in msg.get("tool_calls") or []:
+                    fn = tc.get("function") or {}
+                    raw_args = fn.get("arguments", {})
+                    args = raw_args if isinstance(raw_args, str) else json.dumps(raw_args)
+                    yield ChatStreamPart(
+                        type="tool-call",
+                        tool_call_id=str(tc.get("id") or "call_ollama"),
+                        tool_name=str(fn.get("name") or ""),
+                        arguments=args or "{}",
+                    )
+        except httpx.TimeoutException as e:
+            raise LLMTimeoutError(self._redact(str(e))) from None
+
+
+def _to_ollama_messages(messages: list[ChatMessage]) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for m in messages:
+        item: dict[str, Any] = {"role": m.role, "content": m.content}
+        if m.tool_calls:
+            item["tool_calls"] = m.tool_calls
+        out.append(item)
+    return out
 
 
 class OllamaEmbedder(_OllamaBase):

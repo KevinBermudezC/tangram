@@ -6,7 +6,7 @@ import { ChatPanel } from "@/components/editor/chat-panel";
 import { EditorPalette } from "@/components/editor/palette";
 import { EditorTopbar } from "@/components/editor/topbar";
 import { cn } from "@/lib/utils";
-import type { AnalyzeResponse } from "@/types/tangram";
+import type { AnalyzeResponse, Diagram } from "@/types/tangram";
 
 export interface EditorShellProps {
   content: ReactNode;
@@ -16,6 +16,10 @@ export interface EditorShellProps {
   componentCount?: number;
   connectionCount?: number;
   savedLabel?: string;
+  /** Live canvas snapshot forwarded to the chat request body. */
+  diagram?: Diagram | null;
+  /** Canvas selection forwarded as selected_node_id. */
+  selectedNode?: { id: string; name: string; type: string };
   /** Analysis wiring, forwarded to the chat panel. */
   hasDiagram?: boolean;
   analysis?: AnalyzeResponse | null;
@@ -40,6 +44,8 @@ export function EditorShell({
   componentCount = 0,
   connectionCount = 0,
   savedLabel = "not saved",
+  diagram = null,
+  selectedNode,
   hasDiagram = false,
   analysis = null,
   analyzing = false,
@@ -71,6 +77,8 @@ export function EditorShell({
       </main>
       {!chatHidden && (
         <ChatPanel
+          diagram={diagram}
+          selectedNode={selectedNode}
           hasDiagram={hasDiagram}
           analysis={analysis}
           analyzing={analyzing}

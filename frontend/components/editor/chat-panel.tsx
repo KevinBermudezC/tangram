@@ -11,15 +11,17 @@ import {
   Sparkles,
   TriangleAlert,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Streamdown } from "streamdown";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { chatContextBody } from "@/lib/chat-request";
+import { chipForToolPart } from "@/lib/chat-tool-chip";
 import { cn } from "@/lib/utils";
-import type { AnalyzeResponse, Finding, Severity } from "@/types/tangram";
+import type { AnalyzeResponse, Diagram, Finding, Severity } from "@/types/tangram";
 
 const SUGGESTIONS = [
   "Explain this node",
@@ -29,7 +31,9 @@ const SUGGESTIONS = [
 
 interface ChatPanelProps {
   /** Component the user just selected in the canvas — used as chat context. */
-  selectedNode?: { name: string; type: string };
+  selectedNode?: { id: string; name: string; type: string };
+  /** Live canvas snapshot. Sent on every chat turn so unsaved work is visible. */
+  diagram?: Diagram | null;
   /** The current diagram. Enables the Analyze action when present. */
   hasDiagram?: boolean;
   /** Latest analysis result, or null if none has been run. */
@@ -45,26 +49,46 @@ interface ChatPanelProps {
 /**
  * Right-rail conversational tutor.
  *
- * Backed by `useChat()` from @ai-sdk/react, talking to /api/chat. The route
- * currently returns canned-but-streamed Markdown; once a Tangram backend
- * chat endpoint exists, the route proxies to it without touching this
- * component.
- *
- * Markdown rendering is handled by Streamdown (Vercel) so we get partial-
- * stream rendering for free.
+ * `useChat()` talks to `/api/chat`, which proxies FastAPI `POST /chat`.
+ * The live diagram snapshot and selected_node_id go out with every turn.
+ * Markdown is Streamdown; inspect_* tool parts render as a short chip.
  */
 export function ChatPanel({
   selectedNode,
+  diagram = null,
   hasDiagram = false,
   analysis = null,
   analyzing = false,
   analyzeError = null,
   onAnalyze,
 }: ChatPanelProps) {
-  const [input, setInput] = useState("");
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({ api: "/api/chat" }),
+  const contextRef = useRef({
+    diagram,
+    selectedNodeId: selectedNode?.id ?? null,
   });
+  contextRef.current = {
+    diagram,
+    selectedNodeId: selectedNode?.id ?? null,
+  };
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: "/api/chat",
+        prepareSendMessagesRequest: ({ messages }) => ({
+          body: {
+            messages,
+            ...chatContextBody(contextRef.current),
+          },
+        }),
+      }),
+    [],
+  );
+
+  const { messages, sendMessage, status } = useChat({
+    transport,
+  });
+  const [input, setInput] = useState("");
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -206,6 +230,9 @@ function ChatBubble({ message }: { message: ReturnType<typeof useChat>["messages
       ?.filter((p) => p.type === "text")
       .map((p) => ("text" in p ? p.text : ""))
       .join("") ?? "";
+  const chips = (message.parts ?? [])
+    .map((part) => chipForToolPart(part))
+    .filter((chip): chip is string => Boolean(chip));
 
   return (
     <article
@@ -244,6 +271,17 @@ function ChatBubble({ message }: { message: ReturnType<typeof useChat>["messages
         >
           {text}
         </Streamdown>
+        {chips.length > 0 && (
+          <ul className="m-0 mt-1.5 flex list-none flex-wrap gap-1 p-0">
+            {chips.map((chip) => (
+              <li key={chip}>
+                <Badge variant="pill" className="font-normal normal-case tracking-normal text-[11px]">
+                  {chip}
+                </Badge>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </article>
   );

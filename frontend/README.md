@@ -35,7 +35,7 @@ A small `Backend up / offline` pill in the bottom of the left rail tells you whe
 | `/editor`            | Three-column workspace: palette / canvas / AI chat panel.                  |
 | `/templates`         | Curated starting points. Placeholder.                                      |
 | `/settings`          | Provider keys + theme. Placeholder ("read from `.env` for now").           |
-| `/api/chat`          | Mock streaming endpoint backing the AI panel (see Chat below).             |
+| `/api/chat`          | Passthrough to FastAPI `POST /chat` (tutor + inspect tools).               |
 
 ## Project layout
 
@@ -52,7 +52,7 @@ frontend/
 │   │   └── page.tsx       # Editor (full-width, no rail)
 │   ├── api/
 │   │   └── chat/
-│   │       └── route.ts   # Mock streaming chat endpoint
+│   │       └── route.ts   # Passthrough to FastAPI POST /chat
 │   ├── layout.tsx         # Root layout (providers, fonts, body)
 │   └── globals.css        # Tailwind v4 + @theme tokens
 ├── components/
@@ -69,6 +69,8 @@ frontend/
 │   └── PromptForm.tsx     # Legacy single-page prompt (kept for tests)
 ├── lib/
 │   ├── api.ts             # fetch() against /generate, /health, /diagrams, /analyze
+│   ├── chat-request.ts    # live diagram + selected_node_id for /api/chat
+│   ├── chat-tool-chip.ts  # inspect_* chip labels for the rail
 │   ├── hooks.ts           # useGenerate, useHealth, useDiagrams, useDiagram, useSaveDiagram
 │   ├── diagram-list.ts    # Card/rail view model mapped from GET /diagrams summaries
 │   ├── diagramToFlow.ts   # Tangram Diagram → React Flow {nodes,edges}
@@ -94,7 +96,7 @@ frontend/
 
 **Data layer.** Every backend call goes through TanStack Query hooks in `lib/hooks.ts`. Components consume `useGenerate()` / `useHealth()` / `useDiagrams()` and stay declarative. Caching, retries, and devtools are centralized.
 
-**Chat panel.** Uses `@ai-sdk/react`'s `useChat()` against `/api/chat`. The route is a Next.js Route Handler that streams canned Markdown via `createUIMessageStream` — it gives end-to-end exercise to Streamdown's incremental Markdown rendering. The day a real chat endpoint lands on the backend, only `/api/chat/route.ts` changes.
+**Chat panel.** Uses `@ai-sdk/react`'s `useChat()` against `/api/chat`. That route is a Next.js passthrough: it maps UIMessages and forwards the live canvas snapshot plus `selected_node_id` to FastAPI `POST /chat`. Inference (tutor mode, retrieval, `inspect_diagram` / `inspect_node`) stays on the backend. Streamdown still renders assistant Markdown; finished `inspect_node` parts may show a short chip (`miró Queue · Orders`). Analyze is the existing rail button, not a chat tool.
 
 **Toasts.** `sonner`, mounted in `components/providers.tsx`. Used for transient feedback ("Diagram generated", "Generation failed"). Blocking errors still render inline.
 
@@ -116,7 +118,7 @@ frontend/
 - **Editable React Flow canvas**: drag a component from the palette to create a node, move it, connect nodes handle-to-handle, double-click to rename, Delete to remove. Edits serialize back to the `Diagram` schema and autosave (debounced) via `POST /diagrams`; an explicit **Save** button flushes immediately.
 - Loading / error / blank states on the editor.
 - Library + Recent (mock data, real hooks).
-- AI chat panel with streamed Markdown (mock backend).
+- AI chat panel: select a node, ask why it is there; the tutor inspects that node (not canned keyword replies).
 - `/health` polling drives a backend status pill in the rail.
 
 ## What's NOT wired yet
@@ -124,8 +126,6 @@ frontend/
 | Feature                          | Tracked in                                                |
 | -------------------------------- | --------------------------------------------------------- |
 | Undo / redo on the canvas        | `add-diagram-editor` follow-up                            |
-| Real chat-about-diagram endpoint | `add-chat-about-diagram` (planned)                        |
-| Real chat-about-diagram endpoint | `add-chat-about-diagram` (planned)                        |
 | Export to Mermaid                | `add-mermaid-export`                                      |
 | Per-node AI explanation panel    | `add-ai-explanation-panel`                                |
 | Auto-generated TS types          | `add-openapi-typescript-codegen`                          |

@@ -1,9 +1,9 @@
-"""AI-driven endpoints: /generate and /analyze.
+"""AI-driven endpoints: /generate, /analyze, and /chat.
 
-Wires the public HTTP shape to the generator and analyzer services. The
+Wires the public HTTP shape to the generator, analyzer, and chat services. The
 error-mapping in this module is the contract the frontend will branch on:
 every internal LLMError subclass becomes a typed HTTP response with a stable
-top-level `code` field. Both routes share the same mapping via
+top-level `code` field. All three routes share the same mapping via
 `_raise_for_llm_error` so they can never silently diverge.
 
 Error responses are emitted via `TangramHTTPError`, which the app-level
@@ -19,14 +19,22 @@ import logging
 from typing import NoReturn
 
 from fastapi import APIRouter, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from app.core.config import get_settings
 from app.errors import TangramHTTPError
 from app.schemas.analyze import AnalyzeRequest, AnalyzeResponse
+from app.schemas.chat import ChatRequest
 from app.schemas.diagram import Diagram
 from app.schemas.generate import GenerateRequest
 from app.services.analysis import analyze_diagram
+from app.services.chat import (
+    UI_MESSAGE_STREAM_HEADERS,
+    DiagramNotFoundError,
+    iter_ui_message_stream,
+    stream_chat,
+)
 from app.services.generation import generate_diagram
 from app.services.llm import (
     LLMConfigError,
@@ -162,3 +170,72 @@ async def post_analyze(request: AnalyzeRequest) -> AnalyzeResponse:
         ) from None
     except LLMError as e:
         _raise_for_llm_error(e)
+
+
+@router.post(
+    "/chat",
+    responses={
+        404: {"model": ErrorBody, "description": "diagram_id not found in storage"},
+        413: {"model": ErrorBody, "description": "Chat payload too long"},
+        422: {"description": "Invalid request body (FastAPI default shape)"},
+        429: {"model": ErrorBody, "description": "LLM provider rate-limited the request"},
+        500: {"model": ErrorBody, "description": "Unexpected error"},
+        502: {"model": ErrorBody, "description": "LLM returned an invalid response"},
+        503: {"model": ErrorBody, "description": "LLM provider misconfigured or unavailable"},
+        504: {"model": ErrorBody, "description": "LLM provider timed out"},
+    },
+)
+async def post_chat(request: ChatRequest) -> StreamingResponse:
+    """Stream a tutor reply about the current diagram.
+
+    SSE body is the UI Message Stream protocol (`text-*` and tool parts) so
+    `useChat` on the rail can render it. The Next.js `/api/chat` route
+    proxies this stream; inference and inspect tools stay here.
+    """
+    settings = get_settings()
+    serialized_len = len(request.model_dump_json(by_alias=True))
+    if serialized_len > settings.max_input_chars:
+        raise TangramHTTPError(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=(
+                "Chat payload exceeds the configured input length cap "
+                f"({serialized_len} > {settings.max_input_chars})."
+            ),
+            code="chat_input_too_large",
+        )
+
+    parts = stream_chat(request)
+    first = None
+    try:
+        first = await anext(parts)
+    except StopAsyncIteration:
+        first = None
+    except DiagramNotFoundError:
+        logger.warning("Chat requested unknown diagram_id=%r", request.diagram_id)
+        raise TangramHTTPError(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"No diagram with id {request.diagram_id}.",
+            code="diagram_not_found",
+        ) from None
+    except LLMError as e:
+        _raise_for_llm_error(e)
+
+    async def _with_first():
+        if first is not None:
+            yield first
+        async for part in parts:
+            yield part
+
+    async def body():
+        try:
+            async for event in iter_ui_message_stream(_with_first()):
+                yield event
+        except LLMError as exc:
+            logger.error("LLM error after chat stream started: %s", exc)
+            return
+
+    return StreamingResponse(
+        body(),
+        media_type="text/event-stream",
+        headers=UI_MESSAGE_STREAM_HEADERS,
+    )

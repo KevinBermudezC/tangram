@@ -26,7 +26,7 @@ Goal: someone clones the repo, runs `pip install` + `uvicorn` + `pnpm dev`, type
 | 14 | OpenAPI → TypeScript codegen                | `add-openapi-typescript-codegen`             | ⬜ Planned  |
 | 15 | Editor: drag/drop/connect/edit              | `add-diagram-editor`                         | ✅ Done    |
 | 16 | Per-node AI explanation panel               | `add-ai-explanation-panel`                   | ⬜ Planned  |
-| 17 | Chat-about-diagram endpoint                 | `add-chat-about-diagram` (planned)           | ⬜ Planned  |
+| 17 | Chat-about-diagram endpoint                 | `add-chat-about-diagram`                     | 🟡 Active  |
 | 18 | Export to Mermaid                           | `add-mermaid-export`                         | ⬜ Planned  |
 
 > CI lands at #4 (post-LLM-abstraction, pre-feature-work) so that the editor + LLM features land with guardrails from day one.
@@ -78,7 +78,7 @@ Most of these are ⬜ Planned and good first issues for contributors (see below)
 
 | Capability                                  | Depends on                                  | Notes                                                                                                          |
 | ------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| Real chat endpoint                          | `add-chat-about-diagram` (backend)          | The frontend already speaks the AI SDK + Streamdown stream protocol against `/api/chat` (a local mock route). Once the backend ships, the route becomes a thin proxy. |
+| Real chat endpoint                          | `add-chat-about-diagram`                     | Editor rail `useChat` → Next `/api/chat` passthrough → FastAPI `POST /chat`. Tutor inspects with `inspect_diagram` / `inspect_node`; `pickReply` is gone. Analyze stays the existing button. |
 | Library / Recent backed by real data         | `add-diagram-persistence-routes` + `wire-diagram-persistence-frontend` | Done. `useDiagrams` calls `GET /diagrams`; Library and the rail Recent list render live summaries with empty/error states (no mock records). |
 | `/editor/[id]` route                         | persistence                                  | Done. Opens a saved diagram by ULID via `useDiagram(id)` → `GET /diagrams/{id}`. |
 | Drag-and-drop palette → canvas               | `add-diagram-editor`                        | The palette in `components/editor/palette.tsx` is already `draggable=true`; the drop target on the canvas is a no-op until React Flow editor wires up. |

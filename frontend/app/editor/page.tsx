@@ -12,6 +12,7 @@ import { Enso } from "@/components/enso";
 import { Button } from "@/components/ui/button";
 import { useAnalyze, useGenerate, useSaveDiagram } from "@/lib/hooks";
 import { useDiagramEditor } from "@/lib/useDiagramEditor";
+import { flowToDiagram } from "@/lib/flowToDiagram";
 import { newDiagramId } from "@/lib/ids";
 import { TangramApiError } from "@/lib/api";
 import type { Diagram } from "@/types/tangram";
@@ -120,16 +121,29 @@ function EditorInner() {
 
   const editor = useDiagramEditor(diagram);
   const [counts, setCounts] = useState({ nodes: 0, edges: 0 });
+  const [liveDiagram, setLiveDiagram] = useState<Diagram | null>(diagram ?? null);
+  const [selectedNode, setSelectedNode] = useState<
+    { id: string; name: string; type: string } | undefined
+  >(undefined);
+
+  useEffect(() => {
+    setLiveDiagram(diagram ?? null);
+    setSelectedNode(undefined);
+  }, [diagram]);
+
   const handleChange = useCallback(
     (nodes: unknown[], edges: unknown[]) => {
       editor.onChange(nodes as never, edges as never);
+      if (diagram) {
+        setLiveDiagram(flowToDiagram(nodes as never, edges as never, diagram));
+      }
       setCounts((c) =>
         c.nodes === nodes.length && c.edges === edges.length
           ? c
           : { nodes: nodes.length, edges: edges.length },
       );
     },
-    [editor],
+    [editor, diagram],
   );
 
   const runAnalyze = useCallback(() => {
@@ -158,7 +172,11 @@ function EditorInner() {
   const content = (
     <div className="relative flex-1">
       {diagram && !generating ? (
-        <DiagramCanvas diagram={diagram} onChange={handleChange} />
+        <DiagramCanvas
+          diagram={diagram}
+          onChange={handleChange}
+          onSelectNode={setSelectedNode}
+        />
       ) : (
         <MockCanvas demo={generating} />
       )}
@@ -198,6 +216,8 @@ function EditorInner() {
       componentCount={componentCount}
       connectionCount={connectionCount}
       savedLabel={savedLabel}
+      diagram={liveDiagram}
+      selectedNode={selectedNode}
       hasDiagram={Boolean(diagram)}
       analysis={analysis.data ?? null}
       analyzing={analysis.isPending}
