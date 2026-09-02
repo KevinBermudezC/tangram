@@ -316,6 +316,38 @@ ANTHROPIC_API_KEY=sk-ant-...
 
 If something is misconfigured, the endpoint returns a typed error (503 / 502 / 504 / 429 / 413) with a stable `code` field so the frontend can branch on it.
 
+## Chat endpoint
+
+`POST /chat` is the tutor talking about the open canvas. Send the conversation plus a live diagram snapshot (and the selected node). The handler streams the [UI Message Stream](https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol) the editor rail already consumes — including `inspect_diagram` / `inspect_node` tool parts. The diagram JSON is **not** stuffed into the prompt; the model has to inspect via those two tools. Chat does not persist the diagram or the thread.
+
+```bash
+curl -N -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [{"role": "user", "content": "why is there a queue here?"}],
+    "selected_node_id": "orders",
+    "diagram": {
+      "id": "demo",
+      "metadata": {"name": "demo", "createdAt": "2026-01-01T00:00:00Z", "updatedAt": "2026-01-01T00:00:00Z"},
+      "nodes": [
+        {"id": "api", "type": "backend", "label": "API", "position": {"x": 0, "y": 0}},
+        {"id": "orders", "type": "queue", "label": "Orders", "position": {"x": 200, "y": 0}},
+        {"id": "worker", "type": "backend", "label": "Worker", "position": {"x": 400, "y": 0}}
+      ],
+      "edges": [
+        {"id": "e1", "source": "api", "target": "orders"},
+        {"id": "e2", "source": "orders", "target": "worker"}
+      ]
+    }
+  }'
+```
+
+Unsaved canvases omit `diagram_id` and send `diagram` + `selected_node_id`. Saved ones may send `diagram_id` instead; a live `diagram` always wins.
+
+If there is no snapshot and no loadable `diagram_id`, the stream is a short refusal (no LLM call) asking the user to generate or open a diagram. Analyze stays `POST /analyze` — it is not a chat tool.
+
+The Next.js editor calls this through `/api/chat` (a passthrough). The same LLM setup (Options A–D above) applies, plus `413 chat_input_too_large` and `404 diagram_not_found`.
+
 ## Analysis endpoint
 
 `POST /analyze` is the inverse of `/generate`: send an existing `Diagram`, get back the deterministic rule findings plus an LLM-generated prose critique. It is read-only — the diagram is never mutated or persisted.

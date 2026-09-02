@@ -27,8 +27,7 @@ import type { AnalyzeResponse, Diagram } from "@/types/tangram";
  *   - useDiagrams      → GET /diagrams (live), mapped to DiagramListItem
  *   - useDiagram(id)   → GET /diagrams/{id} (live)
  *   - useSaveDiagram   → POST /diagrams (live), invalidates the list
- *   - useChat          → uses /api/chat (the local mock route) — switches
- *                        transparently when the real chat endpoint exists
+ *   - useChat          → /api/chat passthrough to POST /chat (inspect tools)
  */
 
 const DIAGRAMS_KEY = ["diagrams"] as const;

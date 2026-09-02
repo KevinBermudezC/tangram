@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 from collections.abc import AsyncIterator
-from typing import TypeVar
+from typing import Any, TypeVar
 
 from openai import APITimeoutError as _APITimeoutError
 from openai import AsyncOpenAI
 from openai import RateLimitError as _RateLimitError
 from pydantic import BaseModel
 
-from app.schemas.chat import ChatMessage
+from app.schemas.chat import ChatMessage, ChatStreamPart
 from app.services.llm.base import (
     LLMConfigError,
     LLMInvalidResponse,
@@ -68,7 +68,7 @@ class OpenAIProvider(_OpenAIBase):
         try:
             response = await self._client.chat.completions.create(
                 model=self._model,
-                messages=[m.model_dump() for m in messages],
+                messages=[m.model_dump(exclude_none=True) for m in messages],
                 max_completion_tokens=capped,
                 temperature=temperature,
             )
@@ -100,7 +100,7 @@ class OpenAIProvider(_OpenAIBase):
         try:
             response = await self._client.chat.completions.parse(
                 model=self._model,
-                messages=[m.model_dump() for m in messages],
+                messages=[m.model_dump(exclude_none=True) for m in messages],
                 max_completion_tokens=capped,
                 temperature=temperature,
                 response_format=schema,
@@ -139,7 +139,7 @@ class OpenAIProvider(_OpenAIBase):
         try:
             stream = await self._client.chat.completions.create(
                 model=self._model,
-                messages=[m.model_dump() for m in messages],
+                messages=[m.model_dump(exclude_none=True) for m in messages],
                 max_completion_tokens=capped,
                 temperature=temperature,
                 stream=True,
@@ -150,6 +150,76 @@ class OpenAIProvider(_OpenAIBase):
             piece = chunk.choices[0].delta.content
             if piece:
                 yield piece
+
+    async def stream_parts(
+        self,
+        messages: list[ChatMessage],
+        *,
+        tools: list[dict[str, Any]] | None = None,
+        max_tokens: int | None = None,
+        temperature: float = 0.7,
+    ) -> AsyncIterator[ChatStreamPart]:
+        if not tools:
+            async for text in self.stream(messages, max_tokens=max_tokens, temperature=temperature):
+                if text:
+                    yield ChatStreamPart(type="text", text=text)
+            return
+
+        self._check_input(messages)
+        capped = self._apply_caps(max_tokens)
+        try:
+            stream = await self._client.chat.completions.create(
+                model=self._model,
+                messages=_to_openai_messages(messages),
+                max_completion_tokens=capped,
+                temperature=temperature,
+                tools=tools,
+                stream=True,
+            )
+        except _APITimeoutError as e:
+            raise LLMTimeoutError(self._redact(str(e))) from None
+        except _RateLimitError as e:
+            raise LLMRateLimited(self._redact(str(e))) from None
+
+        pending: dict[int, dict[str, str]] = {}
+        async for chunk in stream:
+            delta = chunk.choices[0].delta
+            if delta.content:
+                yield ChatStreamPart(type="text", text=delta.content)
+            for tc in delta.tool_calls or []:
+                slot = pending.setdefault(tc.index, {"id": "", "name": "", "arguments": ""})
+                if tc.id:
+                    slot["id"] = tc.id
+                if tc.function is not None:
+                    if tc.function.name:
+                        slot["name"] = tc.function.name
+                    if tc.function.arguments:
+                        slot["arguments"] += tc.function.arguments
+        for slot in pending.values():
+            yield ChatStreamPart(
+                type="tool-call",
+                tool_call_id=slot["id"] or "call_0",
+                tool_name=slot["name"],
+                arguments=slot["arguments"] or "{}",
+            )
+
+
+def _to_openai_messages(messages: list[ChatMessage]) -> list[dict[str, Any]]:
+    """Map ChatMessage (including tool turns) to OpenAI's wire shape."""
+    out: list[dict[str, Any]] = []
+    for m in messages:
+        item: dict[str, Any] = {"role": m.role}
+        if m.role == "tool":
+            item["content"] = m.content
+            if m.tool_call_id:
+                item["tool_call_id"] = m.tool_call_id
+        elif m.tool_calls:
+            item["content"] = m.content or None
+            item["tool_calls"] = m.tool_calls
+        else:
+            item["content"] = m.content
+        out.append(item)
+    return out
 
 
 class OpenAIEmbedder(_OpenAIBase):

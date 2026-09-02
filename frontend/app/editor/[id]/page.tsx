@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useCallback, useState } from "react";
+import { use, useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { OctagonAlert } from "lucide-react";
 import { toast } from "sonner";
@@ -10,8 +10,10 @@ import { EditorShell } from "@/components/editor/editor-shell";
 import { Enso } from "@/components/enso";
 import { Button } from "@/components/ui/button";
 import { TangramApiError } from "@/lib/api";
+import { flowToDiagram } from "@/lib/flowToDiagram";
 import { useAnalyze, useDiagram } from "@/lib/hooks";
 import { useDiagramEditor } from "@/lib/useDiagramEditor";
+import type { Diagram } from "@/types/tangram";
 
 /**
  * Open a saved diagram by id.
@@ -37,16 +39,29 @@ export function EditorById({ id }: { id: string }) {
 
   const editor = useDiagramEditor(diagram);
   const [counts, setCounts] = useState({ nodes: 0, edges: 0 });
+  const [liveDiagram, setLiveDiagram] = useState<Diagram | null>(diagram);
+  const [selectedNode, setSelectedNode] = useState<
+    { id: string; name: string; type: string } | undefined
+  >(undefined);
+
+  useEffect(() => {
+    setLiveDiagram(diagram);
+    setSelectedNode(undefined);
+  }, [diagram]);
+
   const handleChange = useCallback(
     (nodes: unknown[], edges: unknown[]) => {
       editor.onChange(nodes as never, edges as never);
+      if (diagram) {
+        setLiveDiagram(flowToDiagram(nodes as never, edges as never, diagram));
+      }
       setCounts((c) =>
         c.nodes === nodes.length && c.edges === edges.length
           ? c
           : { nodes: nodes.length, edges: edges.length },
       );
     },
-    [editor],
+    [editor, diagram],
   );
 
   const runAnalyze = useCallback(() => {
@@ -76,7 +91,13 @@ export function EditorById({ id }: { id: string }) {
 
   const content = (
     <div className="relative flex-1">
-      {diagram && <DiagramCanvas diagram={diagram} onChange={handleChange} />}
+      {diagram && (
+        <DiagramCanvas
+          diagram={diagram}
+          onChange={handleChange}
+          onSelectNode={setSelectedNode}
+        />
+      )}
       {query.isLoading && <LoadingOverlay />}
       {query.isError && (
         <ErrorOverlay
@@ -100,6 +121,8 @@ export function EditorById({ id }: { id: string }) {
       savedLabel={
         diagram ? editor.label : query.isLoading ? "loading…" : "—"
       }
+      diagram={liveDiagram}
+      selectedNode={selectedNode}
       hasDiagram={Boolean(diagram)}
       analysis={analysis.data ?? null}
       analyzing={analysis.isPending}

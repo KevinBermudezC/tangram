@@ -59,6 +59,8 @@ export interface DiagramCanvasProps {
   readOnly?: boolean;
   /** Called with the live graph after every mutation (for autosave). */
   onChange?: (nodes: Node[], edges: Edge[]) => void;
+  /** Called when the selected node changes (or selection is cleared). */
+  onSelectNode?: (node: { id: string; name: string; type: string } | undefined) => void;
 }
 
 /**
@@ -77,7 +79,12 @@ export function DiagramCanvas(props: DiagramCanvasProps) {
   );
 }
 
-function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanvasProps) {
+function DiagramCanvasInner({
+  diagram,
+  readOnly = false,
+  onChange,
+  onSelectNode,
+}: DiagramCanvasProps) {
   const { resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -147,6 +154,19 @@ function DiagramCanvasInner({ diagram, readOnly = false, onChange }: DiagramCanv
         onConnect={onConnect}
         onDrop={onDrop}
         onDragOver={onDragOver}
+        onSelectionChange={({ nodes: selected }) => {
+          const node = selected[0];
+          if (!node) {
+            onSelectNode?.(undefined);
+            return;
+          }
+          const data = (node.data ?? {}) as { label?: string; tangramType?: string };
+          onSelectNode?.({
+            id: node.id,
+            name: String(data.label ?? node.id),
+            type: String(data.tangramType ?? ""),
+          });
+        }}
         nodeTypes={NODE_TYPES}
         defaultEdgeOptions={EDGE_OPTIONS}
         connectionLineType={ConnectionLineType.SmoothStep}
