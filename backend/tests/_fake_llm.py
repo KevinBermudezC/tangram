@@ -46,7 +46,7 @@ class FakeLLMProvider:
         max_tokens: int | None = None,
         temperature: float = 0.7,
     ) -> str:
-        self.calls.append((messages, None))
+        self.calls.append((list(messages), None))
         if self.structured_error is not None:
             raise self.structured_error
         return self.text_response
@@ -59,7 +59,7 @@ class FakeLLMProvider:
         max_tokens: int | None = None,
         temperature: float = 0.3,
     ) -> T:
-        self.calls.append((messages, schema))
+        self.calls.append((list(messages), schema))
         if self.structured_error is not None:
             raise self.structured_error
         if isinstance(self.structured_response, schema):
@@ -87,7 +87,7 @@ class FakeLLMProvider:
         return _yield_parts(self, messages)
 
     def _text_or_raise(self, messages: list[ChatMessage]) -> str:
-        self.calls.append((messages, None))
+        self.calls.append((list(messages), None))
         if self.structured_error is not None:
             raise self.structured_error
         return self.text_response
@@ -101,7 +101,7 @@ async def _yield_parts(
     provider: FakeLLMProvider, messages: list[ChatMessage]
 ) -> AsyncIterator[ChatStreamPart]:
     if provider.stream_script is not None:
-        provider.calls.append((messages, None))
+        provider.calls.append((list(messages), None))
         if provider.structured_error is not None:
             raise provider.structured_error
         if provider._script_i >= len(provider.stream_script):

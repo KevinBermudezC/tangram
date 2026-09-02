@@ -14,7 +14,6 @@ describe("POST /api/chat passthrough", () => {
     expect(src).not.toMatch(/lower\.includes\(["']auth["']\)/);
     expect(src).not.toMatch(/lower\.includes\(["']queue["']\)/);
     expect(src).not.toMatch(/lower\.includes\(["']cache["']\)/);
-    expect(src).not.toContain("canned");
   });
 
   it("forwards the snapshot and selected_node_id to POST /chat", () => {

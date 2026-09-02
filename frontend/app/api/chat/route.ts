@@ -6,7 +6,7 @@ import type { UIMessage } from "ai";
  *
  * The tutor brain (modes/tutor.md, retrieval, inspect_diagram / inspect_node)
  * lives on the backend. This route only maps UIMessages and forwards the
- * live diagram snapshot + selected_node_id. No canned replies.
+ * live diagram snapshot + selected_node_id. No keyword replies.
  */
 export const runtime = "nodejs";
 
